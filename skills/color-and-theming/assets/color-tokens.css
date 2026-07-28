@@ -21,12 +21,19 @@
        200  that surface, hovered  ·  inert placeholder fill
        300  that surface, active/pressed
        400  BORDER
-       500  border hovered  ·  FAINT TEXT (dates, markers, read times)
-       600  border active   ·  RESTING ICON COLOUR
+       500  border hovered  ·  decorative marks (bullets, dots, rail markers)
+       600  border active
        700  solid fill
-       800  solid fill hovered  ·  MUTED TEXT
+       800  solid fill hovered
        900  SECONDARY TEXT
       1000  PRIMARY TEXT  ·  inverted-element fill
+
+     NOTE 500-800 ARE NOT TEXT COLOURS. A border needs 3:1 against its
+     surface; text needs 4.5:1. On a light theme these mid steps are light
+     greys on white — 500 is 1.66:1, 600 is 2.38:1, 800 is 4.12:1 — so all
+     of them fail as text. Only 900 and 1000 are readable. Dark mode hides
+     this completely, because the same indices sit far lighter against a
+     near-black page. Text tiers below.
 
      Note 400 is LIGHTER than 300 in this theme. Not a mistake — a border
      sits beside content and must stay quieter than a pressed surface, which
@@ -60,6 +67,30 @@
      inverted (a tooltip), which is why it's a token and not a literal white. */
   --color-background-100: #ffffff;
   --color-background-200: #fafafa;
+
+  /* ── Text tiers ─────────────────────────────────────────────────────────
+     Held apart from the ramp, because a border and a piece of text have
+     different contrast requirements (3:1 vs 4.5:1) and one step can't serve
+     both. Ratios against background-100:
+
+       gray-1000  primary    17.93:1   body copy, headings, active state
+       gray-900   secondary   8.45:1   emphasised, ancestor rows
+       muted                  6.48:1   deks, supporting copy, <em>
+       quiet                  5.49:1   resting icons, state labels, <cite>
+       faint                  4.61:1   dates, read times, meta
+
+     Worst real pairing is muted on gray-100 (a subtle surface) at 5.79:1.
+
+     The ladder is STRICTLY DESCENDING on purpose. Once every tier has to
+     clear 4.5:1 they crowd together and the hierarchy collapses — check the
+     ordering, not just the thresholds, or you pass WCAG and lose the design.
+
+     Icons ride `quiet` rather than getting their own token: they only need
+     3:1, but they usually sit beside a label and two tokens that must stay
+     visually matched is more coupling than it saves. */
+  --color-muted: #5e5e5e;
+  --color-quiet: #696969;
+  --color-faint: #757575;
 
   /* ── The one accent ─────────────────────────────────────────────────────
      Focus ring only. Links stay monochrome — in a monochrome interface
@@ -125,6 +156,15 @@
      produces harsh contrast with light text. */
   --color-background-100: #0b0b0b;
   --color-background-200: #161616;
+
+  /* Text tiers, re-picked for the dark surface. Note how little `muted` had
+     to change — it keeps a value that already passed at 7.53:1. The contrast
+     failure this ladder exists to fix was overwhelmingly a LIGHT-theme
+     failure; only `faint` was genuinely broken in dark too (3.97:1).
+     Ratios against background-100: muted 7.53 · quiet 5.48 · faint 4.59. */
+  --color-muted: #a0a0a0;
+  --color-quiet: #878787;
+  --color-faint: #7a7a7a;
 
   /* Re-picked, not reused. The same blue that clears 4.5:1 on white has far
      less on near-black — any accent needs a per-theme value. */

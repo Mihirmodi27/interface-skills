@@ -41,7 +41,7 @@ Do not derive sizes from a modular ratio. A 1.25× scale from a 15px base gives 
 | Tooltip | 11 | 1 | — | 400 | inverted |
 | Lettermark | 8.5 | 1 | +0.02em | 500 | muted |
 
-Text tiers (`primary` → `quiet`) are the colour ramp — see the **color-and-theming** skill. In the reference implementation they map to `gray-1000 / 900 / 800 / 600 / 500`.
+Text tiers (`primary` → `quiet`) come from the **color-and-theming** skill. Note they are *not* simply the grey ramp: only the top two are ramp steps (`gray-1000`, `gray-900`), and `muted` / `quiet` / `faint` are separate tokens picked for contrast — because a border needs 3:1 and text needs 4.5:1, so one step can't serve both. Reusing mid-ramp greys for text fails in a light theme and looks fine in dark.
 
 **Why 16px is the ceiling for UI.** Anything above 16 reads as content, not chrome. A section heading at 16/500 and a body paragraph at 14/400 are only 2px apart, but the weight change plus the leading change (1.2 vs 1.65) makes the hierarchy unmistakable. Size is the weakest of the three signals; spend it last.
 

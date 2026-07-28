@@ -50,11 +50,17 @@
 }
 
 /* Text colour tiers live in the color-and-theming skill. The roles below
-   reference them by name — map to your own ramp:
-     primary   → --color-gray-1000
-     secondary → --color-gray-900
-     muted     → --color-gray-800
-     quiet     → --color-gray-500 / 600  */
+   reference them by name:
+     primary   → --color-gray-1000   17.93:1
+     secondary → --color-gray-900     8.45:1
+     muted     → --color-muted        6.48:1
+     quiet     → --color-quiet        5.49:1
+     faint     → --color-faint        4.61:1
+
+   Only the top two are ramp steps. muted/quiet/faint are their OWN tokens,
+   because a border needs 3:1 against its surface and text needs 4.5:1 — one
+   step can't serve both. Reusing mid-ramp greys (500-800) for text fails in
+   a light theme while looking perfectly fine in dark. */
 
 @layer base {
   body {

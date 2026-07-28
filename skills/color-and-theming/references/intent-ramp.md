@@ -34,13 +34,17 @@ For borders on anything translucent, use `gray-alpha-400` instead. See §2 of th
 
 **600 has a second, more important job: the resting colour of an icon.** This surprises people — 600 is a mid-grey, and text never uses it. But an icon has more visual mass than text at the same colour: it's a solid or stroked shape with no counters to lighten it. At 900 an icon looks nearly as dark as primary text; at 600 it sits at the same *perceived* weight as the muted label beside it. Then `hover:text-gray-1000` gives icon and label the same perceived jump.
 
-500 also serves as the **faint text** tier — timestamps, dates, read times, list markers. Genuinely low-contrast, and correctly so: this is information you look up rather than read.
+500 is *also* where the reference implementation put its **faint text** tier — timestamps, dates, read times. **That was a bug, and auditing it is what surfaced the rule below.** `#c9c9c9` on white is 1.66:1. Not "low contrast for information you look up" — illegible, and below even the 3:1 non-text floor. Text tiers are now separate tokens; see §"Borders and text are different jobs".
+
+500 keeps its border-hover intent, and its use as the fill for *decorative* marks (list bullets, a 3px dot, an inactive rail marker) — those carry no text and the structure is conveyed semantically.
 
 ### 700 · 800 — solid fill
 
 A filled element that isn't the primary action: a small marker, a filled chip.
 
-**800 doubles as the muted text tier** — deks, secondary paragraphs, `<em>`, supporting copy. This is the workhorse of the text ladder. In light mode `#7d7d7d` on white is about 4.6:1, so it clears WCAG AA for normal text with almost nothing to spare. Do not use 800 on `gray-100` or a glass surface for small text without checking; that's the combination that fails.
+The reference implementation also used **800 as its muted text tier** — deks, secondary paragraphs, `<em>`, supporting copy. `#7d7d7d` on white is **4.12:1**, which **fails** WCAG AA for normal text (4.5:1). It was the most widely-used text colour on the site, and it failed everywhere in the light theme.
+
+(An earlier version of this file put that figure at "about 4.6:1, clears AA with almost nothing to spare." That was wrong — computed, it's 4.12:1. Don't take a ratio on trust; the arithmetic is ten lines.)
 
 ### 900 — secondary text
 
@@ -89,20 +93,67 @@ Three properties of the dark ramp worth noticing.
 
 - Low steps are surfaces, high steps are text. Always.
 - The word "border" means 400 in both themes.
-- An icon rests at 600 in both themes.
-- Muted text is 800 in both themes.
+- The word "surface" means 100–300 in both themes.
 
-This is what makes theming free at the component level. `text-gray-800` is muted text in light and in dark, without a `dark:` variant.
+This is what makes theming free at the component level: `border-gray-400` is a border in light and in dark, without a `dark:` variant.
+
+## Borders and text are different jobs
+
+The hardest-won rule here, and it came from auditing the reference implementation against this skill's own checklist.
+
+**A border needs 3:1 against its surface. Text needs 4.5:1.** Those are different requirements, so a single ramp step cannot serve both — and in a *light* theme the gap is brutal, because the mid steps are light greys sitting on white:
+
+| Step | Light value | As text on white | Verdict |
+|---|---|---|---|
+| 500 | `#c9c9c9` | 1.66:1 | illegible |
+| 600 | `#a8a8a8` | 2.38:1 | fails even the 3:1 non-text floor |
+| 700 | `#8f8f8f` | 3.23:1 | fails |
+| 800 | `#7d7d7d` | 4.12:1 | fails |
+| 900 | `#4d4d4d` | 8.45:1 | passes |
+| 1000 | `#171717` | 17.93:1 | passes |
+
+Only 900 and 1000 are usable as text. Everything from 500 to 800 is a border value.
+
+**Dark mode hides this completely.** The same indices in the dark ramp sit far lighter *relative to a near-black page*, so 800 is 7.53:1 and 700 is 6.09:1 — all comfortably passing. A system developed and reviewed in dark mode will ship a light theme where most of the body copy fails AA, and nothing will look obviously wrong.
+
+### The fix: text tiers as their own tokens
+
+```css
+:root {
+  --color-muted: #5e5e5e;   /* 6.48:1 — deks, supporting copy, <em> */
+  --color-quiet: #696969;   /* 5.49:1 — resting icons, state labels, <cite> */
+  --color-faint: #757575;   /* 4.61:1 — dates, read times, meta */
+}
+:root[data-theme="dark"] {
+  --color-muted: #a0a0a0;   /* 7.53:1 */
+  --color-quiet: #878787;   /* 5.48:1 */
+  --color-faint: #7a7a7a;   /* 4.59:1 */
+}
+```
+
+Three properties to hold onto:
+
+**Every tier clears 4.5:1 in both themes**, including the worst real pairing (muted on `gray-100`, a subtle surface, at 5.79:1).
+
+**The ladder stays strictly descending** — 17.93 / 8.45 / 6.48 / 5.49 / 4.61 in light, 16.81 / 11.28 / 7.53 / 5.48 / 4.59 in dark. This is the part that's easy to lose: once every tier must clear 4.5:1, they crowd together and the hierarchy collapses. Check the ordering, not just the thresholds.
+
+**Only `faint` moved much in dark mode.** `muted` keeps the old 800 value, which already passed. The failure was overwhelmingly a light-theme failure.
+
+Icons go on `quiet` rather than a dedicated tier. They only need 3:1, but they frequently sit beside a text label at the same colour, and splitting them would mean two tokens that must stay visually matched — more coupling than it saves.
+
+**Decorative marks stay on the gray ramp.** A list bullet, a 3px dot, an inactive rail marker: these carry no text, and the structure they hint at is conveyed semantically. `bg-gray-500` is correct for them, and keeping them quiet is what stops a bulleted list reading as a column of dark dots.
 
 ## Common failures
 
 **Using a surface step for a border.** `border-gray-200` looks fine in light mode and vanishes in dark, because 200 is a dark surface there and sits nearly flush with 100.
 
-**Using a text step for an icon.** `text-gray-900` on a 20px icon reads as heavy as primary text and pulls focus off the label.
+**Using a text step for an icon.** `text-gray-900` on a 20px icon reads as heavy as primary text and pulls focus off the label. Use the `quiet` tier.
+
+**Using a border step for text.** The one this skill got wrong for a whole revision. See the section above — 500 through 800 are borders, and only 900/1000 are readable text on a light surface.
 
 **Reaching for a step that isn't in the ramp.** "I need something between 500 and 600." You don't — you need to identify which intent the element actually has. If two elements genuinely need different colours for the same intent, one of them has a different intent.
 
-**Small muted text on a subtle surface.** `text-gray-800` on `bg-gray-100`: about 4.2:1 in light mode. Fails AA. Either raise the text to 900 or put it on `background-100`.
+**Auditing contrast in dark mode only.** The dark theme flatters every mid step. Compute the light theme, and compute it against the *worst* surface the text actually lands on — a subtle `gray-100`, not `background-100`.
 
 ## Adding a semantic colour
 

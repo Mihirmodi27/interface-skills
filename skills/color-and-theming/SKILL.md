@@ -21,10 +21,10 @@ Eleven steps, each with a defined job:
 | 200 | That surface, hovered | `#ebebeb` | `#212121` |
 | 300 | That surface, active/pressed | `#e6e6e6` | `#282828` |
 | 400 | **Border** | `#eaeaea` | `#2e2e2e` |
-| 500 | Border, hovered | `#c9c9c9` | `#707070` |
-| 600 | Border, active — and **resting icon colour** | `#a8a8a8` | `#7d7d7d` |
+| 500 | Border, hovered — and decorative marks | `#c9c9c9` | `#707070` |
+| 600 | Border, active | `#a8a8a8` | `#7d7d7d` |
 | 700 | Solid fill (a filled button, a marker) | `#8f8f8f` | `#8f8f8f` |
-| 800 | Solid fill, hovered — and **muted text** | `#7d7d7d` | `#a0a0a0` |
+| 800 | Solid fill, hovered | `#7d7d7d` | `#a0a0a0` |
 | 900 | **Secondary text** | `#4d4d4d` | `#c4c4c4` |
 | 1000 | **Primary text** | `#171717` | `#ededed` |
 
@@ -38,6 +38,8 @@ Plus two surfaces held apart from the ramp, because a page background is not a c
 **What this buys you.** "What grey should this border be?" has one answer: 400. Not "let me try a few." And a reviewer can spot a mistake without a colour picker — a border at 300 is wrong because 300 means *pressed surface*, regardless of how it looks.
 
 **Note 400 is lighter than 300 in the light theme** (`#eaeaea` vs `#e6e6e6`). That's not a mistake, and it's the clearest proof the ramp isn't a lightness gradient: a border sits *next to* content and needs to be quieter than a pressed surface, which sits *under* content. Intent wins over monotonicity.
+
+**Steps 500–800 are borders and fills, not text.** A border needs 3:1 against its surface; text needs 4.5:1. On a light theme those mid steps are light greys on white — 500 is 1.66:1, 800 is 4.12:1 — so every one of them fails as text. Only 900 and 1000 are readable. Dark mode hides this entirely, because the same indices sit far lighter against a near-black page. See §4.
 
 → Every step, what breaks when you misuse it: `references/intent-ramp.md`
 
@@ -96,21 +98,29 @@ a:focus-visible { outline-offset: 3px; }
 
 The dark-mode value is brightened (`#3b82f6` vs `#006bff`) because the same blue that has 4.5:1 against white has far less against near-black. **Any accent needs re-picking per theme, not reusing.**
 
-## 4. Text is a five-tier ladder
+## 4. Text is a five-tier ladder — and it is *not* the grey ramp
 
-| Tier | Token | Job |
-|---|---|---|
-| Primary | `gray-1000` | Body copy, headings, active state |
-| Secondary | `gray-900` | Emphasised-but-not-primary, ancestor rows |
-| Muted | `gray-800` | Deks, secondary paragraphs, `<em>`, supporting copy |
-| Quiet | `gray-600` | Resting icons, inactive markers |
-| Faint | `gray-500` | Timestamps, dates, list markers, read times |
+The two upper tiers come from the ramp. The lower three are **their own tokens**, picked for contrast:
 
-Two things fall out of this that are easy to miss.
+| Tier | Token | Light | Dark | Job |
+|---|---|---|---|---|
+| Primary | `gray-1000` | 17.93:1 | 16.81:1 | Body copy, headings, active state |
+| Secondary | `gray-900` | 8.45:1 | 11.28:1 | Emphasised-but-not-primary, ancestor rows |
+| Muted | `muted` `#5e5e5e` / `#a0a0a0` | 6.48:1 | 7.53:1 | Deks, supporting copy, `<em>` |
+| Quiet | `quiet` `#696969` / `#878787` | 5.49:1 | 5.48:1 | Resting icons, state labels, `<cite>` |
+| Faint | `faint` `#757575` / `#7a7a7a` | 4.61:1 | 4.59:1 | Dates, read times, meta |
 
-**Icons rest at 600, not at a text tier.** An icon has more visual mass than text at the same colour — it's a solid or stroked shape with no counters. Resting at 600 and going to 1000 on hover gives icon and label the same perceived weight change.
+**Why they're separate tokens.** A border needs 3:1 against its surface; text needs 4.5:1. Reuse a border step for text and it fails — quietly, and only in the light theme. The reference implementation did exactly this (faint text on `gray-500` at **1.66:1**, icons on `gray-600` at **2.38:1**, most body copy on `gray-800` at **4.12:1**) and it took auditing against this skill's own checklist to catch it. See `references/intent-ramp.md` for the full table and the fix.
 
-**`<em>` maps to *muted*.** Because italics are switched off globally (see the **typographic-system** skill), emphasis is re-expressed on the colour axis: `*em*` recedes to 800, `**strong**` advances to 1000 + weight 500. Emphasis becomes two-directional, which a bold-only system can't do.
+Three things that are easy to miss:
+
+**Check the ordering, not just the thresholds.** Once every tier must clear 4.5:1 they crowd together and the hierarchy collapses. The ladder has to stay strictly descending — verify that, or you'll pass WCAG and lose the design.
+
+**Icons go on `quiet`, not on a tier of their own.** They only need 3:1, but they usually sit beside a label at the same colour, and two tokens that must stay visually matched is more coupling than it saves. An icon does have more visual mass than text at the same value — it's a stroked shape with no counters — so it rests a tier *below* the label it accompanies and both go to primary on hover.
+
+**Decorative marks stay on the grey ramp.** A list bullet, a 3px dot, an inactive rail marker: no text, and the structure is conveyed semantically. `bg-gray-500` is right for them, and keeping them faint is what stops a bulleted list reading as a column of dark dots.
+
+**`<em>` maps to *muted*.** Because italics are switched off globally (see the **typographic-system** skill), emphasis is re-expressed on the colour axis: `*em*` recedes to `muted`, `**strong**` advances to `gray-1000` + weight 500. Emphasis becomes two-directional, which a bold-only system can't do.
 
 ## 5. Theming: one attribute, one set of tokens
 
@@ -200,12 +210,17 @@ That's only half the fallback — dropping the `backdrop-filter` is the other ha
 
 ## Checklist
 
-- [ ] Every colour is a token. No hex in components (the elevation stack is the one exception).
-- [ ] Each ramp step is used for its intent — borders at 400, icons at 600, faint text at 500.
+- [ ] Every colour is a token. Two allowed exceptions: the multi-layer elevation stack, and literal colours inside illustration/SVG artwork.
+- [ ] Each ramp step is used for its intent — borders at 400, surfaces at 100–300.
+- [ ] **No ramp step between 500 and 800 is used as a text colour.** Text uses `gray-900`/`gray-1000` or the muted/quiet/faint tokens.
+- [ ] Text tiers computed, not assumed — in the **light** theme, against the worst surface the text lands on.
+- [ ] Text ladder is strictly descending in contrast, so hierarchy survives the 4.5:1 floor.
+- [ ] Icons clear 3:1; icons that sit beside a label share its tier ladder.
+- [ ] Decorative marks (bullets, dots, inactive markers) stay on the grey ramp.
 - [ ] Alpha ramp on anything layered; solid ramp only on opaque surfaces.
 - [ ] Alpha ramp inverts to white-based in dark mode.
 - [ ] Accent used for focus only, and re-picked (not reused) for dark.
-- [ ] `:focus-visible`, not `:focus`, with `outline-offset`.
+- [ ] `:focus-visible`, not `:focus`, with `outline-offset` — a skip link is the one legitimate `:focus` (it must appear for keyboard focus regardless of heuristics).
 - [ ] Theme driven by a data attribute, not `prefers-color-scheme`.
 - [ ] `color-scheme` declared in both themes.
 - [ ] Blocking inline head script sets the theme before first paint.

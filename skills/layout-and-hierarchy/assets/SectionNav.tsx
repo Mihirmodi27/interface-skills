@@ -89,7 +89,7 @@ function Row({
       ? "text-gray-1000"
       : state === "ancestor"
         ? "text-gray-900"
-        : "text-gray-600 hover:text-gray-1000";
+        : "text-quiet hover:text-gray-1000";
 
   const marker =
     state === "active"
@@ -232,7 +232,7 @@ export function SectionNavCompact({
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-2.5 text-[13px] text-gray-1000 [&::-webkit-details-marker]:hidden">
         On this page
-        <span className="text-gray-600 transition-transform duration-200 ease-geist group-open:rotate-180 motion-reduce:transition-none">
+        <span className="text-quiet transition-transform duration-200 ease-geist group-open:rotate-180 motion-reduce:transition-none">
           <ChevronDownIcon />
         </span>
       </summary>

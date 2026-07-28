@@ -6,8 +6,11 @@
  * headings: 44px above, 12px below, so a heading belongs to the paragraph
  * that follows it rather than floating between two sections.
  *
- * Colour tokens (gray-1000/900/700/500) come from the color-and-theming
- * skill; `reveal` comes from interface-motion.
+ * Colour comes from the color-and-theming skill: `gray-1000`/`gray-900` for
+ * the two upper text tiers, and the `muted`/`quiet` tokens below them (which
+ * are deliberately NOT ramp steps — 500–800 are border values and fail as
+ * text in a light theme). `gray-500` stays on list markers, which carry no
+ * text. `reveal` comes from interface-motion.
  */
 
 import { Fragment, type ReactNode } from "react";
@@ -57,7 +60,7 @@ export function Prose({ blocks }: { blocks: Block[] }) {
                 {/* not-italic is required — <cite> carries UA italics that the
                     global `em, i { font-style: normal }` rule doesn't reach. */}
                 {b.cite && (
-                  <cite className="mt-2 block text-[13px] not-italic text-gray-700">— {b.cite}</cite>
+                  <cite className="mt-2 block text-[13px] not-italic text-quiet">— {b.cite}</cite>
                 )}
               </blockquote>
             );
@@ -115,7 +118,7 @@ export function renderInline(text: string): ReactNode {
         }
         if (tok.startsWith("*") && tok.endsWith("*")) {
           return (
-            <em key={i} className="text-gray-800">
+            <em key={i} className="text-muted">
               {tok.slice(1, -1)}
             </em>
           );
