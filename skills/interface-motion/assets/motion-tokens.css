@@ -1,0 +1,126 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Interface motion — tokens and CSS-driven effects
+   Drop-in for Tailwind v4 (@theme) or plain CSS (the :root fallback below).
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── One curve for the whole system ─────────────────────────────────────
+     The 1.1 end control point overshoots ~10% and settles back — enough to
+     feel physical, not enough to read as bounce. A single shared curve is
+     why unrelated elements moving at once still feel like one mechanism.
+
+     Do NOT add a second bezier "because this needs a different feel." If an
+     element needs distinct character it needs a spring — that's the axis
+     where character belongs without fragmenting the system. */
+  --ease-geist: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+
+  /* ── Duration ladder ────────────────────────────────────────────────────
+     Set by how much of the screen changes, not by how important the element
+     feels. Three numbers carry almost everything: 150 / 200 / 300. */
+  --duration-micro: 100ms;    /* one property, no position — link opacity  */
+  --duration-state: 150ms;    /* colour, background, small transform, icon */
+  --duration-popover: 200ms;  /* chevron, hover card, compound glyph       */
+  --duration-route: 260ms;    /* whole viewport, on the critical path      */
+  --duration-overlay: 300ms;  /* large region entering or collapsing       */
+  --duration-theme: 400ms;    /* literally everything, at once            */
+}
+
+/* Plain-CSS fallback if you're not on Tailwind v4. */
+:root {
+  --ease-geist: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+@layer components {
+  /* ── Reveal on scroll ────────────────────────────────────────────────────
+     CSS animates; JS only adds `.in` (see useReveal.ts). 8px of travel —
+     enough to register, small enough that a page of revealing paragraphs
+     doesn't feel like it's sliding around. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity var(--duration-overlay) var(--ease-geist),
+                transform var(--duration-overlay) var(--ease-geist);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Off entirely — the animation IS the effect, so there's nothing to
+     degrade to. Note it resolves to opacity: 1; the danger with any
+     reveal-on-scroll is leaving content stuck at opacity: 0. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* ── Route transition ───────────────────────────────────────────────────
+     Opacity only — no slide, no scale. Directional motion implies a spatial
+     relationship between routes; in a flat site map there isn't one.
+
+     260ms rather than 300: a page transition sits directly between "I
+     clicked" and "I can read," and that latency reads as the site being
+     slow. 260 is the shortest crossfade that isn't mistaken for a flicker.
+
+     `both` holds the from-state before the animation starts, preventing a
+     one-frame flash of opaque content. Key the wrapper on the pathname to
+     replay it on each navigation. */
+  .route-fade {
+    animation: routeFade var(--duration-route) var(--ease-geist) both;
+  }
+  @keyframes routeFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .route-fade { animation: none; }
+  }
+
+  /* ── Theme crossfade ────────────────────────────────────────────────────
+     Added by the theme setter for ~440ms on an explicit toggle only, then
+     removed. Left in permanently it would make EVERY hover state on the site
+     400ms and sluggish — the !important is what lets it beat each
+     component's own duration-150 for those 440ms, and the removal is what
+     stops it poisoning everything else.
+
+     400ms because this is the largest possible change: every surface, text
+     colour, border, icon fill and shadow simultaneously.
+
+     Plain `ease`, not the house curve — overshoot on a position is momentum;
+     overshoot on a colour interpolation means the background travels past
+     its target and comes back, which reads as a wobble in the light.
+
+     The whole rule sits inside no-preference, so it's opt-in. Reduced-motion
+     users still get the theme change, just instantly. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root.theme-transition,
+    :root.theme-transition *,
+    :root.theme-transition *::before,
+    :root.theme-transition *::after {
+      transition: background-color var(--duration-theme) ease,
+                  color var(--duration-theme) ease,
+                  border-color var(--duration-theme) ease,
+                  fill var(--duration-theme) ease,
+                  stroke var(--duration-theme) ease,
+                  box-shadow var(--duration-theme) ease !important;
+    }
+  }
+
+  /* ── Skip link ──────────────────────────────────────────────────────────
+     Parked off-screen with a transform (not display:none, which would take
+     it out of the tab order) and slid in on focus at the state tier. */
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    z-index: 100;
+    transform: translateY(-200%);
+    transition: transform var(--duration-state) var(--ease-geist);
+  }
+  .skip:focus {
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,183 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Typographic system — tokens
+   Drop-in for Tailwind v4 (@theme) or any CSS setup (the :root block).
+   Swap "Archivo" for your family; keep the ladder.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  --font-sans: "Archivo", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+
+  /* ── Size ladder ──────────────────────────────────────────────────────
+     Each size exists for a named role. See references/scale.md before
+     adding one — most new roles fit an existing size at a new leading. */
+  --text-title: 30px;      /* article title (26px below sm) */
+  --text-title-sm: 26px;
+  --text-prose-h: 19px;    /* prose heading · pull quote */
+  --text-page: 18px;       /* page title */
+  --text-dek: 17px;        /* article dek */
+  --text-section: 16px;    /* section heading · prose body */
+  --text-base: 15px;       /* <body> default */
+  --text-copy: 14px;       /* paragraphs · sub-headings · UI rows */
+  --text-dense: 13px;      /* list rows · meta · footer */
+  --text-micro: 12px;      /* tags · micro-labels */
+  --text-tip: 11px;        /* tooltips · initials */
+  --text-mark: 8.5px;      /* lettermarks — recognised, not read */
+
+  /* ── Leading: three curves, one per job ───────────────────────────────
+     Display tightens as size grows. Reading opens as passages lengthen.
+     UI collapses to 1 so fixed-height boxes centre exactly. */
+  --leading-title: 1.12;
+  --leading-page: 1.25;
+  --leading-heading: 1.2;
+  --leading-prose-h: 1.3;
+  --leading-quote: 1.5;
+  --leading-prose: 1.75;
+  --leading-read: 1.65;
+  --leading-body: 1.55;
+  --leading-tight: 1.4;
+  --leading-none: 1;
+
+  /* ── Tracking: negative above 14px, positive below 12px, zero between ── */
+  --tracking-title: -0.025em;
+  --tracking-page: -0.02em;
+  --tracking-heading: -0.015em;
+  --tracking-quote: -0.01em;
+  --tracking-mark: 0.02em;
+
+  /* ── Weight: two, and only two ─────────────────────────────────────── */
+  --font-weight-normal: 400;   /* all body, all prose, all quiet UI */
+  --font-weight-medium: 500;   /* headings, <strong>, active state, marks */
+}
+
+/* Text colour tiers live in the color-and-theming skill. The roles below
+   reference them by name — map to your own ramp:
+     primary   → --color-gray-1000
+     secondary → --color-gray-900
+     muted     → --color-gray-800
+     quiet     → --color-gray-500 / 600  */
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+
+    /* Tabular by default. In a text-heavy interface most numbers sit in a
+       column that should align — dates, timestamps, read times, clocks.
+       A live-updating number is unreadable without this. */
+    font-variant-numeric: tabular-nums;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Emphasis is re-mapped onto weight and colour. A separate italic file
+     fights geometric letterforms, and a 700 bold blots open prose. Keep the
+     semantic tags — only the visual mapping changed. */
+  em,
+  i {
+    font-style: normal;
+  }
+
+  /* <cite> and <blockquote> carry UA italics the rule above doesn't reach. */
+  cite {
+    font-style: normal;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Role classes — optional. Use these, or apply the tokens inline through
+   Tailwind arbitrary values (text-[14px] leading-[1.65]) as the reference
+   implementation does. Either way the numbers come from one place.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .t-title {
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
+    letter-spacing: var(--tracking-title);
+    font-weight: var(--font-weight-medium);
+  }
+  @media (max-width: 639px) {
+    .t-title {
+      font-size: var(--text-title-sm);
+    }
+  }
+
+  .t-page {
+    font-size: var(--text-page);
+    line-height: var(--leading-page);
+    letter-spacing: var(--tracking-page);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .t-section {
+    font-size: var(--text-section);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .t-sub {
+    font-size: var(--text-copy);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .t-dek {
+    font-size: var(--text-dek);
+    line-height: var(--leading-body);
+  }
+
+  /* Long-form body. A full size step and a leading step above UI copy —
+     the reader holds this in view for seconds at a time. */
+  .t-prose {
+    font-size: var(--text-section);
+    line-height: var(--leading-prose);
+  }
+
+  .t-read {
+    font-size: var(--text-copy);
+    line-height: var(--leading-read);
+  }
+
+  .t-body {
+    font-size: var(--text-copy);
+    line-height: var(--leading-body);
+  }
+
+  /* Single-line UI text in a fixed-height box. leading-none so a descender
+     can't shift the box and vertical centring is exact. */
+  .t-row {
+    font-size: var(--text-copy);
+    line-height: var(--leading-none);
+  }
+
+  .t-dense {
+    font-size: var(--text-dense);
+    line-height: var(--leading-tight);
+  }
+
+  .t-meta {
+    font-size: var(--text-dense);
+  }
+
+  .t-micro {
+    font-size: var(--text-micro);
+  }
+
+  .t-tip {
+    font-size: var(--text-tip);
+    line-height: var(--leading-none);
+  }
+
+  /* Not text — a two-or-three-letter stand-in for a logo, sized below the
+     readability floor because you recognise it rather than read it. */
+  .t-mark {
+    font-size: var(--text-mark);
+    line-height: var(--leading-none);
+    letter-spacing: var(--tracking-mark);
+    font-weight: var(--font-weight-medium);
+  }
+}

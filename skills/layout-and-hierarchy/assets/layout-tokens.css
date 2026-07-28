@@ -1,0 +1,192 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Layout and hierarchy — tokens and structural primitives
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── The measure ────────────────────────────────────────────────────────
+     640px outer, 32px padding → 576px of text. At 16px prose that's ~75–85
+     characters per line: the top of the comfortable range, which is the
+     right place for a site that expects sustained reading (long lines are
+     efficient once the reader is committed, and 1.75 leading pays for the
+     longer return sweep).
+
+     EVERY page uses this. The payoff isn't visual consistency, it's
+     positional continuity: clicking from a summary into its detail view
+     doesn't move the text, so the transition reads as expansion rather than
+     as arriving at a different document. */
+  --container-col: 640px;
+
+  /* The outer frame that rails anchor to, alongside the column. Anchoring
+     both to the SAME frame is what makes the gap between them hold steady
+     from 1280px up — a rail positioned against the viewport instead drifts
+     away from the content it indexes as the window grows. */
+  --container-frame: 1280px;
+  --rail-width: 196px;
+}
+
+@layer base {
+  /* Apple-style continuous corners on every rounded element.
+
+     A standard border-radius is a quarter-circle: constant curvature that
+     drops abruptly to zero where it meets the straight edge. The eye reads
+     that discontinuity as a slight hardness. A superellipse varies curvature
+     continuously into the edge.
+
+     superellipse(k) uses exponent 2^k — k=1 is a normal round corner, k=2 a
+     full iOS squircle, so 1.5 lands about halfway. Not 2, because a full
+     squircle is noticeable at small sizes (it starts to look like a swollen
+     rectangle); halfway reads as "well-drawn corner" rather than as an
+     effect.
+
+     Unsupported browsers ignore it and fall back to normal rounding. Keep it
+     that way — nothing else in the layout should depend on it. */
+  *,
+  *::before,
+  *::after {
+    corner-shape: superellipse(1.5);
+  }
+}
+
+@layer components {
+  .col {
+    max-width: var(--container-col);
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* Skip link. Parked off-screen with a TRANSFORM, never display:none —
+     which would take it out of the tab order and defeat the point. Every
+     page needs a matching id="main". */
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    z-index: 100;
+    background: var(--color-gray-1000);
+    color: var(--color-background-100);
+    padding: 10px 14px;
+    font-size: 13px;
+    text-decoration: none;
+    border-radius: 6px;
+    transform: translateY(-200%);
+    transition: transform 150ms var(--ease-geist);
+  }
+  .skip:focus {
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Print. A real presentation, not an afterthought.
+
+   The .reveal reset is the one people forget: scroll-triggered content is at
+   opacity: 0 until an IntersectionObserver fires, and printing never fires
+   it — so the page prints blank without this.
+   ───────────────────────────────────────────────────────────────────────── */
+@media print {
+  nav,
+  footer,
+  .skip {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* An underlined URL-less link is noise on paper. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   REFERENCE — apply these in components; they're documentation, not classes.
+
+   ── The radius ladder ──────────────────────────────────────────────────
+   Nesting rule: INNER = OUTER − the padding between them. Geometry, not
+   taste — two concentric rounded rectangles share a centre of curvature
+   only if their radii differ by exactly the gap between their edges.
+
+     rounded-full     pills, tags, dots, markers
+     rounded-[5px]    a lettermark box
+     rounded-md    6  tooltips, the skip link
+     rounded-[9px] 9  small cards in a stack
+     rounded-[10px]10 avatar inside a button · a list highlight bar
+     rounded-xl   12  cards, hover panels, disclosures, icon buttons
+     rounded-2xl  16  outer containers — a dock, a sheet, a pocket
+
+   Worked example:
+     Dock          rounded-2xl (16)  p-1 (4)
+       Icon button rounded-[12px]          16 − 4 = 12  ✓
+         Avatar    rounded-[10px]          12 − 2 = 10  ✓
+
+   Radius scales with SIZE, not importance — and sub-proportionally, because
+   a large element with a proportional radius reads as a lozenge.
+
+   ── Hairline weights ───────────────────────────────────────────────────
+   The choice is about what the line is DOING:
+
+     0.5px   internal articulation — a divider between icon groups inside
+             one dock. Renders as a true sub-pixel hairline on retina and
+             rounds UP to 1px elsewhere, so it degrades rather than vanishes.
+     1px     a real edge — where a card ends.
+     2px     a mark with editorial weight — a blockquote rule, a focus ring.
+
+   On translucent surfaces use the ALPHA ramp (border-gray-alpha-400). A
+   solid border on glass doesn't participate in what's behind it and reads as
+   a pasted-on frame.
+
+   An <hr> needs border-0 before you give it a background, or you get the UA
+   border AND your line. Non-semantic dividers get aria-hidden.
+
+   ── The z-index ladder ─────────────────────────────────────────────────
+   Ordered by PERMANENCE, not importance. Gaps of 10 so something can be
+   inserted without renumbering.
+
+     100   skip link — must beat everything, including modals
+      50   fixed navigation
+      40   tap-outside catcher — under the nav, over the page
+      30   a pocket front, above the cards it contains
+      20   hover cards, dropdowns
+      10   a hovered item lifting above its siblings
+     -10   a sliding highlight, behind content inside `isolate`
+
+   The 40/50 pair is the one to get right: a full-screen catcher must be
+   above the page (to catch the click) and below the menu it dismisses (or it
+   eats the menu's own clicks).
+
+   ── Two techniques ─────────────────────────────────────────────────────
+   isolate + negative z: a highlight bar behind icons but in front of its
+   container's background. `-z-10` alone drops it behind the container;
+   `isolate` scopes the negative z inside.
+
+   pointer-events-none on a full-width strip, auto on the content: a fixed
+   nav strip spans the viewport for centring but must not swallow every click
+   along the bottom of the page.
+
+   And the strip carries NO TRANSFORM. A transform makes an element the
+   containing block for position:fixed descendants — a full-bleed w-screen
+   overlay inside it would be trapped in the strip's bounds. Same class of
+   problem as transforms weakening backdrop-filter: when something positioned
+   or filtered behaves inexplicably, check every ancestor for transform,
+   filter, perspective, contain, and will-change.
+
+   ── Viewport units ─────────────────────────────────────────────────────
+   Use dvh, never vh. `vh` refers to the viewport WITHOUT mobile browser
+   chrome, so a 100vh element extends under the address bar and its bottom is
+   unreachable. `dvh` tracks the actual visible area.
+
+   ── Bottom padding ─────────────────────────────────────────────────────
+   Anything with fixed bottom chrome needs pb-28 (112px) audited page by
+   page, or the last line sits under the nav. The most common "looks fine on
+   my long page" bug.
+   ───────────────────────────────────────────────────────────────────────── */
