@@ -100,7 +100,7 @@ And on translucent surfaces, use the alpha ramp. A solid `gray-400` border on gl
 
 ## Elevation tiers
 
-Elevation is covered in depth in the **color-and-theming** skill's `materials.md`. The structural summary:
+Elevation is covered in depth in the **glass-and-depth** skill (`references/depth-cues.md`), including the four-layer stack and why dark mode needs a structurally different shadow. The summary relevant to layout:
 
 | Tier | Layers | For |
 |---|---|---|

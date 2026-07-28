@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────────────────
    Colour and theming — the complete drop-in
-   Tailwind v4. Both ramps, both themes, four materials, all fallbacks.
+   Tailwind v4. Both ramps, both themes, glass tints, focus ring.
    ───────────────────────────────────────────────────────────────────────── */
 
 @import "tailwindcss";
@@ -83,7 +83,6 @@
 :root {
   color-scheme: light;
   --glass-nav-bg: rgba(242, 242, 242, 0.72);
-  --glass-menu-bg: rgba(255, 255, 255, 0.72);
   --glass-panel-bg: rgba(243, 243, 243, 0.97);
   --folder-glass-bg: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.34));
 }
@@ -134,7 +133,6 @@
   --color-highlight: #2c2c2c;
 
   --glass-nav-bg: rgba(26, 26, 26, 0.72);
-  --glass-menu-bg: rgba(18, 18, 18, 0.72);
   --glass-panel-bg: rgba(22, 22, 22, 0.97);
   /* Grey-based, not white — a white gradient over a dark page reads as fog
      rather than glass. */
@@ -148,7 +146,6 @@
   :root,
   :root[data-theme="dark"] {
     --glass-nav-bg: var(--color-gray-100);
-    --glass-menu-bg: var(--color-background-100);
     --glass-panel-bg: var(--color-gray-100);
     --folder-glass-bg: var(--color-background-100);
   }
@@ -180,72 +177,17 @@
   }
 }
 
-@layer components {
-  /* ── Translucent materials ──────────────────────────────────────────────
-     Blur scales with how little you know about the backdrop: 8px over cards
-     you want to still recognise, 24px over arbitrary content.
+/* ─────────────────────────────────────────────────────────────────────────
+   The .glass-* MATERIAL CLASSES that consume the tints above live in
+   glass-and-depth/assets/glass.css — the blur and saturation values, the
+   @supports guard with an opaque baseline, and the other half of the
+   reduced-transparency fallback (dropping backdrop-filter, which this file's
+   tint swap does not do on its own).
 
-     saturate() is NOT optional. Blur averages neighbouring pixels, and
-     averaging colours pulls them toward grey — without the boost, glass over
-     a photo is a muddy wash. This is the difference between "translucent"
-     and "dirty". */
-  .glass-nav {
-    background: var(--glass-nav-bg);
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  }
-
-  .glass-menu {
-    background: var(--glass-menu-bg);
-    backdrop-filter: blur(16px) saturate(1.8);
-    -webkit-backdrop-filter: blur(16px) saturate(1.8);
-  }
-
-  /* Near-opaque (97%) on purpose. This is the one panel whose wrapper
-     animates, and a transform on an ancestor weakens backdrop-filter in its
-     subtree — so the TINT carries the legibility and the blur is a bonus
-     once the animation settles. When you can't rely on the blur, thicken
-     the tint. */
-  .glass-panel {
-    background: var(--glass-panel-bg);
-    backdrop-filter: blur(24px) saturate(1.8);
-    -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  }
-
-  /* Frosted pocket. A vertical gradient rather than a flat tint — brighter
-     where the light hits, fading down. The same catch-light idea as an inset
-     highlight, at a scale where a 1px line would be lost. */
-  .folder-glass {
-    background: var(--folder-glass-bg);
-    backdrop-filter: blur(8px) saturate(1.4);
-    -webkit-backdrop-filter: blur(8px) saturate(1.4);
-  }
-
-  /* Both halves of the fallback are required. Dropping the filter alone
-     leaves a 72% tint over content — worse than the glass was. Swapping the
-     tint alone still pays for the blur. */
-  @media (prefers-reduced-transparency: reduce) {
-    .glass-nav,
-    .glass-menu,
-    .glass-panel,
-    .folder-glass {
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-    }
-  }
-
-  /* Translucent chrome relies on a hairline to define its edge. At high
-     contrast that hairline has to become a real border — the surface is
-     fine, but the boundary must be unambiguous. */
-  @media (prefers-contrast: more) {
-    .glass-nav,
-    .glass-menu,
-    .glass-panel,
-    .folder-glass {
-      border-color: var(--color-gray-1000);
-    }
-  }
-}
+   Both files are needed for working glass. They're split because the tints
+   are colour tokens that re-tint per theme, while the materials are surface
+   craft — different skills own them, and neither should duplicate the other.
+   ───────────────────────────────────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────────────────────────────────
    Elevation, for reference — apply in components, not here. A shadow that

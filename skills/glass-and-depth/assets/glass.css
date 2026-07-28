@@ -1,0 +1,190 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Glass materials — three tiers, with every fallback.
+
+   PAIRS WITH color-and-theming/assets/color-tokens.css, which declares the
+   --glass-*-bg tints and their dark-theme values. This file holds the
+   material classes; that file holds the tints. Both are needed.
+
+   Why the tints live there and not here: they change per theme AND get
+   replaced wholesale by the reduced-transparency fallback, so they have to be
+   runtime :root custom properties rather than build-time tokens. (One of them
+   is also a gradient, which no colour-token system accepts.)
+
+   Three tiers, not four. The reference implementation also defines a
+   `glass-menu` (16px / 1.8 / 72%) for "a menu over a known surface" — and
+   nothing uses it. Every menu turned out to need glass-panel's defensive
+   tint, either because its wrapper animates or because it opens over other
+   glass. Dead CSS in a design system is worse than absent CSS: the next
+   person assumes it's load-bearing.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Opaque baselines ──────────────────────────────────────────────────
+     What a browser without backdrop-filter gets. Progressive enhancement in
+     the correct direction: the opaque version is the DEFAULT and the glass is
+     layered on top. Invert it and the non-supporting path never gets tested.
+
+     Support is good (Firefox unflagged since 103), so this is insurance
+     rather than a live concern — but it's cheap insurance. */
+  .glass-nav {
+    background: var(--color-gray-100);
+  }
+  .glass-panel {
+    background: var(--color-gray-100);
+  }
+  .folder-glass {
+    background: var(--color-background-100);
+  }
+
+  /* ── The materials ─────────────────────────────────────────────────────
+     Test BOTH conditions — Safari shipped only the prefixed version for
+     years, and Safari is where glass matters most. */
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    /* Fixed chrome that arbitrary page content scrolls under — a paragraph, a
+       photograph, a full-bleed image wall. 20px because the less you know
+       about the backdrop, the more of it has to be suppressed so the
+       surface's own icons can be read.
+
+       saturate() is NOT decoration. Blur is a convolution, averaging colours
+       moves them toward grey, so a blurred backdrop is ALWAYS desaturated —
+       more so at larger radii. Without the boost you get the cloudy
+       "glassmorphism" wash. This one line is the difference between
+       translucent and dirty, and it costs nothing: same filter pass. */
+    .glass-nav {
+      background: var(--glass-nav-bg);
+      backdrop-filter: blur(20px) saturate(1.8);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    }
+
+    /* Near-opaque (97%) on purpose, and for three reasons at once:
+
+       1. Its wrapper ANIMATES. A transform on an ancestor weakens
+          backdrop-filter in its subtree — the blur samples the wrong region,
+          or nothing, for the duration. So the TINT carries the legibility and
+          the blur is a bonus once it settles. General rule: when you can't
+          rely on the blur, thicken the tint.
+
+       2. It opens over OTHER GLASS (the nav dock). Two surfaces at the same
+          tint read as one object — the panel would look like the dock had
+          grown taller. The heavy tint buys tier separation.
+
+       3. At 97% you can actually COMPUTE text contrast against the tint. At
+          72% the effective background is whatever happens to be behind it,
+          and the ratio is not computable.
+
+       Where you have the choice, fix it structurally instead: animate the
+       wrapper, put the glass on a static child. */
+    .glass-panel {
+      background: var(--glass-panel-bg);
+      backdrop-filter: blur(24px) saturate(1.8);
+      -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    }
+
+    /* A frosted pocket with cards peeking out behind it. 8px because here you
+       WANT the backdrop recognised — blur is softening, not obscuring. And
+       1.4 rather than 1.8 because those cards are the subject; pushing their
+       saturation would make the pocket louder than its own contents.
+
+       Its tint is a gradient (brighter at the top, where the light hits)
+       rather than a flat fill — the same idea as a 1px inset catch light, at
+       a scale where a 1px line would be lost. */
+    .folder-glass {
+      background: var(--folder-glass-bg);
+      backdrop-filter: blur(8px) saturate(1.4);
+      -webkit-backdrop-filter: blur(8px) saturate(1.4);
+    }
+  }
+
+  /* ── prefers-reduced-transparency ──────────────────────────────────────
+     Two reasons users set this: blur is expensive on low-powered devices,
+     and translucent surfaces are harder to read. One response serves both —
+     replace the material with an opaque one.
+
+     BOTH halves are mandatory and each is useless alone:
+       · filter only → a 72% tint over live content with no blur to suppress
+                       it. WORSE than the glass was; text overlaps text.
+       · tint only   → you still pay the whole cost of the blur, which was
+                       half the reason for the preference.
+
+     The tint half lives in color-tokens.css (it re-declares the :root
+     variables and must come after both theme blocks). This is the other half.
+
+     Useful side effect: with a solid tint, text contrast becomes real and
+     computable — for exactly the users most likely to need it. */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-nav,
+    .glass-panel,
+    .folder-glass {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
+  /* ── prefers-contrast: more ────────────────────────────────────────────
+     A translucent surface leans on its hairline to define its edge, and an
+     8%-alpha hairline is the first thing to disappear under a contrast
+     preference. Promote it to primary text colour.
+
+     Note what is NOT changed: the surface itself. High contrast is about
+     edges and text, not about removing the material. Composes correctly with
+     reduced-transparency if the user has both — solid surface, strong
+     border. */
+  @media (prefers-contrast: more) {
+    .glass-nav,
+    .glass-panel,
+    .folder-glass {
+      border-color: var(--color-gray-1000);
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   REFERENCE — glass is only half of it. A blurred, tinted rectangle is a
+   PATCH. Three non-transparency cues turn it into an object, and every glass
+   surface needs all three. See references/depth-cues.md.
+
+   1 · A HAIRLINE, from the TRANSLUCENT ramp:
+
+         border-[0.5px] border-gray-alpha-400
+
+       Not solid grey — a solid border doesn't participate in what's behind
+       it, so over a photograph it reads as a pasted-on frame. And because
+       the alpha ramp inverts to white-based in dark mode, the border is
+       automatically lighter than its surface there and darker here.
+
+       0.5px renders as a true sub-pixel hairline on retina and rounds UP to
+       1px elsewhere — it degrades rather than disappears.
+
+   2 · A LAYERED SHADOW. Four layers, one light source above:
+
+         inset 0 1px 0 rgba(255,255,255,0.6)   top-edge catch light
+         0 1px 1px rgba(0,0,0,0.02)            contact
+         0 8px 16px -4px rgba(0,0,0,0.04)      near ambient
+         0 24px 32px -8px rgba(0,0,0,0.06)     far ambient
+
+       The inset highlight contributes more than any of the shadows and is
+       the one most often omitted — remove it and the surface looks printed
+       on rather than raised. Negative spread contracts before blurring, so
+       the shadow stays tucked under instead of haloing out. Opacities are
+       2–6%: if you can identify the shadow as a shadow, it's too strong.
+
+       Dark mode is a DIFFERENT shadow, not a re-tint — shadows ~10x stronger
+       (4% black on #0b0b0b is mathematically invisible), inset highlight ~6x
+       weaker (0.6 white on dark reads as a glowing edge). Because the
+       structure changes, this can't be one token; extract the pair to a
+       shared constant. See assets/GlassPanel.tsx.
+
+   3 · CONTINUOUS CORNERS:
+
+         *, *::before, *::after { corner-shape: superellipse(1.5); }
+
+       And nest radii by: INNER = OUTER − the padding between them.
+         Dock rounded-2xl (16) p-1 (4) → button rounded-[12px] → avatar 10px
+
+   ── Performance, briefly ──────────────────────────────────────────────
+   Cost scales with AREA and re-runs whenever anything behind it changes —
+   including every frame of every scroll. Keep surfaces small, keep them few,
+   UNMOUNT closed menus (a hidden backdrop-filter element still pays its
+   filter pass; opacity: 0 does not save you), never animate blur(), and
+   never put glass over video or a flat background.
+   ───────────────────────────────────────────────────────────────────────── */

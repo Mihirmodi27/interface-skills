@@ -140,13 +140,13 @@ Backdrop blur is expensive and, for some users, makes text over it hard to read.
 @media (prefers-reduced-transparency: reduce) {
   :root, :root[data-theme="dark"] {
     --glass-nav-bg: var(--color-gray-100);
-    --glass-menu-bg: var(--color-background-100);
     --glass-panel-bg: var(--color-gray-100);
+    --folder-glass-bg: var(--color-background-100);
   }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass-nav, .glass-menu, .glass-panel {
+  .glass-nav, .glass-panel, .folder-glass {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -161,13 +161,15 @@ Ordering: because the block re-declares custom properties, it must come *after* 
 
 ```css
 @media (prefers-contrast: more) {
-  .glass-nav, .glass-menu, .glass-panel, .folder-glass {
+  .glass-nav, .glass-panel, .folder-glass {
     border-color: var(--color-gray-1000);
   }
 }
 ```
 
 Translucent chrome relies on a hairline border to define its edge. At high contrast that hairline needs to become a real border — the surface itself is fine, but the boundary has to be unambiguous.
+
+Both of these preferences are covered in full — including the `@supports` baseline, the cost model behind the blur, and how to test them — in the **glass-and-depth** skill (`references/performance-and-fallbacks.md`). They appear here because they belong to the same "substitute, don't subtract" family as reduced motion.
 
 ## The general shape
 
