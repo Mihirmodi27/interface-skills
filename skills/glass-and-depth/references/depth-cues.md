@@ -62,15 +62,38 @@ Two inversions happening at once:
 
 **The inset highlight gets ~6× weaker.** 0.6 white on a dark surface is a bright line that reads as a glowing edge rather than a catch light. 0.10 defines the edge without lighting it up.
 
-Because the structure changes and not just the values, elevation **cannot be a single token**. It needs a `dark:` variant — which is the one place raw `rgba()` in a component is acceptable. Extract it once:
+Because the structure changes and not just the values, elevation **cannot be a single token**. It needs a per-theme pair — which is the one place raw `rgba()` outside the token file is acceptable.
 
-```tsx
-const SHADOW =
-  "shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_1px_1px_rgba(0,0,0,0.02),0_8px_16px_-4px_rgba(0,0,0,0.04),0_24px_32px_-8px_rgba(0,0,0,0.06)] " +
-  "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_1px_1px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(0,0,0,0.5),0_24px_32px_-8px_rgba(0,0,0,0.6)]";
+Put it in a **CSS class**, not a JS constant:
+
+```css
+.dock-shadow {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 1px rgba(0, 0, 0, 0.02),
+    0 8px 16px -4px rgba(0, 0, 0, 0.04),
+    0 24px 32px -8px rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="dark"] .dock-shadow {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 1px 1px rgba(0, 0, 0, 0.3),
+    0 8px 16px -4px rgba(0, 0, 0, 0.5),
+    0 24px 32px -8px rgba(0, 0, 0, 0.6);
+}
 ```
 
-One constant, imported everywhere it's needed.
+```tsx
+<div className="glass-nav dock-shadow rounded-2xl border-[0.5px] border-gray-alpha-400 p-1">
+```
+
+The reference implementation started with the exported-constant version above and moved to this. Three reasons the class wins:
+
+- **It's ~400 characters of arbitrary-value syntax either way**, and in a class it's readable — four lines you can actually compare against the four in the dark block.
+- **A shared constant still has to be imported and interpolated** at every site, so it shows up in five files' class strings and a `grep` for a shadow finds five hits rather than one definition.
+- **The escaping is a real hazard.** `shadow-[…rgba(0,0,0,0.04)…]` has to be written with underscores for spaces and no spaces inside the parens, and a typo there produces a class the build silently drops — no shadow, no error.
+
+**Extract it the moment it appears twice.** A four-layer shadow is both the most-copied value in a system like this and the hardest to eyeball a divergence in — nobody spots a `0.04` that became `0.05` in one of five places.
 
 ## 3. Elevation tiers
 

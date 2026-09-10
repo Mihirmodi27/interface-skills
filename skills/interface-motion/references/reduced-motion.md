@@ -21,6 +21,10 @@ So: **substitute, don't subtract.** For every animation, ask what it was communi
 | Smooth scroll | `behavior: "auto"` | Programmatic scrolling is a large-area motion. |
 | Theme crossfade | Instant swap | Whole-viewport colour interpolation. |
 | Press scale | **Keep it** | 8% on a 40px button, 0ms. Below any threshold of concern. |
+| A once-a-session greeting | Never plays at all | It's a flourish by definition. Don't substitute a quieter one — skip it. |
+| First-open theatre (staggered lines) | Same open, zero-length transitions | The disclosure still opens; the choreography doesn't run. |
+| A GPU dissolve between images | Fall back to the plain `<img>` | The same path as no-WebGL, already built. |
+| Icon fill crossfade | Instant swap (`motion-reduce:transition-none`) | The state is the message; the 200ms fade isn't. |
 
 ### In JavaScript
 
@@ -170,6 +174,37 @@ Ordering: because the block re-declares custom properties, it must come *after* 
 Translucent chrome relies on a hairline border to define its edge. At high contrast that hairline needs to become a real border — the surface itself is fine, but the boundary has to be unambiguous.
 
 Both of these preferences are covered in full — including the `@supports` baseline, the cost model behind the blur, and how to test them — in the **glass-and-depth** skill (`references/performance-and-fallbacks.md`). They appear here because they belong to the same "substitute, don't subtract" family as reduced motion.
+
+### Set pieces: skip, don't soften
+
+A once-a-session greeting is the one case where the answer is genuinely "off". There's nothing it communicates that the page underneath doesn't communicate better by simply being there. Gate it in the same inline script that decides whether it plays at all, so it's settled before the first pixel rather than substituted after:
+
+```js
+if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+```
+
+Two consequences worth planning for. **A manual replay override must not defeat the preference** — `?intro` re-runs the greeting for development, and reduced motion still wins, because that's a preference and not a cache. And **the "seen" flag should still be written**, or the reader's first non-reduced session in another tab surprises them.
+
+### Client-only flags and hydration
+
+Anything that plays "the first time" reads its answer from `sessionStorage`, which the server can't see. So the flag is false on the server for everyone and true on the client for most — and that is a hydration mismatch waiting to happen.
+
+**Branch transitions on it, never rendered styles.**
+
+```tsx
+variants={{
+  // A constant. Both renders agree on it.
+  shut: { opacity: 0, y: 6, filter: "blur(4px)" },
+  open: {
+    opacity: 1, y: 0, filter: "blur(0px)",
+    // Only the transition reads the flags — a transition isn't a style, so
+    // there's nothing for hydration to disagree about.
+    transition: { duration: reduce ? 0 : theatre ? 0.34 : 0.16, ease: EASE },
+  },
+}}
+```
+
+This also gives reduced motion the better shape: a zero-length transition to the *same* end state, rather than a different starting position.
 
 ## The general shape
 

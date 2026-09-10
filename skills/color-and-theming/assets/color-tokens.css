@@ -116,6 +116,38 @@
   --glass-nav-bg: rgba(242, 242, 242, 0.72);
   --glass-panel-bg: rgba(243, 243, 243, 0.97);
   --folder-glass-bg: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.34));
+
+  /* ── The one chromatic exception ────────────────────────────────────────
+     Beyond the focus ring, a monochrome system can afford at most one place
+     colour goes — and the justification has to be structural. Here it's a
+     collapsed summary panel: it's an OFFER rather than content ("do you want
+     the three-line version?"), which makes it the one element allowed to
+     announce itself, and means the exception can't spread, because nothing
+     else on the site is an offer.
+
+     Delete this block if you don't have such an element. An exception with a
+     weak justification becomes a palette within two components. */
+  --sv-edge-top: #16276b;      /* deep navy at the top of the 1px stroke */
+  --sv-edge-mid: #2f5ac4;
+  --sv-edge-bottom: #6d97ea;   /* running to a lighter blue at the bottom */
+  --sv-fill-top: #f4f6fc;
+  --sv-fill-bottom: #eef2fa;
+  --sv-accent: #2f5ac4;        /* the MARK, and only the mark */
+  --sv-sheen-hi: #8fb2f2;
+
+  /* Four shadows, not one. A single centred blur reads as a drop shadow
+     that happens to be blue; weighting it to the two SIDES is what makes it
+     read as light coming off the panel. See the glass-and-depth skill. */
+  --sv-glow:
+    0 1px 2px rgba(22, 39, 107, 0.05),
+    -10px 0 20px -18px rgba(47, 90, 196, 0.38),
+    10px 0 20px -18px rgba(47, 90, 196, 0.38),
+    0 10px 24px -16px rgba(47, 90, 196, 0.3);
+  --sv-glow-lift:
+    0 1px 2px rgba(22, 39, 107, 0.08),
+    -14px 0 28px -18px rgba(47, 90, 196, 0.75),
+    14px 0 28px -18px rgba(47, 90, 196, 0.75),
+    0 14px 34px -16px rgba(47, 90, 196, 0.6);
 }
 
 /* ── Dark theme ───────────────────────────────────────────────────────────
@@ -177,6 +209,35 @@
   /* Grey-based, not white — a white gradient over a dark page reads as fog
      rather than glass. */
   --folder-glass-bg: linear-gradient(to bottom, rgba(48, 48, 48, 0.5), rgba(30, 30, 30, 0.34));
+
+  /* The same edge, LIFTED — every stop moved by roughly the same amount.
+     A #16276b top stop is within a few points of a #0b0b0b page, so the
+     stroke would simply go missing down its darker half. The instinct is to
+     lighten only the dark end, and that's the mistake: it pinches the ramp
+     and it stops reading as one gradient. A gradient is a relationship
+     between its stops, so re-picking it for a theme means re-picking all of
+     them — exactly as the accent rule says.
+
+     The fill is TINTED, not darkened. It sits at gray-100's weight so the
+     panel doesn't punch a hole in the page: "raised" means "more contrast
+     against the page", and the direction flips between themes. */
+  --sv-edge-top: #24407f;
+  --sv-edge-mid: #3f6ed0;
+  --sv-edge-bottom: #86adf7;
+  --sv-fill-top: #171d2a;
+  --sv-fill-bottom: #1b2230;
+  --sv-accent: #86adf7;
+  --sv-sheen-hi: #dbe8ff;
+  --sv-glow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    -10px 0 22px -18px rgba(90, 140, 240, 0.45),
+    10px 0 22px -18px rgba(90, 140, 240, 0.45),
+    0 10px 26px -16px rgba(63, 110, 208, 0.35);
+  --sv-glow-lift:
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    -14px 0 30px -18px rgba(120, 165, 250, 0.9),
+    14px 0 30px -18px rgba(120, 165, 250, 0.9),
+    0 14px 36px -16px rgba(90, 140, 240, 0.7);
 }
 
 /* Reduced transparency → solid surfaces in both themes. MUST come after both

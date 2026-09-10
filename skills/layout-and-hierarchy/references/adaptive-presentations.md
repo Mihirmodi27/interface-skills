@@ -132,6 +132,72 @@ Free keyboard behaviour, free `aria-expanded`, free find-in-page (browsers open 
 
 The compact version costs **one line** above the article. That's the design constraint that makes it acceptable to put a nav in the reading flow at all.
 
+## Case 3: two views of one collection, chosen by the reader
+
+The first two cases fork on a *device* capability. This one forks on a preference, and most of what makes it work isn't layout at all.
+
+The reference implementation's galleries offer a masonry **wall** (everything at once) and a **roll** (one photograph open above a filmstrip), switched from a small dock. Same data, same route, two genuinely different ways of looking — which is the same test as §6 of the SKILL.md: the interaction model changes, not just the arrangement.
+
+### The state can't live in either component
+
+The control and the thing it controls are siblings, so a third party has to own the value:
+
+```ts
+export type GalleryLayout = "grid" | "roll";
+let current: GalleryLayout = "grid";
+
+const listeners = new Set<(layout: GalleryLayout) => void>();
+export function onGalleryLayoutChange(fn: (l: GalleryLayout) => void) {
+  listeners.add(fn);
+  return () => { listeners.delete(fn); };
+}
+export function setGalleryLayout(layout: GalleryLayout) {
+  current = layout;
+  for (const fn of listeners) fn(layout);
+}
+```
+
+Exactly the shape a theme store or a sound-preference store has, and for exactly the same reason. Two consumers, neither of which can be the other's parent without distorting the layout.
+
+```ts
+// Mirror it in a hook. Read in an EFFECT, not during render: on a
+// server-rendered page the module and the server agree on "grid" for a fresh
+// load, but arriving from another gallery with "roll" already picked would
+// have the client's first paint disagree with the markup.
+export function useGalleryLayout() {
+  const [layout, setLayout] = useState<GalleryLayout>("grid");
+  useEffect(() => {
+    setLayout(getGalleryLayout());
+    return onGalleryLayoutChange(setLayout);
+  }, []);
+  return { layout, pickLayout: setGalleryLayout };
+}
+```
+
+### Persisting the choice is the decision, and the default is "don't"
+
+The theme persists to `localStorage` forever. The gallery layout deliberately does not — it lives in module memory, and resets to the wall as each collection mounts, so a fresh load, a reload, and a move between two galleries all open on the wall.
+
+The reasoning is worth quoting because it applies to most view toggles:
+
+> The wall is the view that shows the whole collection, which is what you want on arrival. The roll is somewhere you go on purpose, and neither a previous visit nor the other gallery should decide it for you.
+
+A persisted view preference means a reader can land on a page in a mode they picked weeks ago, for a different collection, and not remember choosing it. **Persist a preference about the *reader* (theme, sound, motion). Don't persist a preference about a *thing* they were looking at.**
+
+### The switch has to carry their position
+
+Covered in §6 of **interface-motion**, but it belongs to the layout decision too: find the item nearest the centre of the viewport before the outgoing layout unmounts, and open the incoming one there. Leaving a wall at photograph 60 and arriving at the top of a filmstrip is worse than not switching at all.
+
+### One layout detail underneath all of it
+
+**Each tile declares its own aspect ratio**, rather than the grid imposing a uniform box:
+
+```tsx
+<figure style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
+```
+
+Three things fall out of it. Nothing is cropped, so `object-cover` has nothing to do. Nothing shifts on load, because the box was reserved. And the same image can travel between the two layouts without distorting, because both ends compute to the same shape — which is what makes the transition possible at all. A grid of uniform boxes forecloses that before you start.
+
 ## Capability queries, not just width
 
 Width tells you how much room you have. It does not tell you whether the user has a pointer.
@@ -199,8 +265,7 @@ Arrangement, not interaction:
 ```tsx
 "grid gap-4 sm:gap-6 grid-cols-3"           // grid density
 "columns-3 gap-1 sm:columns-4"              // masonry columns
-"pt-28 sm:pt-20"                            // page padding
-"text-[30px] sm:text-[26px]"                // the one responsive type step
+"pt-28 sm:pt-20"                            // page padding under fixed chrome
 "absolute left-3 right-3 top-full … xl:left-full xl:top-1/2 xl:ml-6 xl:w-60"
 ```
 
@@ -210,9 +275,11 @@ That last one is the interesting case — a hover card that sits *below* its row
 
 | Breakpoint | Width | What changes |
 |---|---|---|
-| `sm` | 640px | Mobile dock ↔ desktop dock. Article title size. Page padding. Masonry columns. Stack columns. |
+| `sm` | 640px | Mobile dock ↔ desktop dock. Page padding. Masonry columns. Stack columns. |
 | `xl` | 1280px | The TOC rail appears. The hover card moves beside its row. |
 
 Two breakpoints for the whole site. `sm` because it coincides with the reading measure — below it the column is padding-limited, so it's the natural place for the layout to change character. `xl` because that's the width at which there is finally enough margin outside a 640px column to park a 196px rail.
 
 Both are derived from the content, not chosen from a device list. That's the point: **a breakpoint should be the width at which a specific layout decision stops working.**
+
+Note what's *not* on the list any more: type size. An earlier version of the system stepped a 30px article title down to 26px below `sm`. Collapsing the type ladder to an 18px ceiling removed the need — see the **typographic-system** skill. **A responsive type step is usually a symptom that one size is too large for the narrowest measure you ship**, and fixing the ladder is better than tuning the breakpoint.

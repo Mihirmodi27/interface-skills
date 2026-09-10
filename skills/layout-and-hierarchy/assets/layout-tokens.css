@@ -153,6 +153,7 @@
    inserted without renumbering.
 
      100   skip link — must beat everything, including modals
+      60   a once-a-session overlay — over the dock, under the skip link
       50   fixed navigation
       40   tap-outside catcher — under the nav, over the page
       30   a pocket front, above the cards it contains
@@ -160,9 +161,15 @@
       10   a hovered item lifting above its siblings
      -10   a sliding highlight, behind content inside `isolate`
 
-   The 40/50 pair is the one to get right: a full-screen catcher must be
-   above the page (to catch the click) and below the menu it dismisses (or it
-   eats the menu's own clicks).
+   60 is what the gaps were for: a greeting overlay arrived long after this
+   ladder was set and slotted in without touching an existing value.
+
+   Two pairs to understand rather than copy. 40/50: a full-screen catcher
+   must be above the page (to catch the click) and below the menu it
+   dismisses (or it eats the menu's own clicks). 60/100: a splash overlay
+   covers the navigation — or it isn't covering the page — but must never
+   cover the skip link, because a keyboard user tabbing during a two-second
+   greeting has to be able to get past it.
 
    ── Two techniques ─────────────────────────────────────────────────────
    isolate + negative z: a highlight bar behind icons but in front of its

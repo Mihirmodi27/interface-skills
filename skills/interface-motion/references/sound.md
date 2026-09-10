@@ -82,7 +82,7 @@ The interval between them is roughly a fourth — pleasant rather than dissonant
 
 ## The autoplay policy
 
-An `AudioContext` starts `suspended` and can only be resumed from a user gesture. So hover sounds are silent until the first click or tap unlocks it, permanently.
+An `AudioContext` starts `suspended` and can only be resumed from a user gesture. So hover sounds are silent until the reader's first real interaction unlocks it, permanently.
 
 ```ts
 export function unlockAudio(): void {
@@ -91,13 +91,36 @@ export function unlockAudio(): void {
 }
 ```
 
-Called on `pointerdown`. And every playback path checks state rather than assuming:
+And every playback path checks state rather than assuming:
 
 ```ts
 if (!c || c.state !== "running") return;
 ```
 
 This is a feature, not a workaround: a page you've merely scrolled past makes no sound, and sound only ever begins after you've interacted. Fail silently — never surface an error for this.
+
+### Arm it on every gesture the browser accepts, not just the one you expect
+
+```ts
+const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
+
+/* Idempotent — resume() on a running context is a no-op, which is cheaper
+   than the bookkeeping to detach these after the first one lands. */
+const onUnlock = () => unlockAudio();
+for (const type of UNLOCK_EVENTS) {
+  document.addEventListener(type, onUnlock, { passive: true });
+}
+```
+
+The reference implementation shipped `pointerdown` alone for months. Two failures, and neither is exotic:
+
+**Hover is not activation, in any engine.** A reader who lands on the page and simply moves the mouse across the dock hears nothing — and there is no later gesture to recover from, because *the hover was the interaction*. The bug hid because whoever tests it clicks something within a few seconds.
+
+**Keyboard-only readers never heard the site at all.** Tab to a link, press Enter: that dispatches `click`, not `pointerdown`, so the context was still suspended when the click handler asked it to play. Every screen, every session. `keydown` is the fix, and it's the one that matters most, because the affected group is precisely the group least able to work around it.
+
+**`wheel` is deliberately absent.** Scrolling is the one input in this neighbourhood that counts as activation in no engine at all, so listening for it wouldn't unlock anything — it would just move the silence somewhere harder to find.
+
+The general form: **enumerate the activation gestures, not the gesture your own hands make.** If your unlock list has one entry, it's probably wrong.
 
 ## Delegation, not per-element wiring
 
@@ -115,7 +138,6 @@ const onOver = (e: PointerEvent) => {
   if (el) playHover();
 };
 
-document.addEventListener("pointerdown", () => unlockAudio());
 document.addEventListener("pointerover", onOver);
 document.addEventListener("click", onClick);
 ```
@@ -127,6 +149,43 @@ Three details:
 - **`closest(SELECTOR)`** means it works for anything interactive, including elements added later, with no per-component wiring.
 
 `summary` is in the selector because a `<details>` disclosure is a real control that should feel like one.
+
+### Dense surfaces opt out of the hover tick
+
+```ts
+// Surfaces made of a hundred small targets — an image wall, a filmstrip —
+// opt out with data-quiet-hover. A tick per tile as the cursor crosses them
+// is a machine gun, not feedback. Clicks still tick.
+if (el && !el.closest("[data-quiet-hover]")) playHover();
+```
+
+One attribute on the container, and the whole subtree goes quiet on hover while staying audible on click. Worth noting what the opt-out *isn't*: it's not "this surface is unimportant", it's a rate limit. The signal stops being feedback somewhere around three ticks a second, and a grid of thumbnails passes that trivially.
+
+## Sound as a phrase
+
+Two sounds is a texture. Occasionally you want a *run* of them — the reference implementation plays one note per photograph as they flick past in the opening screen, then a landing note as the real mark arrives.
+
+```ts
+/* An A major pentatonic run, written out rather than computed from an
+   interval: five notes want to BE a phrase, and pentatonic is the scale
+   where no two of them can sound wrong together. */
+const RIFFLE = [880, 990, 1100, 1320, 1467];
+
+export function playRiffleStep(i: number): void {
+  tok(RIFFLE[Math.min(Math.max(i | 0, 0), RIFFLE.length - 1)], 0.1, 0.06);
+}
+
+/** The mark arriving last, and the run resolving onto it. */
+export const playLanding = () => tok(587, 0.26, 0.16);
+```
+
+Three decisions worth copying:
+
+- **Pentatonic, because the phrase can be truncated.** A photograph that fails to load drops its turn, so the run comes up short. In a scale with no dissonant pair, a phrase that stops early still sounds finished.
+- **Quieter than a click** (0.06 against 0.13). Five notes inside a second should read as a flutter, not a drum fill.
+- **The landing note resolves *downward*.** It's a fifth below where the run started, and it's the only accented note. Land above the run and it sounds like one more step rather than the end of the phrase.
+
+This is still a set piece, not a texture — it plays once a session. See §14 of the SKILL.md.
 
 ## Mute, and persistence
 
@@ -156,6 +215,6 @@ If you default to on, the mute control has to be *easy to find within seconds*. 
 
 **Haptics.** `navigator.vibrate()` exists but isn't implemented here — Safari on iOS doesn't support it, so it would only fire on Android, and a feedback channel that exists on one platform is worse than none. If you add it, keep it under 10ms and tie it to the same mute preference.
 
-**Sounds for anything other than hover and click.** No navigation sound, no reveal sound, no error sound. Two sounds is a texture; five is a soundtrack.
+**Sounds for anything other than hover, click, and the one greeting phrase.** No navigation sound, no reveal sound, no error sound. Two sounds is a texture; five is a soundtrack. The riffle earns its place by playing once per tab and never again.
 
 **Pitch variation.** A tempting flourish — vary the pitch by element type or position. It turns an ambient texture into something the user starts trying to interpret.

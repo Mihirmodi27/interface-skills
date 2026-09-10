@@ -9,6 +9,19 @@ import { useEffect } from "react";
  * re-attaches to the new page's `.reveal` elements after a route change —
  * without it, a client-side navigation leaves the incoming page's content
  * permanently at opacity: 0.
+ *
+ * THE THIRD GUARD IS NOT IN THIS FILE, and it's the one people miss. A feature
+ * check can't catch "JavaScript never ran at all": the CSS ships, `.reveal`
+ * applies, and nothing arrives to add `.in`. The reader gets a correct document
+ * they cannot see. Put this in the document head, beside where you load the app:
+ *
+ *   <noscript>
+ *     <style>.reveal { opacity: 1 !important; transform: none !important; }</style>
+ *   </noscript>
+ *
+ * The general rule: any CSS that hides content pending JavaScript needs a
+ * <noscript> reset. This is a correctness bug, not a nicety — the failure mode
+ * is a blank page rather than a plain one.
  */
 export function useReveal(dep?: unknown) {
   useEffect(() => {

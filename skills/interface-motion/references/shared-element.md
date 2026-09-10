@@ -146,3 +146,82 @@ isActive
 ```
 
 Two highlights visible at once — a static one and a sliding one — makes it ambiguous which is the selection. Ceding the surface to the pointer while the pointer is present resolves it, and the active item keeps its text colour throughout so you never fully lose track of where you are.
+
+Note the pairing with icon fill (§13 of the SKILL.md): the *glyph* fills both when it's current and when it's hovered, deliberately, because previewing a choice and reporting one are the same gesture a beat apart. The chip is what disambiguates them when both are on screen. Two signals, each doing half the job — don't make either one carry both.
+
+## Escalating to the GPU
+
+Everything above is one small rectangle moving between measured boxes, and that's why it's affordable. Some shared-element transitions aren't that shape, and the point at which to stop using the DOM is worth knowing precisely.
+
+The case that forced it: an image gallery with two layouts — a masonry wall of ~100 tiles, and a "roll" with one photo open above a filmstrip — where the same photograph travels between them.
+
+Three things break the DOM approach here at once:
+
+1. **Aspect ratios differ.** Consecutive photographs are 1:1 then 16:9. Animating one `<img>` between two boxes of different aspect distorts it for the whole trip.
+2. **The wall is expensive to re-lay-out.** Animating layout properties on a container of 100 tiles is not a per-frame budget.
+3. **The endpoints exist at different moments.** One rect is measurable only while the outgoing layout is rendered; the other only after the incoming one commits.
+
+### The shape of the fix
+
+One viewport-sized canvas above the gallery, drawing a single photo into an arbitrary screen rect. The trip becomes four numbers in a uniform, so it costs no reflow at any size:
+
+```ts
+export type Rect = { x: number; y: number; width: number; height: number };
+
+/** Straight-line interpolation. Equal-aspect endpoints keep their aspect throughout. */
+export function lerpRect(a: Rect, b: Rect, t: number): Rect { /* … */ }
+```
+
+### The four rules that keep it honest
+
+**Only the decorative element goes on the GPU.** The wall stays DOM. A hundred tiles as textures is ~590MB before any atlasing, and those tiles carry the keyboard and screen-reader semantics a canvas can't. The open photo is `alt=""` — the labels live in the strip beside it — so nothing is lost by drawing it. *The moment the canvas owns something with semantics, or with a hundred instances, you've traded accessibility and memory for a transition.*
+
+**Failing returns `null`, never throws.** This is constructed inside an effect, so an exception takes the whole view down instead of falling back:
+
+```ts
+export function createPhotoStage(canvas: HTMLCanvasElement): PhotoStage | null {
+  try {
+    /* … */
+    // A failed shader link only makes some libraries warn — the throw lands
+    // later, on the first draw. Check for the artefact that proves setup
+    // completed rather than trusting the constructor.
+    if (!program.uniformLocations) return null;
+    /* … */
+  } catch {
+    return null; // No WebGL, or a context that can't be set up.
+  }
+}
+```
+
+`null` is the caller's cue to keep its `<img>` — which is also the path for reduced motion, and the path if the GPU drops the context later. That fallback isn't a nicety; it's the same code path that renders for everyone whose machine says no.
+
+**Carry the reading position across.** Before the switch, find the tile nearest the centre of the viewport and open the other layout on *that* item, from *that* rect:
+
+```ts
+// Read while the OUTGOING layout is still rendered — from the layout store's
+// synchronous subscriber, before React commits the incoming one.
+export function centreFrame(): { id: string; rect: Rect } | null {
+  const midX = window.innerWidth / 2, midY = window.innerHeight / 2;
+  let best = null;
+  for (const el of document.querySelectorAll<HTMLImageElement>("img[data-frame]")) {
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.bottom <= 0 || r.top >= window.innerHeight) continue;
+    const d = Math.hypot(r.left + r.width / 2 - midX, r.top + r.height / 2 - midY);
+    if (!best || d < best.d) best = { id: el.dataset.frame!, rect: r, d };
+  }
+  return best;
+}
+```
+
+Leaving a wall at photo 60 and arriving at the top of a filmstrip is a worse transition than no transition at all. This generalises past galleries: **any layout switch should resume where the reader was, and the measurement has to happen before the old layout unmounts.**
+
+**Each end keeps its own shape.** Two rects, not one. A single shared rect draws one of the two photographs stretched to the other's box for the entire crossfade. Interpolate them separately and let the pair share a centre — two rects of equal aspect stay that aspect through a linear lerp, so nothing can distort. (This also makes the GPU path match the `<img>` fallback exactly: two absolutely-centred images, each at its own aspect ratio, crossfading.)
+
+### Two implementation notes that cost real time to find
+
+**Mipmaps, or the photo shimmers.** A 2000px photo drawn into a 355px tile samples one texel in five. Without a mip chain the minified image aliases, and it shimmers as the rect moves sub-pixel through the flight. Generate mipmaps and use trilinear (`LINEAR_MIPMAP_LINEAR`), so crossing between mip levels as the photo grows doesn't step.
+
+**Fade the last pixel of the edge.** The rect's edges land on fractional pixels and move every frame. A binary in/out test makes the boundary snap from one column to the next, which reads as the edge crawling. One `smoothstep` across a pixel's width holds it still — and fade *alpha only* on a non-premultiplied context, or the edge darkens toward black instead of disappearing.
+
+**Don't call `WEBGL_lose_context` on teardown.** It frees GPU memory a little sooner and poisons the canvas element for good — and React reuses the node across a remount (StrictMode does it on every mount), so the next context won't compile its shaders and won't say why. Dropping the textures and the references is enough; the context goes with the element.
+

@@ -1,6 +1,6 @@
 ---
 name: interface-motion
-description: Design and audit interface animation — a duration ladder tied to how much of the screen changes, one shared easing curve, springs tuned by character rather than by number, asymmetric open/close, shared-element highlights that slide between targets, squash-and-stretch from disagreeing springs, reveal-on-scroll, route transitions, theme crossfades, press feedback, rAF-throttled scroll listeners, hover intent, and synthesised UI sound. Use when adding or reviewing animations, transitions, menus, dropdowns, sheets, tooltips, hover states, scroll effects, page transitions, or motion that feels sluggish, floaty, janky, or gratuitous — and always when implementing reduced-motion, reduced-transparency, or touch-versus-pointer behaviour.
+description: Design and audit interface animation — a duration ladder tied to how much of the screen changes, one shared easing curve, springs tuned by character rather than by number, asymmetric open/close, shared-element highlights that slide between targets, GPU escalation for a single travelling element, squash-and-stretch from disagreeing springs, icon fill as the one signal for chosen, once-a-session set pieces, reveal-on-scroll, route transitions, theme crossfades, press feedback, rAF-throttled scroll listeners, hover intent, and synthesised UI sound. Use when adding or reviewing animations, transitions, menus, dropdowns, sheets, disclosures, tooltips, hover states, icon states, splash or greeting screens, scroll effects, page transitions, or motion that feels sluggish, floaty, janky, or gratuitous — and always when implementing reduced-motion, no-JavaScript, reduced-transparency, or touch-versus-pointer behaviour.
 ---
 
 # Interface Motion
@@ -32,7 +32,24 @@ Two entries break the pattern deliberately:
 - **Route at 260ms**, not 300. A page transition is on the critical path to content — every millisecond is latency the user feels as slowness. 260 is the shortest crossfade that still reads as a transition rather than a flicker.
 - **Theme at 400ms with plain `ease`.** This is the largest possible change (every surface, every text colour, every border simultaneously) so it gets the longest duration. And it's the one case where the overshooting house curve is *wrong* — colour doesn't have momentum, so an overshoot on a background-colour interpolation just looks like a wobble.
 
-Nothing loops. Nothing exceeds 400ms. Nothing animates to attract attention.
+Nothing loops. Nothing animates to attract attention. Nothing on this ladder exceeds 400ms.
+
+### Two things that sit off the ladder, and why that's allowed
+
+The ladder is for **state**: something changed and the user needs to follow it. Two categories legitimately aren't state, and forcing them onto the ladder makes them worse rather than tighter.
+
+**The subject of the moment.** In an image gallery, stepping between photographs dissolves over **620ms** — half again the longest state duration:
+
+```ts
+const DISSOLVE = 0.62;  // stepping between photographs
+const FLIGHT   = 0.42;  // the same photograph moving between two layouts
+```
+
+The photograph *is* the content, not chrome reporting a change to it. A noise-thresholded dissolve needs time to read as a dissolve rather than a cut, and the reader is looking directly at the thing that's animating. Note the discipline in the pair: the flight — the same photo travelling between two layouts — stays at 420ms, inside the overlay tier, because that *is* a state change and the photo is already on screen at both ends. **Same component, two durations, decided by whether the motion is the subject or the report.**
+
+**A once-a-session set piece.** The opening screen runs 560ms in, holds 1400ms, and takes about 2.5 seconds end to end. That is indefensible as interaction and fine as a greeting, because it happens once per tab, never blocks a deep link, and never plays under reduced motion. It gets its own budget precisely because it's *not* on the interaction path.
+
+The test: **would a user see this more than a handful of times a session?** If yes, it's on the ladder. If no, it can have its own timing — but it has to earn the exemption by never appearing again.
 
 ## 2. One easing curve
 
@@ -47,8 +64,17 @@ Where it doesn't apply:
 - **Opacity-only micro-transitions** use `ease-out` at 100ms. Opacity has no position, so overshoot is meaningless (and clamps at 1 anyway).
 - **The theme crossfade** uses plain `ease`, per above.
 - **Anything spring-driven** doesn't use a bezier at all.
+- **Any track that also drives a filter.** This one is a correctness constraint, not taste: an overshooting curve passes *beyond* its end value, and a `blur()` animating to `0px` would have to go through a negative radius to get back. Use an expo-out instead — `cubic-bezier(0.16, 1, 0.3, 1)`, which decelerates hard and never exceeds 1.
 
-Never write a second bezier "because this one needs to feel different." Reach for a spring instead — that's the axis where character belongs.
+```ts
+// Lines staggering in behind a blur. Not --ease-geist: the same track drives
+// filter: blur(4px) → blur(0px), and the house curve would overshoot past zero.
+const EASE = [0.16, 1, 0.3, 1] as const;
+```
+
+The generalisable version: **check what else is riding the curve.** Overshoot is safe on transform and meaningless on opacity, but any property with a floor at zero — blur, brightness, a border radius, a scale you've promised won't invert — cannot take a curve that goes past its target.
+
+Never write a second bezier "because this one needs to feel different." Reach for a spring instead — that's the axis where character belongs. The exception above is a different thing: it isn't a second character, it's the same intent expressed by a curve that's legal for the property.
 
 → Full reasoning, plus the bezier-vs-spring decision: `references/easing-and-duration.md`
 
@@ -138,6 +164,19 @@ Three details that make it work:
 
 → The pattern in full, including the tooltip variant and hit-target measurement: `references/shared-element.md`
 
+### When the DOM element isn't enough
+
+A shared highlight works because it's one small rectangle. A shared *photograph* travelling between two layouts is a different problem: animating an `<img>` between two boxes of different aspect ratios distorts it, and re-laying-out a hundred-tile wall on every frame of the trip is not affordable.
+
+The reference implementation puts one viewport-sized canvas above the gallery and draws the open photo into an arbitrary screen rect. The trip becomes four numbers in a uniform, so it costs no reflow at any size. Four rules make that safe rather than clever:
+
+- **Only the decorative element goes on the GPU.** The wall stays DOM. A hundred tiles as textures is ~590MB before any atlasing, and those tiles carry the keyboard and screen-reader semantics a canvas can't. The open photo is `alt=""` — the labels live in the strip beside it — so nothing is lost by drawing it.
+- **Failing must return `null`, never throw.** This runs inside an effect; an exception takes the gallery down instead of falling back. The caller keeps its `<img>` whenever there's no context — which is also the path for reduced motion, and the path if the GPU drops the context later.
+- **Carry the reading position across.** Before the layout switch, find the tile nearest the centre of the viewport and open the other layout on *that* item, from *that* rect. Leaving a wall at photo 60 and arriving at the top of a filmstrip is a worse transition than no transition. Measure it while the outgoing layout is still rendered — from the store's synchronous subscriber, before React commits the incoming one.
+- **Each end keeps its own shape.** Two rects, not one: consecutive photographs aren't the same aspect ratio, and a single shared rect draws one of them stretched for the whole dissolve. Interpolate them separately and share a centre; two rects of equal aspect stay that aspect through a linear lerp, so nothing can distort.
+
+**The generalisable rule: escalate to the GPU for one element, not for a view.** The moment the canvas owns something with semantics or with a hundred instances, you've traded accessibility and memory for a transition.
+
 ## 7. Reduced motion is a branch, not a switch
 
 Every animated component reads the preference and takes a different path. There is no global "disable animations" — that's how you end up with a menu that pops into existence with no indication it opened.
@@ -219,7 +258,21 @@ An `IntersectionObserver` adds `.in` and immediately **unobserves** — a reveal
 
 8px of travel. Enough to register as movement, small enough that a page of revealing paragraphs doesn't feel like it's sliding around.
 
-Two failure modes the implementation guards against: no `IntersectionObserver` (add `.in` to everything immediately — never leave content at `opacity: 0` behind a feature check), and route changes (re-run the observer keyed on the pathname, or the new page's elements are never observed).
+Three failure modes the implementation guards against.
+
+**No `IntersectionObserver`** — add `.in` to everything immediately. Never leave content at `opacity: 0` behind a feature check.
+
+**Route changes** — re-run the observer keyed on the pathname, or the new page's elements are never observed.
+
+**No JavaScript at all.** This is the one people miss, and a feature check doesn't catch it: the CSS ships, the class applies, and the script that would add `.in` never runs. The result is a correct document the reader cannot see. The guard is two lines in the document head:
+
+```html
+<noscript>
+  <style>.reveal { opacity: 1 !important; transform: none !important; }</style>
+</noscript>
+```
+
+The general principle: **any CSS that hides content pending JavaScript needs a `<noscript>` reset.** Reveal-on-scroll is the common case, but so is anything gated on a hydrated class — and this is a correctness bug, not a progressive-enhancement nicety, because the failure mode is a blank page rather than a plain one.
 
 ## 10. Performance: `m` not `motion`
 
@@ -263,7 +316,96 @@ On the press, not the release. Respond to `pointerdown`; waiting for `click` fee
 
 The site also plays a synthesised "tok" on hover and click — Web Audio, no asset files, a sine fundamental plus a marimba-like 3.9:1 partial with a fast decay and a lowpassed noise transient for the wooden attack. Hover is quiet and high (1200Hz, 0.09s, 0.05 gain); click is lower and louder (900Hz, 0.14s, 0.13 gain). It's gated behind the autoplay policy, muteable, and persisted.
 
+Two rules the reference implementation learned the hard way, both worth having before you write the first line:
+
+**Arm the context on every gesture the browser accepts as activation, not just the one you expect.**
+
+```ts
+const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
+```
+
+Listening on `pointerdown` alone is the bug. Hover is not activation in any engine, so a reader who moves the mouse across the dock without clicking hears nothing — and there is no later gesture to recover from, because *the hover was the interaction*. It's worse for the keyboard: tab to a link, press Enter, and the resulting `click` still finds a suspended context. Keyboard-only readers never hear the site at all, on any screen. Attach all three, keep the handler idempotent (`resume()` on a running context is a no-op, cheaper than the bookkeeping to detach), and note that `wheel` is deliberately excluded — scrolling counts as activation in no engine, so including it just moves the silence somewhere harder to find.
+
+**Give dense surfaces a way to opt out of hover sound.**
+
+```ts
+if (el && !el.closest("[data-quiet-hover]")) playHover();
+```
+
+An image wall or a filmstrip is a hundred small targets in a row. A tick per tile as the cursor crosses them is a machine gun, not feedback. Clicks still sound — the opt-out is about *rate*, not about the surface being unimportant.
+
+**Sound can be a phrase, not just an event.** Where the site plays a run of notes — one per photograph flicking past in the opening screen — they're written out as an A major pentatonic run rather than computed from an interval, because the run comes up short whenever an image fails to load and drops its turn. Pentatonic is the scale where no two notes can sound wrong together, so a truncated phrase still resolves. The landing note is the only accented one and sits a fifth *below* where the run started, so it closes the phrase instead of sounding like one more step.
+
 This is the most optional thing in the system. If you add it: hover sound on mouse only (`pointerType === "mouse"`), a visible mute control, and default to *on* only if you're confident. Full synthesis walkthrough and the delegation pattern: `references/sound.md`
+
+## 13. Fill means chosen
+
+A rule about icons that is really a rule about motion, because the mechanism is a crossfade.
+
+**An icon is filled when, and only when, it is the thing you've picked or the thing you're pointing at.** Nothing is filled because it looks better. Reporting a selection and previewing one are the same gesture a beat apart, so they get the same treatment: the glyph commits to "this one" under the pointer, and simply stays committed if you click. Where both are on screen at once — a hovered item in a dock whose current page is elsewhere — the sliding highlight from §6 is what tells them apart.
+
+The mechanism matters as much as the rule. **A filled variant is not a second drawing.** It's the same outline with its interior painted in, layered *over* the stroke at the same coordinates:
+
+```tsx
+export const fillFade = (on: boolean) =>
+  `transition-opacity duration-200 ease-out motion-reduce:transition-none ${on ? "opacity-100" : "opacity-0"}`;
+
+// The inverse, for interior lines a solid shape swallows — a briefcase's
+// divider, a document's rules. They have to leave as the fill arrives.
+export const detailFade = (on: boolean) =>
+  `transition-opacity duration-200 ease-out motion-reduce:transition-none ${on ? "opacity-0" : "opacity-100"}`;
+```
+
+Because the silhouette never moves between states, the two layers cross-fade in place: no pop, no reflow, nothing to line up by hand. Two details:
+
+- **200ms `ease-out`, not the house curve.** Same split the springs make — the overshoot is right for travel and wrong for a fade.
+- **Interior detail needs a knockout, not deletion.** Where the filled shape would swallow a line, paint the silhouette through a mask: the shape in white (fill *and* stroke, so it matches the outline exactly), the interior lines in black at the stroke width the outline used, so each gap lands where its line was.
+
+**Three kinds of mark sit outside the rule**, and knowing why is what keeps it from becoming decoration:
+
+| Mark | Why fill is wrong | What it does instead |
+|---|---|---|
+| Brand marks — socials, a tech stack | They're official solid silhouettes; an outlined form would be an off-brand redrawing | Colour: quiet at rest, full on hover |
+| Open strokes — chevrons, arrows, checks, menu bars | No interior to paint | A stroke-weight ladder by role |
+| A mark on static content, or a lone toggle | Never hovered, never current — or the only mark on screen | Stays in the default state |
+
+That last row is the one to internalise: **fill that distinguishes nothing is just weight.** A single toggle whose glyph already changes shape has nothing to be picked out *from*, so filling it adds mass and no meaning.
+
+## 14. Set pieces play once
+
+Some motion is a greeting rather than feedback: an opening screen, a summary panel's first reveal. It's allowed to be longer and more theatrical than anything on the duration ladder — on the condition that it happens **once a session** and never blocks anything.
+
+```ts
+// Once a session, per item. The theatre is a welcome; a re-run is a delay.
+const seenKey = (slug: string) => `short-version:${slug}`;
+```
+
+Four rules, and each one is a bug the reference implementation hit.
+
+**Decide before the first pixel, in an inline script.** Whether a greeting plays depends on `sessionStorage`, which the server can't see — so the decision can't come from React without a frame of the page appearing before the overlay covers it. Set an attribute on `<html>` from a blocking inline script and let CSS answer the question at paint. The component's only job is to *end* it, by flipping the attribute.
+
+```js
+// Home page only, first landing of the session only, never under reduced motion.
+// A link to a section (/#work) is someone asking for that section — a deep link
+// skips the greeting too.
+document.documentElement.dataset.intro = "on";
+```
+
+**A filling animation beats a declared value.** If the entrance is a CSS animation with `both`, you cannot transition out of it with a plain declaration — the animation's `to` state wins. Replace the animation rather than layering a transition over it.
+
+**Branch transitions on the client-only flag, never rendered styles.** "Has this played before?" is false on the server for everyone and true on the client for most. Branch a *style* on it and React hands you two different first paints and says so in the console. Branch only the transition — a transition isn't a style, so there's nothing for hydration to disagree about, and a reader who asked for less motion gets a zero-length one rather than a different starting position.
+
+```tsx
+variants={{
+  shut: { opacity: 0, y: 6, filter: "blur(4px)" },   // constant, both renders
+  open: { opacity: 1, y: 0, filter: "blur(0px)",
+          transition: { duration: reduce ? 0 : theatre ? 0.34 : 0.16, ease: EASE } },
+}}
+```
+
+**Record "seen" on completion, not on start.** Setting the flag as the animation begins lands in the same render batch as the open and cancels the very animation it's recording. `onAnimationComplete` also makes a second open in the same visit as quiet as a second visit, which is the way round a reader expects.
+
+One more, for anything collapsible: **animate height, don't unmount.** The content then sits in the served HTML where a crawler or an `llms.txt` can reach it. Use `inert` plus `aria-hidden` while closed so a screen reader or a tab press meets the trigger rather than the hidden prose.
 
 ## Assets
 
@@ -271,17 +413,27 @@ This is the most optional thing in the system. If you add it: hover sound on mou
 - `assets/motion-presets.ts` — every spring and tween above, with the reduced-motion substitutes.
 - `assets/DropMenu.tsx` — the squash-and-stretch menu, complete.
 - `assets/useScrollTick.ts` — the rAF-throttled scroll primitive with hysteresis.
-- `assets/useReveal.ts` — the IntersectionObserver hook, with both guards.
+- `assets/useReveal.ts` — the IntersectionObserver hook, with all three guards.
 
 ## Checklist
 
 - [ ] Every duration is on the ladder. No 250ms, no 500ms, no 1s.
+- [ ] Anything off the ladder is either the subject of the moment or a once-a-session set piece — and says which.
 - [ ] One easing curve, plus `ease-out` for opacity-only and plain `ease` for the theme fade.
+- [ ] No overshooting curve on a track that also drives a filter, or any property with a floor at zero.
 - [ ] Opacity split out of every spring as its own short tween.
 - [ ] Open springs, close tweens flat and faster.
 - [ ] Shared element for list/dock highlights — not per-item backgrounds.
 - [ ] `initial={false}` on any persistent element that re-targets.
+- [ ] A canvas escalation covers one decorative element, returns `null` on failure, and carries the reading position across.
+- [ ] Icons fill only when current or hovered; filled layer crossfades over the outline in place.
+- [ ] Marks that can't fill (brand silhouettes, open strokes, lone toggles) signal some other way.
 - [ ] `useReducedMotion()` branch in every animated component; `.reveal` fully off.
+- [ ] A `<noscript>` reset for any CSS that hides content pending JavaScript.
+- [ ] Set pieces gated before first paint by an inline script, not by React.
+- [ ] Client-only flags branch transitions, never rendered styles.
+- [ ] "Seen" recorded on animation *complete*, not on start.
+- [ ] Collapsible content animates height and goes `inert` — it doesn't unmount.
 - [ ] `scrollIntoView` behaviour passes the reduced-motion preference.
 - [ ] Scroll listeners are `passive` and rAF-throttled; one listener per behaviour.
 - [ ] Hysteresis on any scroll-direction toggle.
@@ -289,4 +441,6 @@ This is the most optional thing in the system. If you add it: hover sound on mou
 - [ ] `LazyMotion` + `m` + `strict`. No bare `motion.*`.
 - [ ] No `backdrop-filter` inside an animating transform.
 - [ ] Press feedback on pointer-down.
+- [ ] Audio armed on `pointerdown`, `keydown` **and** `touchstart` — not pointer alone.
+- [ ] Dense hover surfaces opt out of hover sound.
 - [ ] Nothing loops; nothing animates to attract attention.

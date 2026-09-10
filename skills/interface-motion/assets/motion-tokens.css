@@ -23,6 +23,34 @@
   --duration-route: 260ms;    /* whole viewport, on the critical path      */
   --duration-overlay: 300ms;  /* large region entering or collapsing       */
   --duration-theme: 400ms;    /* literally everything, at once            */
+
+  /* ── Off the ladder, deliberately ───────────────────────────────────────
+     The ladder is for STATE. Two things aren't state, and squeezing them
+     onto it makes them worse rather than tighter.
+
+     THE SUBJECT OF THE MOMENT — the thing animating IS the content, so the
+     user is looking directly at it and the motion has to read in its own
+     right. Note the pair: the dissolve is the subject, the flight is a
+     report about it, so the flight stays inside the overlay tier. */
+  --duration-dissolve: 620ms; /* stepping between images                   */
+  --duration-flight: 420ms;   /* one image moving between two layouts      */
+
+  /* A SET PIECE earns its budget by never appearing again — once per tab,
+     never blocking a deep link, never played under reduced motion. */
+  --duration-setpiece-in: 560ms;
+  --duration-setpiece-out: 320ms;
+
+  /* ── The curve for a track that also drives a filter ────────────────────
+     NOT --ease-geist. The house curve overshoots past 1, and a blur
+     animating to 0px would have to pass through a NEGATIVE radius to settle
+     back. Browsers clamp rather than crash, so the symptom is a value stuck
+     at zero for the tail of the transition — which reads as the animation
+     stalling right at the end, and is very hard to attribute.
+
+     Applies to any property with a hard floor: blur, brightness, a radius
+     going to 0, a scale you've promised won't invert. Expo-out has the same
+     "arrives decisively" character without ever leaving [0, 1]. */
+  --ease-filter: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Plain-CSS fallback if you're not on Tailwind v4. */
@@ -56,6 +84,27 @@
       transition: none;
     }
   }
+
+  /* Print is a real presentation, and scroll-triggered content prints blank
+     without this. The most-forgotten line in the file. */
+  @media print {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* THE THIRD GUARD IS NOT CSS. A feature check can't catch "JavaScript
+     never ran at all": the rules above ship, `.reveal` applies, and nothing
+     arrives to add `.in`. The reader gets a correct document they cannot
+     see — a blank page rather than a plain one. Put this in the head:
+
+       <noscript>
+         <style>.reveal { opacity: 1 !important; transform: none !important; }</style>
+       </noscript>
+
+     The general rule: any CSS that hides content pending JavaScript needs a
+     <noscript> reset. */
 
   /* ── Route transition ───────────────────────────────────────────────────
      Opacity only — no slide, no scale. Directional motion implies a spatial

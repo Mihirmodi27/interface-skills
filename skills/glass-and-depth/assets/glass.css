@@ -171,8 +171,9 @@
        Dark mode is a DIFFERENT shadow, not a re-tint — shadows ~10x stronger
        (4% black on #0b0b0b is mathematically invisible), inset highlight ~6x
        weaker (0.6 white on dark reads as a glowing edge). Because the
-       structure changes, this can't be one token; extract the pair to a
-       shared constant. See assets/GlassPanel.tsx.
+       structure changes, this can't be one token — it's a per-theme pair,
+       and it belongs in the .dock-shadow class at the foot of this file
+       rather than repeated inline at every use.
 
    3 · CONTINUOUS CORNERS:
 
@@ -188,3 +189,131 @@
    filter pass; opacity: 0 does not save you), never animate blur(), and
    never put glass over video or a flat background.
    ───────────────────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   The elevation stack, as a class.
+
+   Every floating surface takes this alongside its material class:
+
+     <div class="glass-nav dock-shadow rounded-2xl border-[0.5px] …">
+
+   It is NOT a design token, because it isn't a colour — no token system
+   takes a four-layer box-shadow (see §6 of the color-and-theming skill).
+   And it can't be one value, because dark mode changes the structure and
+   not just the numbers. A class is the only place it can live, and putting
+   it in one is what stops a ~400-character string being copied into five
+   components with a dark twin each.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .dock-shadow {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6), /* top-edge catch light */
+      0 1px 1px rgba(0, 0, 0, 0.02),          /* contact                */
+      0 8px 16px -4px rgba(0, 0, 0, 0.04),    /* near ambient           */
+      0 24px 32px -8px rgba(0, 0, 0, 0.06);   /* far ambient            */
+  }
+
+  /* Shadows ~10x stronger; the inset highlight ~6x weaker. */
+  :root[data-theme="dark"] .dock-shadow {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 1px 1px rgba(0, 0, 0, 0.3),
+      0 8px 16px -4px rgba(0, 0, 0, 0.5),
+      0 24px 32px -8px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   A gradient 1px stroke — no wrapper element, no mask.
+
+   Two background layers on one box: the fill clipped to the padding edge,
+   the gradient clipped to the border edge, with a transparent border to
+   show it through.
+
+   background-origin: border-box IS THE LOAD-BEARING LINE. Without it the
+   gradient is SIZED to the padding box while being clipped to the border
+   box, so the stroke gets the wrong end of the ramp on all four sides — a
+   one-word omission that produces a result which looks almost right.
+
+   AND THE STOPS ARE IN PIXELS, NOT PERCENTAGES. Percentages are relative to
+   the box, so the ramp rescales whenever the box resizes: a 46px closed bar
+   ran the entire sweep inside its own height, came out louder than the
+   250px panel it opened into, and shimmered through the open animation as
+   the ramp re-fitted frame by frame. Anchored in pixels the top of the
+   stroke holds still and the colour simply grows downward.
+
+   Colours come from the color-and-theming skill's --sv-* family, which is
+   that system's one chromatic exception. Delete this block if you don't
+   have such an element.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .sv-panel {
+    border: 1px solid transparent;
+    background-image:
+      linear-gradient(var(--sv-fill-top), var(--sv-fill-bottom)),
+      linear-gradient(
+        180deg,
+        var(--sv-edge-top) 0px,
+        var(--sv-edge-mid) 120px,
+        var(--sv-edge-bottom) 240px
+      );
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    /* Four shadows, not one. A single centred blur reads as a drop shadow
+       that happens to be blue; the two HORIZONTAL casts are what make it
+       read as light coming off the panel. Same negative spread as the
+       elevation stack, so the glow stays tucked rather than haloing. */
+    box-shadow: var(--sv-glow);
+    transition: box-shadow 220ms var(--ease-geist);
+  }
+
+  /* Lifts on hover and STAYS lifted while open, so the colour reports the
+     same state the chevron does. */
+  .sv-panel:hover,
+  .sv-panel[data-open="true"] {
+    box-shadow: var(--sv-glow-lift);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sv-panel {
+      transition: none;
+    }
+  }
+
+  /* One pass of light across the label as it opens — never a loop. A
+     repeating shimmer claims the thing is still working, which it isn't.
+     Drop the class on animationend so the label goes back to painted text:
+     background-clip: text with color: transparent is a text-selection and
+     forced-colours hazard to leave in place. */
+  .sv-sheen {
+    background-image: linear-gradient(
+      100deg,
+      var(--sv-accent) 40%,
+      var(--sv-sheen-hi) 50%,
+      var(--sv-accent) 60%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: svSheen 700ms var(--ease-geist) both;
+  }
+  @keyframes svSheen {
+    from {
+      background-position: 140% 0;
+    }
+    to {
+      background-position: -40% 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sv-sheen {
+      animation: none;
+      background-image: none;
+      color: var(--sv-accent);
+    }
+  }
+}

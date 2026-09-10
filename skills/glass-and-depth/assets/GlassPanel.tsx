@@ -1,7 +1,9 @@
 /**
  * The glass surface, as a component — every depth cue in one place.
  *
- * The point of this file is the SHADOW constant and the wrapper/surface split.
+ * The point of this file is the wrapper/surface split and the depth cues in
+ * one place. (The elevation stack itself is better as the `.dock-shadow`
+ * class in assets/glass.css — see the note on the SHADOW constant below.)
  * Glass is four properties plus three depth cues, and the cues are the part
  * people skip: a blurred tinted rectangle with no hairline and no shadow is a
  * patch, not a floating panel.
@@ -39,8 +41,22 @@ import type { ReactNode } from "react";
                               edge rather than a catch light
 
    Because the STRUCTURE changes and not just the values, elevation cannot be
-   a single token — it needs a dark: variant, and this is the one place raw
-   rgba() in a component is acceptable. Hence: one constant, imported. */
+   a single token — it needs a per-theme pair, and this is the one place raw
+   rgba() outside the token file is acceptable.
+
+   PREFER THE CLASS. `.dock-shadow` in assets/glass.css is the same four
+   layers in a form you can actually read and diff against its dark twin.
+   The reference implementation started with the constant below and moved
+   to the class, for three reasons:
+
+     · it's ~400 characters either way, and four CSS lines beat one string
+     · a constant still gets imported and interpolated at every call site,
+       so a grep for the shadow finds five hits rather than one definition
+     · the arbitrary-value escaping is a live hazard — underscores for
+       spaces, no spaces inside the parens, and a typo produces a class the
+       build silently drops: no shadow, no error
+
+   The constant is kept here for codebases that can't add a stylesheet. */
 export const SHADOW =
   "shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_1px_1px_rgba(0,0,0,0.02),0_8px_16px_-4px_rgba(0,0,0,0.04),0_24px_32px_-8px_rgba(0,0,0,0.06)] " +
   "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_1px_1px_rgba(0,0,0,0.3),0_8px_16px_-4px_rgba(0,0,0,0.5),0_24px_32px_-8px_rgba(0,0,0,0.6)]";

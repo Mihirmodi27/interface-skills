@@ -1,6 +1,6 @@
 ---
 name: glass-and-depth
-description: Build translucent "glass" surfaces that read as real floating material rather than as glassmorphism — blur scaled to how little you know about the backdrop, saturation to stop the blur going grey, tint that carries legibility when the blur is compromised, and the depth cues a translucent surface can't float without (a hairline edge, a layered shadow stack, continuous corners). Use when building or reviewing frosted navigation, floating menus, sheets, drop-ups, hover cards, tooltips, modal panels, or any backdrop-filter surface; when glass looks muddy, cloudy, flat, or unreadable; when stacking glass over glass; when text over a translucent surface fails contrast; and always when implementing reduced-transparency, high-contrast, or no-backdrop-filter fallbacks.
+description: Build translucent "glass" surfaces that read as real floating material rather than as glassmorphism — blur scaled to how little you know about the backdrop, saturation to stop the blur going grey, tint that carries legibility when the blur is compromised, and the depth cues a translucent surface can't float without (a hairline edge, a layered shadow stack, continuous corners). Also covers gradient 1px strokes built from two background layers, glows weighted to read as emission rather than as a coloured drop shadow, and one-pass sheens. Use when building or reviewing frosted navigation, floating menus, sheets, drop-ups, hover cards, tooltips, modal panels, gradient borders or any backdrop-filter surface; when glass looks muddy, cloudy, flat, or unreadable; when a gradient shifts or shimmers as its box resizes; when stacking glass over glass; when text over a translucent surface fails contrast; and always when implementing reduced-transparency, high-contrast, reduced-motion, or no-backdrop-filter fallbacks.
 ---
 
 # Glass and Depth
@@ -103,13 +103,23 @@ className="glass-nav rounded-2xl border-[0.5px] border-gray-alpha-400 p-1"
 
 ### The shadow stack
 
-Four layers modelling one light source above the element:
+Four layers modelling one light source above the element — and it belongs in **one class**, not inline:
 
-```
-inset 0 1px 0 rgba(255,255,255,0.6),      /* top-edge catch light */
-0 1px 1px rgba(0,0,0,0.02),               /* contact */
-0 8px 16px -4px rgba(0,0,0,0.04),         /* near ambient */
-0 24px 32px -8px rgba(0,0,0,0.06)         /* far ambient */
+```css
+.dock-shadow {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),   /* top-edge catch light */
+    0 1px 1px rgba(0, 0, 0, 0.02),            /* contact */
+    0 8px 16px -4px rgba(0, 0, 0, 0.04),      /* near ambient */
+    0 24px 32px -8px rgba(0, 0, 0, 0.06);     /* far ambient */
+}
+:root[data-theme="dark"] .dock-shadow {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 1px 1px rgba(0, 0, 0, 0.3),
+    0 8px 16px -4px rgba(0, 0, 0, 0.5),
+    0 24px 32px -8px rgba(0, 0, 0, 0.6);
+}
 ```
 
 The **inset highlight** does more for the floating impression than any of the shadows — it's the specular catch where a raised surface faces the light. The **contact shadow** is what makes it look *resting on* something rather than pasted over. **Two ambient layers** instead of one, because a single large shadow reads as fog while two fall off like real penumbra. **Negative spread** contracts before blurring, so the shadow stays tucked under the element instead of haloing past its edges.
@@ -117,6 +127,8 @@ The **inset highlight** does more for the floating impression than any of the sh
 Opacities are 2–6%. Elevation should be felt, not seen — if you can identify the shadow as a shadow, it's too strong.
 
 Dark mode is a **different** shadow, not the same one re-tinted: shadows go up ~10× (4% black on `#0b0b0b` is mathematically invisible) while the inset highlight drops ~6× (0.6 white on a dark surface reads as a glowing edge, not a catch light).
+
+**Extract it the moment it appears twice.** In the reference implementation this was a ~400-character string repeated inline across the dock, its drop-ups and a preference box, each copy needing a dark-mode twin kept in step. A four-layer shadow is both the most-copied value in a system like this and the hardest to eyeball a divergence in — nobody spots a `0.04` that became `0.05` in one of five places. It's also a value that *can't* be a design token, because it isn't a colour (see §6 of **color-and-theming**), so a class is the only place it can live.
 
 ### Continuous corners
 
@@ -128,7 +140,72 @@ A `border-radius` quarter-circle has constant curvature that drops abruptly to z
 
 → Every elevation tier, the nesting radius rule, why each layer is there: `references/depth-cues.md`
 
-## 6. Text over glass is the real accessibility problem
+## 6. A gradient edge, without a wrapper or a mask
+
+The hairline in §5 is one flat colour. Occasionally a surface wants an edge that *changes* down its height — the reference implementation's one chromatic panel runs deep navy at the top to a pale blue at the bottom. The usual answers are a wrapper div with the gradient as its background and the content inset by 1px, or an SVG mask. Both are worse than the CSS that already exists:
+
+```css
+.sv-panel {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--sv-fill-top), var(--sv-fill-bottom)),      /* the fill */
+    linear-gradient(180deg,                                          /* the stroke */
+      var(--sv-edge-top) 0px,
+      var(--sv-edge-mid) 120px,
+      var(--sv-edge-bottom) 240px);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+```
+
+Two background layers on one box: the fill clipped to the padding edge, the gradient clipped to the border edge. The transparent border is what lets the second layer show through as a stroke.
+
+**`background-origin: border-box` is the load-bearing line.** Without it the gradient is *sized* to the padding box even while being clipped to the border box, so the stroke gets the wrong end of the ramp on all four sides. It's a one-word omission that produces a result which looks almost right, which is the worst kind.
+
+### Anchor gradient stops in pixels, not percentages
+
+This is the part that generalises furthest, and it took a visible bug to find.
+
+Percentage stops are relative to the box, so **the ramp rescales whenever the box resizes.** On a panel that opens from a 46px bar to a 250px panel, the closed state ran the entire navy-to-pale sweep inside its own 46px height — coming out *louder* than the panel it opened into, which is backwards — and it shimmered through the whole open animation as the ramp re-fitted itself frame by frame.
+
+Anchored in pixels (`0px / 120px / 240px`), the top of the stroke holds still and the colour simply grows downward as the panel opens. That costs nothing and is the better reveal.
+
+The rule: **a gradient on anything that changes size should be anchored in absolute units.** Percentages are right for a fixed box and wrong for a disclosure, a resizable panel, or anything animating its height.
+
+### Weight the glow to the sides
+
+A coloured shadow has a failure mode: it reads as *a drop shadow that happens to be blue* rather than as light coming off the panel. Four shadows rather than one fixes it:
+
+```css
+box-shadow:
+  0 1px 2px rgba(22, 39, 107, 0.05),          /* contact */
+  -10px 0 20px -18px rgba(47, 90, 196, 0.38), /* left */
+  10px 0 20px -18px rgba(47, 90, 196, 0.38),  /* right */
+  0 10px 24px -16px rgba(47, 90, 196, 0.3);   /* below */
+```
+
+The two horizontal casts are what make it read as emission. Same negative-spread trick as the elevation stack, so the glow stays tucked rather than haloing.
+
+It lifts on hover **and stays lifted while the panel is open** — `.sv-panel:hover, .sv-panel[data-open="true"]` — so the colour is reporting the same state the chevron is. Transition it at 220ms, and turn the transition off under `prefers-reduced-motion`.
+
+### One pass of light, not a loop
+
+If a label shimmers as the panel opens, clip a moving gradient to the text and run it **once**:
+
+```css
+.sv-sheen {
+  background-image: linear-gradient(100deg,
+    var(--sv-accent) 40%, var(--sv-sheen-hi) 50%, var(--sv-accent) 60%);
+  background-size: 250% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: svSheen 700ms var(--ease-geist) both;
+}
+```
+
+Two rules. **Drop the class on `animationend`**, so the label goes back to being painted text rather than sitting on a clipped background forever — `background-clip: text` with `color: transparent` is a text-selection and forced-colours hazard to leave in place. And **never loop it**: a repeating shimmer claims the thing is still working, which it isn't. Under reduced motion, kill the animation and the background image and set the plain accent colour.
+
+## 7. Text over glass is the real accessibility problem
 
 **You cannot compute the contrast ratio of text on a translucent surface**, because the effective background depends on what's behind it — which is arbitrary page content, or a photograph.
 
@@ -140,7 +217,7 @@ Three ways to make it safe, in order of preference:
 
 The trap to avoid: measuring contrast against the tint colour as if the surface were opaque, when it's at 72%. That number is fiction — the real ratio is worse everywhere the backdrop is light.
 
-## 7. Fallbacks
+## 8. Fallbacks
 
 ### `prefers-reduced-transparency` — both halves, and it must come last
 
@@ -193,7 +270,7 @@ Opaque first, glass as the enhancement. Test both conditions — Safari shipped 
 
 Always ship `-webkit-backdrop-filter`. Safari still wants it, and Safari is where glass matters most.
 
-## 8. Performance
+## 9. Performance
 
 `backdrop-filter` is genuinely expensive: for every frame, the browser copies the region behind the element, filters it, and composites. It scales with **area**, and it re-runs whenever anything behind it changes — including scroll.
 
@@ -207,13 +284,13 @@ What to avoid: full-page glass overlays, glass on list items (one per row), anim
 
 → Cost model, containment, what to measure: `references/performance-and-fallbacks.md`
 
-## 9. When not to use glass
+## 10. When not to use glass
 
 Glass says "this floats above your content, and the content continues underneath." If that isn't true, it's the wrong material.
 
 - **A page section.** It's not floating; it's the page.
 - **A card in a grid.** Nothing meaningful is behind it. Use a solid surface and a shadow.
-- **Anything holding reading copy.** See §6.
+- **Anything holding reading copy.** See §7.
 - **Over a solid single-colour background.** The blur has nothing to reveal — you're paying for a filter to produce a flat tint. Just use the tint.
 - **When the content behind it must stay readable.** Then you want a shadow, not a blur.
 
@@ -221,8 +298,8 @@ The reference implementation uses glass in exactly four places, all of them floa
 
 ## Assets
 
-- `assets/glass.css` — the three material classes with all fallbacks, plus the `@supports` guard the reference implementation is missing. Pairs with `color-and-theming/assets/color-tokens.css`, which declares the tints.
-- `assets/GlassPanel.tsx` — the wrapper/surface split, the shared shadow constant, hairline and stacking, as a component.
+- `assets/glass.css` — the three material classes with all fallbacks, plus the `@supports` guard the reference implementation is missing, the `.dock-shadow` elevation class, and the gradient-stroke panel. Pairs with `color-and-theming/assets/color-tokens.css`, which declares the tints and the `--sv-*` stops.
+- `assets/GlassPanel.tsx` — the wrapper/surface split, hairline and stacking, as a component.
 
 ## Checklist
 
@@ -235,7 +312,12 @@ The reference implementation uses glass in exactly four places, all of them floa
 - [ ] Every glass surface has a hairline **and** a shadow, not one alone.
 - [ ] Hairline uses the translucent ramp, not a solid grey.
 - [ ] Shadow is layered (inset highlight + contact + ambient), with negative spread.
+- [ ] The shadow stack lives in **one class**, not repeated inline — with its dark twin beside it.
 - [ ] Dark shadows ~10× stronger, dark inset highlight ~6× weaker.
+- [ ] A gradient stroke uses `background-origin: border-box` and a transparent border.
+- [ ] Gradient stops are in **pixels** on anything that resizes or animates its height.
+- [ ] A coloured glow is weighted to the sides, or it just reads as a tinted drop shadow.
+- [ ] A sheen runs once, drops its class on `animationend`, and is off under reduced motion.
 - [ ] No reading copy on glass; no muted or small text on glass.
 - [ ] `prefers-reduced-transparency` swaps tint **and** drops filter, and comes last.
 - [ ] `prefers-contrast: more` promotes the hairline.

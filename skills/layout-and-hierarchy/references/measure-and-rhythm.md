@@ -10,7 +10,9 @@
 
 At 16px prose that's roughly 75–85 characters per line. The commonly-cited comfortable range is 45–75; 576px sits at the top of it, which is a deliberate choice for a site that expects sustained reading — long lines are more efficient once the reader is committed, and the 1.75 leading compensates for the longer return sweep. At 14px UI copy the same column is ~85–95 characters, which is fine because that text is scanned rather than read.
 
-The padding does double duty. On a 375px phone the column is `375 − 64 = 311px`, which is the *reason* the article title steps down from 30px to 26px below `sm`. And on desktop the 32px keeps text off the edge of a maximised window.
+The padding does double duty. On a 375px phone the column is `375 − 64 = 311px`, and on desktop the 32px keeps text off the edge of a maximised window.
+
+That 311px used to force a responsive type step — a 30px article title wrapping to three lines. It doesn't any more, because the type ladder came down to an 18px ceiling and nothing left is too wide for the narrowest column. Worth registering as a general point: **the narrowest measure you ship is a constraint on the type scale, and it's usually cheaper to satisfy it in the scale than with a breakpoint.**
 
 Notice that 640px equals Tailwind's `sm` breakpoint. Convenient rather than meaningful — below that width the column is padding-limited rather than max-width-limited, so the breakpoint and the measure coincide naturally.
 

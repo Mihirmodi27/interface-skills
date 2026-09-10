@@ -160,3 +160,20 @@ Icons go on `quiet` rather than a dedicated tier. They only need 3:1, but they f
 If you need success/warning/error, add them as their own tokens with their own light/dark values — don't try to squeeze them into the grey ramp. Give each one a *pair*: a text/icon value and a surface value, both re-picked per theme. And keep them out of the focus-ring colour's territory, so the ring remains distinctive.
 
 The reference implementation has none of these, because nothing on the site reports state. That's worth checking before you add them.
+
+## Spending your one chromatic exception
+
+Separate question from semantic colour, and a harder one: not "does this state need a colour?" but "may this *element* be colourful?"
+
+The reference implementation says yes exactly once, to a collapsed summary panel, and the test it had to pass is worth stating as a test:
+
+**Is this element content, or is it an offer?** Content is what the reader came for and it should look like everything else they came for. An offer — "do you want the short version?", "shall I explain this?" — is the interface speaking about the content rather than being it. That's a category the eye is entitled to find quickly, and it's a category most pages have exactly one of.
+
+Two containment rules, because an exception that isn't contained becomes a palette:
+
+**Only the mark takes the accent.** Inside the coloured element, the text stays in the page's ink. A blue paragraph inside the panel would be a second thing to look at *within* the loud element, and the loudness stops meaning anything as soon as it's shared.
+
+**Re-pick every stop for dark, not just the one that vanished.** A near-black top stop on a near-black page disappears down its darker half. Lightening only that end compresses the ramp and it stops reading as one gradient — move the whole thing, the way you'd re-pick an accent rather than brightening it.
+
+And the honest check before you spend it at all: **can the element do its job with weight, position and air instead?** Most can. The one that can't is usually the one that has to be found before the reader has started reading — which is a small set.
+

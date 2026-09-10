@@ -110,6 +110,7 @@ Also note the whole block is inside `prefers-reduced-motion: no-preference`, so 
 | Use a bezier when | Use a spring when |
 |---|---|
 | The property has no position (opacity, colour, filter) | Something is physically moving |
+| …but see below — a *filter* can't take the overshooting one | |
 | The change is a discrete state flip | The motion can be interrupted or re-targeted mid-flight |
 | You want the *same* feel as everything else | You want a specific character |
 | Duration must be exact and predictable | Arrival time can vary a little |
@@ -127,3 +128,40 @@ The `1.1` in the final control point puts the curve above 1 near the end — the
 That single number is what makes 150ms colour transitions feel like something *happened* rather than something was *set*. And because every non-spring transition on the site shares it, elements that have nothing to do with each other still feel like one mechanism when they move together.
 
 Anti-pattern: authoring a second curve because a particular element "needs a different feel." A second curve halves the coherence and buys almost nothing. If an element genuinely needs distinct character, it needs a spring — that's the axis where character is expressible without fragmenting the system.
+
+## The one property class the house curve can't have
+
+The overshoot is safe on `transform` — going 10% past a translation and settling back is exactly the physical impression it's for. It's meaningless on opacity, which clamps at 1. But there is a third case, and it's a correctness bug rather than a matter of taste:
+
+**A property with a hard floor at zero cannot take a curve that goes past its target.**
+
+```ts
+// Lines staggering in behind a blur: filter: blur(4px) → blur(0px).
+// --ease-geist would have to pass through a NEGATIVE radius to settle back.
+const EASE = [0.16, 1, 0.3, 1] as const;   // expo-out: decelerates hard, never exceeds 1
+```
+
+The class of properties: `blur()`, `brightness()`, `saturate()` toward 0, `border-radius` toward 0, any scale you've promised won't invert. Browsers clamp rather than crash, so the symptom isn't an error — it's a value that sticks at zero for the tail of the transition while everything else on the same track is still settling. Which reads as the animation *stalling* right at the end, and is very hard to attribute.
+
+The check before you reach for the house curve: **what else is riding this track?** A transform and an opacity together are fine. Add a filter and the whole track needs a monotone curve.
+
+Expo-out `cubic-bezier(0.16, 1, 0.3, 1)` is the right substitute. It has the same "arrives decisively then eases" character the house curve has, without ever leaving [0, 1]. Using it does not fragment the system in the way a second *character* curve would — it's the same intent, expressed by a curve that's legal for the property.
+
+## Durations that legitimately sit off the ladder
+
+The ladder is for **state**: something changed, and the user needs to follow it. Two categories aren't state, and squeezing them onto the ladder makes them worse rather than tighter.
+
+**The subject of the moment.** When the thing animating *is* the content rather than chrome reporting a change to it, the user is looking directly at it and the motion has to be readable in its own right. An image gallery's dissolve between photographs runs 620ms — a noise-thresholded dissolve needs time to read as a dissolve rather than a cut.
+
+The discipline is in the pair, though. In the same component:
+
+```ts
+const DISSOLVE = 0.62;  // stepping between photographs — the subject
+const FLIGHT   = 0.42;  // the same photo moving between layouts — a state change
+```
+
+The flight stays inside the overlay tier because the photograph is already on screen at both ends; it only has to be *followable*. Same component, two durations, decided by whether the motion is the subject or the report.
+
+**A once-a-session set piece.** A greeting screen can take two and a half seconds. It's exempt because it happens once per tab, never blocks a deep link, and never plays under reduced motion — and it has to keep earning that by never appearing again. See §14 of the SKILL.md for how to gate one.
+
+The test: **would a user see this more than a handful of times a session?** If yes, it's on the ladder. If no, it can have its own budget.

@@ -1,6 +1,6 @@
 ---
 name: color-and-theming
-description: Build and audit colour systems for near-monochrome interfaces — a grayscale ramp where each step encodes an intent (background, hover, border, fill, text) rather than just a lightness, a parallel translucent ramp for anything layered, light/dark theming by re-tinting the same tokens under a data attribute, and accent colour restricted to focus. Use when defining colour tokens, picking a grey for a border or a hover state, implementing dark mode without a flash of wrong theme, choosing text colour tiers, deciding between build-time tokens and runtime custom properties, or reviewing a palette that feels muddy, inconsistent, or accidentally colourful. For building translucent glass surfaces or layered shadows, use the glass-and-depth skill.
+description: Build and audit colour systems for near-monochrome interfaces — a grayscale ramp where each step encodes an intent (background, hover, border, fill, text) rather than just a lightness, a parallel translucent ramp for anything layered, light/dark theming by re-tinting the same tokens under a data attribute, accent colour restricted to focus, and how to spend at most one deliberate chromatic exception without it spreading. Use when defining colour tokens, picking a grey for a border or a hover state, introducing one colourful element into a monochrome page, re-picking an accent or a gradient for dark mode, implementing dark mode without a flash of wrong theme, choosing text colour tiers, deciding between build-time tokens and runtime custom properties, or reviewing a palette that feels muddy, inconsistent, or accidentally colourful. For building translucent glass surfaces, gradient strokes or layered shadows, use the glass-and-depth skill.
 ---
 
 # Colour and Theming
@@ -72,7 +72,7 @@ This is the crux. A dark-mode border is lighter than its surface, so a black ove
 
 Rule of thumb: **solid ramp for opaque surfaces, alpha ramp for anything layered.**
 
-## 3. One accent, and it isn't for links
+## 3. One accent for focus — and at most one deliberate exception
 
 ```css
 --color-blue-700: #006bff;   /* light */
@@ -97,6 +97,48 @@ a:focus-visible { outline-offset: 3px; }
 `:focus-visible`, never `:focus` — a mouse click on a button should not leave a ring behind.
 
 The dark-mode value is brightened (`#3b82f6` vs `#006bff`) because the same blue that has 4.5:1 against white has far less against near-black. **Any accent needs re-picking per theme, not reusing.**
+
+
+
+### The second exception, if you allow one
+
+Focus is the *default* place colour goes because it must be unmissable. A monochrome system can afford at most one more, and the reference implementation spends it on a single component: a collapsed "short version" panel at the top of a long case study.
+
+The justification has to be structural, not aesthetic. Here it is that **the panel is an offer rather than content** — it's the interface asking "do you want the three-line version?", not part of the argument. That makes it the one element allowed to announce itself, and it means the exception can't spread: nothing else on the site is an offer.
+
+```css
+:root {
+  --sv-edge-top: #16276b;      /* deep navy at the top of the stroke */
+  --sv-edge-mid: #2f5ac4;
+  --sv-edge-bottom: #6d97ea;   /* to a lighter blue at the bottom */
+  --sv-fill-top: #f4f6fc;
+  --sv-fill-bottom: #eef2fa;
+  --sv-accent: #2f5ac4;        /* the mark, and only the mark */
+}
+```
+
+Two rules that keep an exception from becoming a palette:
+
+**Only the mark takes the accent.** The summary text inside the panel stays in the same ink as the rest of the page. A blue paragraph would be a second thing to look at *inside* the element that is already the loud one, and the loudness stops meaning anything once it's shared.
+
+**Dark mode lifts the whole ramp, it doesn't pinch the ends.**
+
+```css
+:root[data-theme="dark"] {
+  --sv-edge-top: #24407f;   /* was #16276b — within a few points of the dark page */
+  --sv-edge-mid: #3f6ed0;
+  --sv-edge-bottom: #86adf7;
+  --sv-fill-top: #171d2a;   /* tinted, not darkened — sits at gray-100's weight */
+  --sv-fill-bottom: #1b2230;
+  --sv-accent: #86adf7;
+}
+```
+
+A `#16276b` top stop is within a few points of a `#0b0b0b` page, so the stroke simply goes missing down its darker half. The instinct is to lighten only the dark end — and that's the mistake: it compresses the ramp and it stops reading as one gradient. **Move every stop by roughly the same amount.** A gradient is a relationship between its stops, so re-picking it for a theme means re-picking all of them, exactly as §3 says about the accent.
+
+Note the fill is *tinted*, not darkened. It sits at `gray-100`'s weight in the dark theme, so the panel doesn't punch a hole in the page — the same "raised means more contrast against the page, and the direction flips between themes" rule that governs the glass tints in §6.
+
+The material this builds — a 1px gradient stroke and a side-weighted glow, with no wrapper element — belongs to the **glass-and-depth** skill. This skill owns the colours; that one owns the surface.
 
 ## 4. Text is a five-tier ladder — and it is *not* the grey ramp
 
@@ -185,7 +227,9 @@ Two reasons they can't be tokens:
 1. **A media query has to replace them at runtime.** The `prefers-reduced-transparency` fallback swaps every glass tint for a solid one. A build-time token can't be re-declared by a media query.
 2. **One of them isn't a colour.** No colour-token system accepts a `linear-gradient()`.
 
-The principle worth carrying: **a value that changes by *context* — theme, user preference, container — belongs in `:root`. A value that's part of the design vocabulary belongs in `@theme`.**
+The same test puts the `--sv-*` family from §3 in `:root` too, for the second reason: two of them are multi-stop gradients and one is a four-layer `box-shadow`. Neither is a colour, and no colour-token system will take them.
+
+The principle worth carrying: **a value that changes by *context* — theme, user preference, container — belongs in `:root`. A value that's part of the design vocabulary belongs in `@theme`.** And anything that isn't a single colour — a gradient, a shadow stack, a filter chain — is `:root` regardless, because a token system has nowhere to put it.
 
 Two colour-side notes on these tints. The nav tint is `#f2f2f2` (matching `gray-100`), not white — chrome that's slightly grey reads as an object on the page rather than a hole in it. And the dark tints are *lighter* than the dark page background, because "raised" means "more contrast against the page" and the direction flips between themes.
 
@@ -220,12 +264,16 @@ That's only half the fallback — dropping the `backdrop-filter` is the other ha
 - [ ] Alpha ramp on anything layered; solid ramp only on opaque surfaces.
 - [ ] Alpha ramp inverts to white-based in dark mode.
 - [ ] Accent used for focus only, and re-picked (not reused) for dark.
+- [ ] At most one chromatic exception beyond focus, justified structurally — and the justification doesn't apply to anything else on the page.
+- [ ] Inside a chromatic element, only the mark takes the colour; its text stays in the page's ink.
+- [ ] A gradient re-picked for dark mode moves **every** stop, not just the one that disappeared.
 - [ ] `:focus-visible`, not `:focus`, with `outline-offset` — a skip link is the one legitimate `:focus` (it must appear for keyboard focus regardless of heuristics).
 - [ ] Theme driven by a data attribute, not `prefers-color-scheme`.
 - [ ] `color-scheme` declared in both themes.
 - [ ] Blocking inline head script sets the theme before first paint.
 - [ ] Dark surfaces are near-black, not `#000`.
-- [ ] Context-dependent colours (glass tints) are runtime `:root` variables, not `@theme` tokens.
+- [ ] Context-dependent colours (glass tints, gradient stops) are runtime `:root` variables, not `@theme` tokens.
+- [ ] Anything that isn't a single colour — a gradient, a shadow stack — is in `:root` regardless.
 - [ ] The reduced-transparency tint swap names both theme selectors and comes last.
 - [ ] Contrast checked in both themes — muted text on a subtle surface is the case that fails.
 - [ ] Glass surfaces audited against the `glass-and-depth` checklist.

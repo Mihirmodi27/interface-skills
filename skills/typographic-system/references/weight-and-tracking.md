@@ -42,20 +42,23 @@ One caution: a weight change alters the text's rendered width, so a row that gai
 
 | Size | Tracking | Reasoning |
 |---|---|---|
+| 7.5px | −0.01em | Card lettering, set solid. The exception below the floor — see the note. |
 | 8.5–11px | +0.02em | Tiny glyphs and near-caps need air or the counters close up. |
 | 12–14px | 0 | Default metrics are designed for this range. Leave them. |
-| 16–19px | −0.015em | Enough to look set; small enough to be invisible as a decision. |
-| 18px | −0.02em | A page title is a tighter, more deliberate object than a section heading at the same-ish size. |
-| 30px | −0.025em | At display size, default spacing looks accidental. |
-| 19px quote | −0.01em | Deliberately looser than a 19px heading — a quote should breathe. |
+| 16px | −0.015em | Enough to look set; small enough to be invisible as a decision. |
+| 18px | −0.02em | A page title is a tighter, more deliberate object than a section heading two pixels below it. |
+
+Five rows, and only two of them are the negative-tracking-at-size rule — because the ladder tops out at 18px. **Tracking is a large-size correction, so a system with no large sizes barely needs it.** An earlier version of this table ran to 30px at −0.025em with separate values for a 19px heading and a 19px quote; all three sizes were deleted from the ladder, and their tracking went with them. If you find yourself tracking six steps, check whether the scale is doing too much work.
+
+The 7.5px row looks like it contradicts the 8.5–11px one above it, and it doesn't: that lettering is set solid at near-caps size on a card, where the tightening is compensating for the *setting* rather than for the size. It's also the one place a 600 weight is allowed. Two exceptions in one place is a hint you're outside the text system entirely — which you are, because nobody reads it.
 
 ### Why negative and why size-dependent
 
-A typeface's sidebearings are drawn once, at a nominal size, for text-range use. Scale the outlines up and the spaces scale with them, so a 30px heading gets ~2× the optical gap of the same word at 15px — but the *reader's* tolerance for gaps doesn't double. Large type therefore always looks slightly loose unless you pull it in.
+A typeface's sidebearings are drawn once, at a nominal size, for text-range use. Scale the outlines up and the spaces scale with them, so an 18px heading gets a wider optical gap than the same word at 13px — but the *reader's* tolerance for gaps doesn't scale with it. Large type therefore always looks slightly loose unless you pull it in.
 
 Below the text range the reverse holds: rendering and hinting thicken strokes relative to counters, and letters start to touch. Tiny type needs positive tracking, and near-caps needs more of it, because capitals have no descenders or ascenders to create visual separation.
 
-`em` units matter here: tracking must scale with the type. A `px` letter-spacing that looks right at 30px will destroy 14px text.
+`em` units matter here: tracking must scale with the type. A `px` letter-spacing that looks right at 18px will destroy 14px text.
 
 ### Never track body copy
 

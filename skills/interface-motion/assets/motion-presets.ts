@@ -86,6 +86,47 @@ export const DURATION = {
   theme: 0.4,
 } as const;
 
+/* ── Off the ladder, deliberately ────────────────────────────────────────
+   The ladder is for STATE: something changed and the user has to follow it.
+   Two categories aren't state, and squeezing them onto the ladder makes
+   them worse rather than tighter.
+
+   THE SUBJECT OF THE MOMENT. When the thing animating IS the content, the
+   user is looking directly at it and the motion has to read in its own
+   right. Note the discipline in the pair below: same component, two
+   durations, decided by whether the motion is the subject or the report. */
+export const SUBJECT = {
+  /** Stepping between images — a noise-thresholded dissolve, not a cut. */
+  dissolve: 0.62,
+  /** The same image moving between two layouts. On screen at both ends, so
+      it only has to be followable — back inside the overlay tier. */
+  flight: 0.42,
+} as const;
+
+/* A SET PIECE gets its own budget by never appearing again: once per tab,
+   never blocking a deep link, never played under reduced motion. See §14 of
+   the SKILL.md for the gating. */
+export const SET_PIECE = {
+  /** The first open of a disclosure, per line. */
+  theatreLine: 0.34,
+  /** Every subsequent open of the same thing. */
+  quietLine: 0.16,
+  /** Between staggered children on the first open only. */
+  stagger: 0.09,
+} as const;
+
+/* ── The curve for a track that also drives a filter ─────────────────────
+   NOT --ease-geist. The house curve overshoots past 1, and a blur animating
+   to 0px would have to pass through a NEGATIVE radius to settle back.
+   Browsers clamp rather than crash, so the symptom isn't an error — it's a
+   value stuck at zero for the tail while everything else is still moving,
+   which reads as the animation stalling right at the end.
+
+   Applies to any property with a hard floor: blur, brightness, a radius
+   going to 0, a scale you've promised won't invert. Expo-out has the same
+   "arrives decisively" character without ever leaving [0, 1]. */
+export const EASE_FILTER = [0.16, 1, 0.3, 1] as const;
+
 /* ── Blur crossfade ──────────────────────────────────────────────────────
    Text swapping in place — a wordmark revealing its tagline on hover, say.
    Note the asymmetry (280 in / 180 out): same principle as the springs.
@@ -102,3 +143,68 @@ export function blurCrossfade(reduce: boolean | null) {
     exit: { opacity: 0, filter: blur, transition: { duration: 0.18, ease: "easeIn" } },
   } as const;
 }
+
+/* ── First-open theatre ──────────────────────────────────────────────────
+   Staggered lines behind a blur, on the FIRST open only; every subsequent
+   open is a quick fade. `theatre` comes from sessionStorage, so it is false
+   on the server for everyone and true on the client for most.
+
+   Which is why the shut state below is a CONSTANT. Branch a rendered style
+   on a client-only flag and React hands you two different first paints and
+   says so in the console. Only the transition reads the flags — a transition
+   isn't a style, so there's nothing for hydration to disagree about, and a
+   reader who asked for less motion gets a zero-length transition to the same
+   end state rather than a different starting position.
+
+   Record "seen" on animation COMPLETE, not on start: setting it earlier
+   lands in the same render batch as the open and cancels the very animation
+   it's recording. */
+export function theatreLine(reduce: boolean | null, theatre: boolean) {
+  return {
+    shut: { opacity: 0, y: 6, filter: "blur(4px)" },
+    open: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        duration: reduce ? 0 : theatre ? SET_PIECE.theatreLine : SET_PIECE.quietLine,
+        // A blur is on this track — see EASE_FILTER above.
+        ease: EASE_FILTER,
+      },
+    },
+  } as const;
+}
+
+/** The parent's stagger. Zero after the first open, so a re-open is instant. */
+export function theatreList(theatre: boolean) {
+  return {
+    open: {
+      transition: {
+        staggerChildren: theatre ? SET_PIECE.stagger : 0,
+        delayChildren: theatre ? 0.06 : 0,
+      },
+    },
+  } as const;
+}
+
+/* ── Icon fill ───────────────────────────────────────────────────────────
+   Fill means CHOSEN — the page you're on, or the one you're pointing at.
+   Nothing is filled because it looks better.
+
+   The filled variant is not a second drawing: it's the same outline with its
+   interior painted in, layered OVER the stroke at the same coordinates. The
+   silhouette never moves, so the two crossfade in place — no pop, no reflow.
+
+   ease-out, not the house curve: the overshoot is right for travel and wrong
+   for a fade. Same split the springs make between position and opacity. */
+export const fillFade = (on: boolean) =>
+  `transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+    on ? "opacity-100" : "opacity-0"
+  }`;
+
+/** The inverse — interior lines a solid shape swallows (a briefcase's
+    divider, a document's rules) have to leave as the fill arrives. */
+export const detailFade = (on: boolean) =>
+  `transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+    on ? "opacity-0" : "opacity-100"
+  }`;
