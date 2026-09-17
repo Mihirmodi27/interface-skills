@@ -1,0 +1,24 @@
+{
+  "name": "design-skills",
+  "displayName": "Design Skills",
+  "version": "1.0.0",
+  "description": "Five skills that encode a design system for text-heavy interfaces: a type ladder with two weights, motion sized to how much of the screen changes, an intent-indexed grey ramp, glass that reads as material, and one reading measure every page shares.",
+  "author": {
+    "name": "Mihir Modi",
+    "url": "https://modimihir.com"
+  },
+  "homepage": "https://github.com/Mihirmodi27/interface-skills#readme",
+  "repository": "https://github.com/Mihirmodi27/interface-skills",
+  "license": "MIT",
+  "keywords": [
+    "design-system",
+    "typography",
+    "motion",
+    "colour",
+    "glass",
+    "layout",
+    "css",
+    "tailwind",
+    "react"
+  ]
+}

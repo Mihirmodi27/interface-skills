@@ -1,0 +1,35 @@
+{
+  "name": "interface-skills",
+  "version": "1.0.0",
+  "description": "Five AI skills that encode a design system for text-heavy interfaces — typography, motion, colour, glass, and structure.",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "skills",
+    "design-system",
+    "typography",
+    "motion",
+    "css",
+    "tailwind"
+  ],
+  "homepage": "https://github.com/Mihirmodi27/interface-skills#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mihirmodi27/interface-skills.git"
+  },
+  "license": "MIT",
+  "author": "Mihir Modi (https://modimihir.com)",
+  "type": "module",
+  "bin": {
+    "interface-skills": "bin/install.mjs"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "install.sh",
+    ".claude-plugin"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

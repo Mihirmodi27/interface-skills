@@ -40,14 +40,41 @@ A few principles do most of the work, and they show up in every skill:
 
 ## Installing
 
-Copy a skill directory into your project's or user-level skills folder:
+One command puts all five in a project, under `.claude/skills/`. Pick whichever fits how you work.
+
+**Shell** — nothing to install first:
 
 ```sh
-# Project-scoped
-cp -R skills/typographic-system  /path/to/project/.claude/skills/
+curl -fsSL https://raw.githubusercontent.com/Mihirmodi27/interface-skills/main/install.sh | sh
+```
 
-# Or user-level, available everywhere
-cp -R skills/interface-motion  ~/.claude/skills/
+**npx** — same installer, if you already have Node:
+
+```sh
+npx github:Mihirmodi27/interface-skills
+```
+
+**As a Claude Code plugin** — the repo is also a marketplace, so the five arrive as one plugin and `/plugin update` keeps them current:
+
+```
+/plugin marketplace add Mihirmodi27/interface-skills
+/plugin install design-skills@interface-skills
+```
+
+The two installers take the same arguments. Skill names install a subset, `--user` writes to `~/.claude/skills` so they're available in every project, `--dir` puts them somewhere else entirely, and `--force` overwrites copies you already have — without it, anything already installed is left alone:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Mihirmodi27/interface-skills/main/install.sh | sh -s -- --user
+npx github:Mihirmodi27/interface-skills glass-and-depth color-and-theming
+./install.sh --help
+```
+
+Arguments go after `sh -s --` when the script is piped, because everything before that belongs to `sh` rather than to the script.
+
+Or copy a directory by hand — a skill is just a folder:
+
+```sh
+cp -R skills/typographic-system  /path/to/project/.claude/skills/
 ```
 
 Skills load on demand — Claude reads the frontmatter `description` to decide when one is relevant, so you don't need to invoke them by name. Install all five for a coherent system, or just the one you need.

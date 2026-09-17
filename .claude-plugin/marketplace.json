@@ -1,0 +1,18 @@
+{
+  "name": "interface-skills",
+  "owner": {
+    "name": "Mihir Modi",
+    "url": "https://github.com/Mihirmodi27"
+  },
+  "metadata": {
+    "description": "A design system for text-heavy interfaces, as skills.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "design-skills",
+      "source": "./",
+      "description": "Typography, motion, colour, glass and layout — five skills distilled from the system running on modimihir.com."
+    }
+  ]
+}
