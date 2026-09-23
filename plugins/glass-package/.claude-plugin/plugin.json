@@ -1,0 +1,14 @@
+{
+  "name": "glass-package",
+  "displayName": "Glass Package",
+  "version": "2.0.0",
+  "description": "The exact design system running on modimihir.com, to copy as-is: a type ladder with two weights, an intent-indexed grey ramp, glass that reads as material, one reading measure every page shares, and motion sized to how much of the screen changes — with drop-in token files and components.",
+  "author": {
+    "name": "Mihir Modi",
+    "url": "https://modimihir.com"
+  },
+  "homepage": "https://github.com/Mihirmodi27/interface-skills#readme",
+  "repository": "https://github.com/Mihirmodi27/interface-skills",
+  "license": "MIT",
+  "keywords": ["design-system", "typography", "motion", "colour", "glass", "layout", "css", "tailwind", "react"]
+}

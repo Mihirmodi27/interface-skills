@@ -1,7 +1,7 @@
 {
   "name": "interface-skills",
-  "version": "1.0.0",
-  "description": "Five AI skills that encode a design system for text-heavy interfaces — typography, motion, colour, glass, and structure.",
+  "version": "2.0.0",
+  "description": "Interface design skills in two packages: the Glass package, one exact system to copy, and a customizable set that applies the same practices in your project's own names and values.",
   "keywords": [
     "claude",
     "claude-code",
@@ -25,7 +25,7 @@
   },
   "files": [
     "bin",
-    "skills",
+    "plugins",
     "install.sh",
     ".claude-plugin"
   ],

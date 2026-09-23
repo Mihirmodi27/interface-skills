@@ -5,14 +5,22 @@
     "url": "https://github.com/Mihirmodi27"
   },
   "metadata": {
-    "description": "A design system for text-heavy interfaces, as skills.",
-    "version": "1.0.0"
+    "description": "Interface design skills in two packages: the Glass package, an exact system to copy, and interface-design, the same practices fitted to your own project.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
-      "name": "design-skills",
-      "source": "./",
-      "description": "Typography, motion, colour, glass and layout — five skills distilled from the system running on modimihir.com."
+      "name": "interface-design",
+      "source": "./plugins/interface-design",
+      "description": "Six skills that apply one set of interface best practices — type hierarchy, colour and theming, layout, surfaces and depth, motion — in your project's own names and values, via a DESIGN.md the setup skill writes for you."
+    },
+    {
+      "name": "glass-package",
+      "source": "./plugins/glass-package",
+      "description": "The exact design system running on modimihir.com — typography, colour, layout, glass and motion — with its real values and drop-in assets, to copy as-is."
     }
-  ]
+  ],
+  "renames": {
+    "design-skills": "glass-package"
+  }
 }
