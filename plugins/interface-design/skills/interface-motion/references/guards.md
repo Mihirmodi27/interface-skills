@@ -1,6 +1,6 @@
 # Guards
 
-Reduced motion, content that starts hidden, and set pieces — the three places where motion can take something away from the user instead of adding to it. Each section is a set of fallbacks that must all exist, because each covers a different reader.
+Reduced motion, content that starts hidden, and set pieces: where motion can take something away. Each section's fallbacks must all exist, because each covers a different reader.
 
 ## Reduced motion: substitute, don't subtract
 
@@ -9,17 +9,17 @@ For every animation, ask what it communicates, then find the cheapest thing that
 | Original | Reduced path | Why |
 |---|---|---|
 | Spring slide, re-targeting highlight | Flat tween at `duration.state` | The move is the message; the physics is decoration |
-| Scale, squash or slide entrance | Plain fade at the same tier | Presence still communicated, nothing travels |
+| Scale, squash or slide entrance | Plain fade at the same tier | Presence still shown; nothing travels |
 | Blur cross-fade | Cross-fade with `blur(0px)` at both ends | Blur is the trigger; the fade isn't |
 | Reveal-on-scroll | Off; content in its final visible state | The animation is the whole effect |
 | Route fade, ambient loop | Off | Ditto |
 | Hover lift whose motion is the whole interaction | No hover variant at all | Static is correct |
 | Theme cross-fade | Instant | Whole-viewport interpolation |
-| Programmatic smooth scroll | `behavior: "auto"` | The whole viewport moving is among the strongest triggers |
+| Programmatic smooth scroll | `behavior: "auto"` | Whole-viewport motion is among the strongest triggers |
 | Icon fill cross-fade | Instant swap | The state is the message |
 | Press scale at `duration.instant` | Keep it | Small, short, below any threshold of concern |
 | Close tween (`ease.exit`) | Keep it | Already flat and short |
-| Set piece | Never plays | It's a flourish by definition; don't substitute a quieter one |
+| Set piece | Never plays | A flourish by definition; don't substitute a quieter one |
 
 ### CSS
 
@@ -60,21 +60,21 @@ const reduce = useReducedMotion();
 const styles = useSpring({ opacity: open ? 1 : 0, y: open || reduce ? 0 : 12, config: snappy });
 ```
 
-`MotionConfig reducedMotion="user"` (Motion) and `Globals.assign({ skipAnimation: true })` (React Spring) are switches. The first drops transforms and keeps opacity, which is a reasonable floor; the second drops everything, which is the regression this section exists to prevent. Neither replaces the per-component branch.
+`MotionConfig reducedMotion="user"` (Motion) drops transforms and keeps opacity, a reasonable floor; `Globals.assign({ skipAnimation: true })` (React Spring) drops everything, the regression this section prevents. Neither replaces the per-component branch.
 
 ### Imperative APIs
 
-Nothing called from JavaScript reads the media query for you: `scrollIntoView`, `scrollTo`, `Element.animate`, a GSAP timeline built outside `matchMedia`, a canvas or WebGL loop. Pass the preference in, and listen for its `change` event if the component lives long.
+Nothing called from JavaScript reads the media query: `scrollIntoView`, `scrollTo`, `Element.animate`, a GSAP timeline built outside `matchMedia`, a canvas or WebGL loop. Pass the preference in, and listen for its `change` event if the component lives long.
 
 ### Testing
 
-macOS: Accessibility → Display → Reduce motion. iOS: Accessibility → Motion. Windows: Accessibility → Visual effects → Animation effects. Chrome DevTools: Rendering → Emulate `prefers-reduced-motion`. Walk the whole interface with it on. The failure isn't jank; it's a menu that appears with no sign it opened, or a section that never appears.
+macOS: Accessibility → Display → Reduce motion. iOS: Accessibility → Motion. Windows: Accessibility → Visual effects → Animation effects. Chrome DevTools: Rendering → Emulate `prefers-reduced-motion`. Walk the whole interface with it on, looking not for jank but for a menu that appears with no sign it opened, or a section that never appears.
 
-Related preferences belong to other skills and follow the same "substitute, don't subtract" shape: `prefers-reduced-transparency` (translucent surfaces become opaque) in `surfaces-and-depth`, `prefers-contrast: more` in `color-and-theming`.
+Related preferences take the same shape elsewhere: `prefers-reduced-transparency` (translucent surfaces become opaque) in `surfaces-and-depth`, `prefers-contrast: more` in `color-and-theming`.
 
 ## Content that starts hidden
 
-A reveal, done so that every reader sees the content:
+A reveal every reader sees:
 
 ```css
 .reveal { opacity: 0; translate: 0 var(--reveal-travel);
@@ -108,25 +108,25 @@ export function observeReveals(): () => void {
 // Call again on every client-side navigation, keyed on the path.
 ```
 
-Every line is a guard for a reader who would otherwise see nothing:
+Each guard saves a reader who would otherwise see nothing:
 
 | Guard | The reader it saves |
 |---|---|
-| `threshold: 0` with a root margin | Anyone reading an element taller than the viewport. A threshold is a fraction of the element's *own* area; an element can never exceed viewport ÷ its height, so `0.1` is unreachable for anything over ten screens tall — and a long article is exactly that |
-| `data-in`, not a class | Anyone whose element re-renders. A framework rewrites `class` from its own value on every render and silently drops a class added from outside; it leaves attributes it doesn't render alone |
+| `threshold: 0` with a root margin | Anyone reading an element taller than the viewport. A threshold is a fraction of the element's *own* area, and an element can never exceed viewport ÷ its height, so `0.1` is unreachable for anything over ten screens tall — a long article, exactly. A root margin works at any height |
+| `data-in`, not a class | Anyone whose element re-renders. A framework rewrites `class` from its own value on every render, dropping a class added from outside; attributes it doesn't render, it leaves alone |
 | No-observer fallback | Old or stripped-down browsers |
-| `<noscript>` reset | Readers with JavaScript off, and crawlers. A feature check can't catch "the script never ran" |
+| `<noscript>` reset | Readers with JavaScript off, and crawlers; a feature check can't catch "the script never ran" |
 | Print rule | Anyone printing; scroll-triggered content prints blank without it |
 | Re-observe on navigation | Anyone arriving on a second page client-side |
 | Reduced-motion rule | Readers who asked for less motion |
 
-The re-render failure is hard to see because a utility applied during a hover can outrank the reveal's opacity and hide the damage; the page breaks only when the pointer *leaves*. Test the state after the interaction, not during it.
+The re-render failure hides well: a utility applied during a hover can outrank the reveal's opacity, so the page breaks only when the pointer *leaves*. Test the state after the interaction, not during it.
 
-The general rule: **any CSS that hides content pending JavaScript needs a `<noscript>` reset**, whether it's a reveal, a hydration class or a skeleton.
+**Any CSS that hides content pending JavaScript needs a `<noscript>` reset**, whether a reveal, a hydration class or a skeleton.
 
 ### Collapsibles
 
-Animate the height (`grid-template-rows: 0fr` ↔ `1fr`, or `interpolate-size: allow-keywords` where supported) and keep the content mounted. Set `inert` and `aria-hidden` while shut, so a tab press or a screen reader meets the trigger rather than hidden prose. The content stays in the served HTML, where search and anything reading the page can find it.
+Animate the height (`grid-template-rows: 0fr` ↔ `1fr`) and keep the content mounted, `inert` and `aria-hidden` while shut, so a tab press or screen reader meets the trigger, not hidden prose, and search still finds the content in the served HTML.
 
 ## Set pieces
 
@@ -145,9 +145,9 @@ Decide before the first pixel, in a blocking inline script in the document head:
 </script>
 ```
 
-The component's only job is to *end* it — flip the attribute — and to record "seen" in its completion callback. Recording on start lands in the same render as the play and cancels the very animation it records. Write "seen" under reduced motion too, so the reader's next tab doesn't surprise them.
+The component only *ends* it — flips the attribute — and records "seen" in its completion callback; recording on start lands in the same render as the play and cancels the animation it records. Write "seen" under reduced motion too, so the reader's next tab doesn't surprise them.
 
-**Branch client-only flags on the transition, never on a rendered style.** "Has this played?" is false on the server for everyone and true on the client for most. A style branched on it gives server and client different first paints; a transition branched on it gives both the same paint and differs only in how long the change takes:
+**Branch client-only flags on the transition, never on a rendered style.** "Has this played?" is false on the server for everyone and true on the client for most: a style branched on it paints differently on each, while a branched transition paints the same and differs only in how long the change takes:
 
 ```tsx
 variants={{
@@ -156,6 +156,6 @@ variants={{
 }}
 ```
 
-A filling CSS animation (`animation-fill-mode: both`) can't be transitioned out of with a plain declaration — the animation's end state wins. Replace the animation to end it.
+A filling CSS animation (`animation-fill-mode: both`) can't be transitioned out of with a plain declaration, because the animation's end state wins; replace the animation to end it.
 
-**Nothing waits behind it.** The page underneath is rendered and interactive; the skip link is the first focusable element and ending the piece is the first thing focusing it does; any key or click ends it at once.
+**Nothing waits behind it.** The page underneath is rendered and interactive; the skip link is the first focusable element, and focusing it ends the piece; any key or click ends it at once.

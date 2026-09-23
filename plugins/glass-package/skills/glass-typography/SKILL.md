@@ -1,29 +1,17 @@
 ---
 name: glass-typography
-description: The exact type system from modimihir.com — the Glass package, to copy as-is. Build and audit type systems for interfaces that are mostly text — a dense small-size ladder with a deliberately low ceiling, two weights instead of five, leading that runs inverse to size, negative tracking as a large-size correction, roles that separate on weight, leading and rules once size runs out, and emphasis carried by weight and colour rather than italic or bold. Use when setting a type scale, picking sizes/weights/leading/tracking, styling headings, body copy, long-form prose, leads, keylines, pull quotes, deks, notes, meta lines, captions, labels, tooltips or lettermarks, styling imported Markdown you can't put classes on, separating UI copy from reading copy, choosing text colour tiers, handling numerals and tabular alignment, self-hosting fonts and metric-matched fallbacks, or reviewing typography that feels noisy, inconsistent, or like two templates from different sites.
+description: The exact type system from modimihir.com — the Glass package, to copy as-is. For mostly-text interfaces: a dense ladder with a low ceiling, two weights, leading inverse to size, tracking only at large sizes, roles that separate on weight, leading and rules, and emphasis by weight and colour, not italic. Use when setting a type scale, picking sizes/weights/leading/tracking, styling headings, body copy, long-form prose, leads, keylines, pull quotes, deks, notes, meta lines, captions, labels, tooltips or lettermarks, styling imported Markdown you can't put classes on, separating UI copy from reading copy, choosing text colour tiers, handling numerals and tabular alignment, self-hosting fonts and metric-matched fallbacks, or reviewing typography that feels noisy, inconsistent, or like two templates from different sites.
 ---
 
 # Glass Typography
 
 > **Glass package.** This is the type system running on [modimihir.com](https://modimihir.com), with its real values, meant to be copied whole. For the same principles fitted to your project's own names, values and character, use `typographic-system` from the adaptable set. When both are installed and the project's `DESIGN.md` names a preset other than `glass`, that skill leads and this one is only a worked example.
 
-A type system for interfaces where the text *is* the product — portfolios, docs, writing, dashboards with real prose in them. It optimises for one thing: **a reader should never notice the typography, only the hierarchy.**
-
-Five ideas do the work. Everything else follows from them.
-
-1. **Two weights.** 400 and 500. Weight marks structure, never emphasis.
-2. **A dense, small ladder with a low ceiling.** Everything lives between 11 and 18px. Steps of 1–2px, not 1.25× ratios.
-3. **Leading runs inverse to size.** Tight at display sizes, open at reading sizes — and once the ladder is short, leading is a role signal rather than a refinement.
-4. **Tracking is a large-size correction.** 0 at 14px, −0.015em at 16, −0.02em at 18. That's the whole range.
-5. **Emphasis is weight and colour, not italic or bold.**
-
-And a sixth that only shows up once you've compressed the scale: **when size stops separating two roles, they separate on weight, leading, or a rule — each on a different axis.**
-
-The worked example throughout is the system running on [modimihir.com](https://modimihir.com) — Archivo, a 640px measure, Tailwind v4 tokens. The numbers are real and copyable; the reasoning transfers to any family.
+For interfaces where the text *is* the product — portfolios, docs, writing. The aim: **a reader should never notice the typography, only the hierarchy.** The example is Archivo in a 640px measure with Tailwind v4 tokens; the reasoning transfers to any family.
 
 ## 1. The role ladder
 
-Do not derive sizes from a modular ratio. A 1.25× scale from a 14px base gives you 14 / 17.5 / 21.9 / 27.3 — four sizes for a page that needs ten, and none of them land on a whole pixel. Assign a size to a **role** instead, and let the ladder be as dense as the roles demand.
+Do not derive sizes from a modular ratio: 1.25× from 14px gives 14 / 17.5 / 21.9 / 27.3, four sizes for a page that needs ten, none on a whole pixel. Give each **role** a size, in steps of 1–2px, as densely as the roles demand.
 
 | Role | Size | Leading | Tracking | Weight | Text tier |
 |---|---|---|---|---|---|
@@ -48,19 +36,13 @@ Do not derive sizes from a modular ratio. A 1.25× scale from a 14px base gives 
 | Lettermark | 8.5 | 1 | +0.02em | 500 | muted |
 | Card lettering | 7.5 | 1.2 | −0.01em | 600 | primary |
 
-Text tiers (`primary` → `quiet`) come from the **glass-color** skill. Note they are *not* simply the grey ramp: only the top two are ramp steps (`gray-1000`, `gray-900`), and `muted` / `quiet` / `faint` are separate tokens picked for contrast — because a border needs 3:1 and text needs 4.5:1, so one step can't serve both. Reusing mid-ramp greys for text fails in a light theme and looks fine in dark.
+Text tiers (`primary` → `quiet`) come from the **glass-color** skill. Only the top two are grey-ramp steps (`gray-1000`, `gray-900`); `muted` / `quiet` / `faint` are separate tokens picked for contrast: a border needs 3:1, text 4.5:1, and one step can't serve both. Mid-ramp greys as text fail in a light theme and look fine in dark.
 
-**Eighteen is the ceiling, and the ceiling is lower than you think.** An earlier version of this ladder topped out at 30px, with a 19px prose heading, a 17px dek and a 16px prose body — the shape almost every article template has. The reference implementation deleted all four sizes and did not replace them. What forced it:
-
-> Two templates were setting their own hierarchy. Articles and case studies opened at 30px with a 17px standfirst and 19px section headings, while every other page — the index pages, a skill's own page — opened at 18px. Landing on a case study from the work index felt like arriving at a different site.
-
-The fix was to give the detail templates the scale the rest of the site already had, and then to notice that the rest of the site was running on **two sizes**: 16 for headings, 14 for everything a reader reads. So the reading column came down to those two as well.
-
-**The lesson generalises past these numbers.** A scale is only a system if every template is on it. A template that opens two steps above the others isn't expressing importance, it's opting out — and the reader feels the opt-out as inconsistency long before they notice the sizes.
+**Eighteen is the ceiling, and it's lower than you think.** An earlier ladder topped out at 30px, with a 19px prose heading, a 17px dek and a 16px prose body. Case studies and articles opened at 30px and every other page at 18px, so a case study felt like a different site. **A scale is only a system if every template is on it**; one that opens two steps above the others is opting out, not expressing importance. The rest of the site ran on **two sizes**, 16 for headings and 14 for everything read; the detail templates came down to those, and the four sizes were deleted, not replaced.
 
 ### When size stops doing the work
 
-Collapse a ladder like this and you hit the real problem: eight roles now share 14px, and size can no longer tell any of them apart. That's the constraint the system is *for*. Each one separates on a different axis:
+Collapse the ladder and eight roles share 14px — the constraint the system is *for*. Each separates on a different axis, no two sharing a mechanism. That keeps a one-size column legible, and means a ninth 14px role needs an unused axis first.
 
 | Role | The signal | Not |
 |---|---|---|
@@ -69,13 +51,11 @@ Collapse a ladder like this and you hit the real problem: eight roles now share 
 | Pull quote | a 3px rounded bar and a 16px indent | a size step |
 | Dek | the muted tier, and tighter leading at 1.55 | a size step |
 
-And the rule that falls out of it, which is worth more than the ladder: **a tier must never outrank the heading it sits under.** An earlier pass set the keyline at 17px, above the 16px heading it belonged to, and the page read as though the paragraphs were shouting over the titles. Pulling everything to one size removes any chance of that returning — a tier can't outrank a heading it's no longer competing with on size.
+**A tier must never outrank the heading it sits under** — the rule worth more than the ladder. A 17px keyline under a 16px heading made the paragraphs shout over the titles; at one size, that can't return.
 
-The trade is real and worth stating: page titles and section headings are now the same 16px, separated by position and spacing rather than scale. That's flatter than an article template usually is. It's the right flat, because the home page already worked that way and the detail pages were the outlier.
+The cost is a flatter page: titles and section headings are both 16px, separated by position and spacing. It's the right flat, because the home page already worked that way and the detail pages were the outlier.
 
-Read the table as a set: no two rows use the same mechanism. That's what makes a one-size reading column legible, and it's why you can't add a ninth 14px role without finding it an unused axis.
-
-**Nothing in this ladder resizes.** Not one role changes size across viewports — a 14px paragraph is 14px on a phone. The previous version had one responsive step, a 30px title dropping to 26px below `sm`; it went when the size that needed it went. Worth registering as a general point: a responsive type step is usually a symptom that one size is too large for the narrowest measure you ship, and fixing the ladder beats tuning the breakpoint.
+**Nothing in this ladder resizes.** The old step, a 30px title dropping to 26px below `sm`, went with the size that needed it. A responsive type step usually means one size is too large for your narrowest measure: fix the ladder, not the breakpoint.
 
 → Full derivation, including how to add a role without bloating the ladder: `references/scale.md`
 
@@ -86,29 +66,29 @@ Load 400 and 500. That is the system.
 - **400** — all body copy, all reading copy, all quiet UI.
 - **500** — headings at every level, active states, `<strong>`, lettermarks.
 
-There is no 600 and no 700. A heading at 500 against body at 400 is already a clear step; going to 700 makes the heading shout and forces every *other* level to get louder to keep its distance. That escalation is how type systems end up with five weights and no hierarchy.
+No 600, no 700. 500 against 400 is already a clear step; 700 makes headings shout and forces every *other* level louder to keep its distance, which is how systems end up with five weights and no hierarchy.
 
-**The one exception, and where it lives.** The reference implementation has exactly one `font-semibold` in it, on 7.5px lettering inside a folder card. Below about 8px a 500 stops registering as a weight at all — there aren't enough pixels across a stem for the difference to survive rasterisation — so the choice is 600 or nothing. Note the shape of the exception: it's below the ladder's readable floor, on something you recognise rather than read. That's the only kind of exception a two-weight system should accept, and one instance of it is the right number.
+**The one exception** is a single `font-semibold`, on 7.5px folder-card lettering. Below about 8px a 500 doesn't survive rasterisation as a weight — too few pixels across a stem — so it's 600 or nothing. It's below the readable floor, on something recognised rather than read: the only kind of exception to accept, and one is the right number.
 
-**Weight is also how you avoid signalling state with colour alone.** In a table of contents, the active row takes `font-medium` *and* the primary text colour. Colour alone fails WCAG 1.4.1; weight alone is subtle but real; together they are unambiguous. Reach for weight before you reach for a background.
+**Weight also keeps state off colour alone.** A contents rail's active row takes `font-medium` *and* primary colour: colour alone fails WCAG 1.4.1, weight alone is subtle but real, together they're unambiguous. Reach for weight before a background.
 
 → Weight and tracking in depth, including when 300 is legitimate: `references/weight-and-tracking.md`
 
 ## 3. Leading runs inverse to size
 
-There are three leading curves, one per job:
+Three curves, one per job:
 
 | Job | Range | Rule |
 |---|---|---|
-| **Display** — titles, headings | 1.2 – 1.3 | The bigger the size, the tighter the leading. A 16px heading at 1.65 reads as two loose lines rather than one heading. |
-| **Reading** — paragraphs, prose | 1.55 – 1.9 | The longer the passage, the more open. Prose body at 14/1.75 is deliberately looser than a UI paragraph at 14/1.55. |
-| **UI** — rows, tooltips, labels | 1 – 1.4 | Single-line text in a fixed-height box uses `leading-none`, so vertical centring is exact and a descender can't shift the box. |
+| **Display** — titles, headings | 1.2 – 1.3 | Bigger means tighter. A 16px heading at 1.65 reads as two loose lines, not one heading. |
+| **Reading** — paragraphs, prose | 1.55 – 1.9 | Longer passages, more open: prose body 14/1.75 against a UI paragraph's 14/1.55. |
+| **UI** — rows, tooltips, labels | 1 – 1.4 | Single-line text in a fixed-height box takes `leading-none`: exact centring, and no descender shifts the box. |
 
-The inversion is not a preference, it's optics. Line spacing needs to exceed the visual gap *inside* a line — the x-height. At display sizes the x-height is already large, so a tight ratio reads generously; at 14px the same ratio would collide.
+The inversion is optics: line spacing must exceed the gap *inside* a line, the x-height. That's already large at display sizes, so a tight ratio reads generously; at 14px it would collide.
 
-**Two headings at the same size can still differ.** A detail-page title is 16/1.3 while a section heading is 16/1.2, because titles wrap to two lines and section headings are one word. Leading is the axis that survives a collapsed size ladder — use it before you reach for a size step.
+**Two headings at one size can still differ**: a detail-page title is 16/1.3 and a section heading 16/1.2, because titles wrap and section headings are one word. Leading survives a collapsed ladder; use it before a size step.
 
-**Prose gets its own, looser numbers, and leading is now a role signal rather than a refinement.** With body, lead and keyline all at 14px, the lead is distinguished *only* by its 1.9 against the body's 1.75. That's a 0.15 difference doing the entire job of an opening paragraph, and it works — but it means leading has to be exact, not approximated.
+**In prose, leading is a role signal rather than a refinement.** A 0.15 step, 1.9 against 1.75, is all that marks the lead from the body, so leading must be exact, not approximated.
 
 ## 4. Tracking is negative and scales with size
 
@@ -120,22 +100,18 @@ The inversion is not a preference, it's optics. Line spacing needs to exceed the
 tiny caps +0.02em     (8.5px lettermarks, 11px initials)
 ```
 
-Digital type is rendered with slightly loose default spacing at large sizes. Pulling it in is what makes a heading look *set* rather than typed. Below 14px, do the opposite: tiny text and anything approaching all-caps needs *positive* tracking or the letters merge.
+Default spacing reads loose at large sizes; pulling it in makes a heading look *set*, not typed. Below 14px, tiny text and near-caps need *positive* tracking or the letters merge. **Tracking is a large-size correction, so a system with no large sizes barely needs it** — two negative values, 2px apart. Tracking six steps means the scale is doing too much work.
 
-Note how little range this covers now — two values, 2px apart. That's the honest consequence of a ladder that tops out at 18px: **tracking is a large-size correction, so a system with no large sizes barely needs it.** If you find yourself tracking six different steps, check whether the scale is doing too much work.
-
-Never track body copy. A −0.01em on a 14px paragraph is invisible at best and a legibility cost at worst.
+Never track body copy: −0.01em on a 14px paragraph is invisible at best and a legibility cost at worst.
 
 ## 5. Emphasis without italic or bold
-
-This is the most opinionated rule here, and the one that most changes how a page reads.
 
 ```css
 /* Italics are switched off globally. */
 em, i { font-style: normal; }
 ```
 
-Archivo's true italic is a separate file and its slant fights the geometric letterforms. So emphasis is re-mapped onto the two axes the system already has:
+Archivo's true italic is a separate file whose slant fights its geometric letterforms, so emphasis moves to two axes the system already has:
 
 - `*emphasis*` → the **muted** text colour. It recedes rather than tilts.
 - `**strong**` → weight 500 + the **primary** text colour. It advances.
@@ -146,9 +122,7 @@ if (bold) return <strong className="font-medium text-gray-1000">{text}</strong>;
 if (em)   return <em className="text-gray-800">{text}</em>;
 ```
 
-Two consequences worth knowing. First, `<strong>` at 500 rather than 700 means emphasis inside a paragraph doesn't create a dark blot you read before the sentence. Second, because `em` de-emphasises rather than emphasises, you get a real *two-directional* emphasis — something bold-only systems can't express.
-
-Keep the semantic tags. Screen readers announce them; only the visual mapping changed.
+At 500, `<strong>` doesn't make a dark blot you read before the sentence; and because `em` de-emphasises, emphasis runs in *two directions*, which bold-only systems can't express. Keep the semantic tags: screen readers announce them.
 
 ## 6. Numerals
 
@@ -156,15 +130,11 @@ Keep the semantic tags. Screen readers announce them; only the visual mapping ch
 body { font-variant-numeric: tabular-nums; }
 ```
 
-Tabular by default, globally — not per-component. In a text-heavy interface, numbers are almost always in a column that should align: date ranges in an experience list, timestamps, read times, version numbers. The one place proportional numerals win (a number inside a running sentence) is rare enough that the global default is the right trade.
-
-A live clock **must** be tabular or the whole row twitches once a second as the digits change width.
+Globally, not per-component: text-heavy interfaces put numbers in columns that should align — date ranges, timestamps, read times, versions. Proportional numerals win only inside a running sentence, too rare to set the default. A live clock **must** be tabular or its row twitches every second as digits change width.
 
 ## 7. One family, self-hosted
 
-One family, one voice. A display/body pairing needs a reason — a distinct editorial register, a code face, a brand lockup. "Headings should feel different" is not one; that's what weight, size, leading and tracking are for.
-
-The reference implementation carries exactly one exception, and it's the legitimate kind:
+One family, one voice. A second needs a reason — an editorial register, a code face, a brand lockup — and "headings should feel different" isn't one; weight, size, leading and tracking do that. The one exception here is legitimate:
 
 ```css
 --font-sans: var(--font-archivo), system-ui, -apple-system, "Helvetica Neue", sans-serif;
@@ -173,7 +143,7 @@ The reference implementation carries exactly one exception, and it's the legitim
 --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 ```
 
-A code face is a real second register: monospace means "this is literal, count the characters." But it's a **system stack, not a webfont.** A handful of inline `<code>` spans and two code blocks do not justify a second font request, and every platform already ships a good monospace. The general rule: *a second family earns a download only if it's carrying reading copy.*
+Monospace is a real second register ("this is literal, count the characters") but a **system stack, not a webfont**: a few `<code>` spans and two code blocks don't justify a request, and every platform ships a good one. *A second family earns a download only if it's carrying reading copy.*
 
 ### Self-host, and let the loader generate the fallback
 
@@ -182,18 +152,12 @@ A code face is a real second register: monospace means "this is literal, count t
 const archivo = Archivo({ subsets: ["latin"], display: "swap", variable: "--font-archivo" });
 ```
 
-The reference implementation moved off Google's CDN, and the reasoning is worth repeating because `preconnect` is usually presented as the fix:
+Google's CDN cost a DNS lookup and TLS handshake for the stylesheet and again for gstatic before the font was requested: three round trips over two third-party hosts. `preconnect`, the usual fix, shortens that without removing it; you still wait on one origin to learn a URL on another. Self-hosted, the font rides your existing connection, with a `<link rel="preload">` alongside the HTML.
 
-> The Google-hosted version needed a DNS lookup and TLS handshake for the stylesheet, then the same again for gstatic before the font itself was even requested. Three round trips across two third-party hosts is a long time to hold the real typeface.
+- **Keep `display: swap`.** Fallback text beats no text.
+- **Generate a metric-matched fallback.** `next/font` synthesises a local face scaled to your family's metrics (x-height, widths, ascent), so a swap that *does* happen doesn't move the line. It's the half of `display: swap` people skip, and what makes it safe: unmatched, a swap is a reflow under the reader's eye, worse than a wait.
 
-`preconnect` shortens that, it doesn't remove it — you are still waiting on a stylesheet from one origin to learn the URL of a file on another. Self-hosted, the font is on the connection you already have, and the framework emits a `<link rel="preload">` for it alongside the HTML.
-
-Two things to keep:
-
-- **`display: swap` stays.** A flash of fallback text still beats a flash of nothing.
-- **Generate a metric-matched fallback.** `next/font` synthesises a local face with your family's metrics (x-height, widths, ascent) scaled onto it, so if the swap *does* happen the line doesn't move. This is the half of `display: swap` people skip, and it's the half that makes it safe — swap without metric matching is a reflow, and a reflow under the reader's eye is worse than a wait.
-
-**Where a swap costs the most is your loudest hint that it matters.** Here it's the opening screen: one line of text alone on the page, so a substitution under it is unmissable. Find the moment in your interface where a single string carries the whole frame, and tune font loading for that moment rather than for the average page.
+**Tune loading where a swap costs most**: here the opening screen, one line alone on the page. Find where one string carries the whole frame and tune for that, not the average page.
 
 ```css
 body {
@@ -204,9 +168,7 @@ body {
 
 ## 8. Prose you don't control
 
-Everything above assumes you're setting each block. Sometimes you aren't: a rendered Markdown document, a CMS field, an imported README. It arrives as an HTML string, so it can't carry utility classes and there's no component to hang a variant off.
-
-Style it **by element, inside one scoped class** — and hold it to the same ladder rather than letting it invent a second one:
+Rendered Markdown, a CMS field or an imported README arrives as an HTML string, with no classes and no component to vary. Style it **by element, in one scoped class**, on the same ladder:
 
 ```css
 .skill-prose            { font-size: 14px; line-height: 1.65; color: var(--color-muted); }
@@ -216,18 +178,18 @@ Style it **by element, inside one scoped class** — and hold it to the same lad
 .skill-prose > :first-child { margin-top: 0; }
 ```
 
-Four things this has to get right that authored prose doesn't:
+Four things it needs that authored prose doesn't:
 
-- **`> :first-child { margin-top: 0 }`.** The document starts with whatever it starts with, and a leading `<h2>` would otherwise push 44px of nothing above itself.
-- **Three heading levels, not one.** Authored prose on this site uses two. An imported document nests deeper, so `h4` gets a real role (13px, secondary tier) instead of falling through to a browser default.
-- **Wide content scrolls inside its own box.** Code blocks and tables are the two things a Markdown document has that a designed page doesn't, and both are unbounded. `overflow-x: auto` on the `<pre>`, and a wrapping `.table-scroll` div around each table — the page body must never scroll sideways.
-- **Give `<ul>` your own marker.** `list-style: none` plus a 3px `::before` dot, matching the hand-rolled bullets everywhere else, because a UA disc at 14px is far too heavy for this system. Set `li::marker { font-variant-numeric: tabular-nums }` on ordered lists so a run past 9 doesn't shift its text.
+- **`> :first-child { margin-top: 0 }`**, or a leading `<h2>` pushes 44px of nothing above itself.
+- **Three heading levels, not one.** Imports nest deeper than authored prose's two, so `h4` gets a real role (13px, secondary tier), not a browser default.
+- **Wide content scrolls in its own box**, since code blocks and tables are unbounded: `overflow-x: auto` on the `<pre>`, a wrapping `.table-scroll` div on each table. The page body must never scroll sideways.
+- **Your own `<ul>` marker**: `list-style: none` and a 3px `::before` dot matching the hand-rolled bullets, because a UA disc at 14px is far too heavy. On ordered lists, `li::marker { font-variant-numeric: tabular-nums }` stops a run past 9 shifting its text.
 
-The principle: **imported prose is a guest in your type system, not a second one.** Map its elements onto roles you already have, and only add a role where the document genuinely needs something your pages don't.
+**Imported prose is a guest in your type system, not a second one.** Map it onto roles you have; add one only where the document needs something your pages don't.
 
 ## 9. UI copy and reading copy are different systems
 
-The single most useful distinction in the whole skill. The same page runs two type systems:
+The most useful distinction here — one page runs two type systems:
 
 |  | UI copy | Reading copy |
 |---|---|---|
@@ -237,42 +199,40 @@ The single most useful distinction in the whole skill. The same page runs two ty
 | Optimised for | scanning, glancing | sustained reading |
 | Colour | often secondary/quiet | primary |
 
-The two ranges overlap almost completely now, which is the point: **once the ladder is short, the distinction is carried by leading and measure, not by size.** A 14px nav row and a 14px paragraph are the same size and nothing else about them matches.
-
-A nav row and a paragraph can both be 14px and still be doing unrelated jobs. When something looks off, check you haven't applied reading leading to a UI row (the row grows and the dock loses its rhythm) or UI leading to a paragraph (it turns into a wall).
+The ranges overlap: **once the ladder is short, leading and measure carry the distinction, not size.** A 14px nav row and a 14px paragraph share nothing else. If something looks off, check for reading leading on a UI row (it grows; the dock loses its rhythm) or UI leading on a paragraph (a wall).
 
 → How prose blocks are set — headings, quotes, lists, spacing: `references/long-form-prose.md`
 
 ## Assets
 
-- `assets/type-tokens.css` — the full ladder as CSS custom properties plus Tailwind v4 `@theme` tokens, the role classes, and a scoped block for imported Markdown.
-- `assets/prose.tsx` — the long-form renderer: the two-size reading column, the `lead` / `keyline` / `note` / `quote` / `figure` blocks and the axis each one separates on, plus the inline emphasis and link mapping.
+- `assets/type-tokens.css` — the ladder as CSS custom properties and Tailwind v4 `@theme` tokens, the role classes, and a scoped block for imported Markdown.
+- `assets/prose.tsx` — the long-form renderer: the two-size column, the `lead` / `keyline` / `note` / `quote` / `figure` blocks and their axes, inline emphasis and link mapping.
 
 ## Applying this to an existing codebase
 
-1. **Inventory before you change anything.** Grep every distinct size, weight, leading and tracking in use, *grouped by template*. Systems drift into 14 sizes and 5 weights without anyone deciding to — and the drift usually turns out to be one or two templates running their own scale.
-2. **Collapse weights first.** It's the highest-leverage single change, and the most visible.
-3. **Map sizes to roles, not to a scale.** Two roles that share a size are fine. A size with no role gets deleted.
-4. **Set leading per curve.** Most drift shows up here — a heading with reading leading, a paragraph with UI leading.
+1. **Inventory before changing anything.** Grep every distinct size, weight, leading and tracking, *grouped by template*: systems drift into 14 sizes and 5 weights without anyone deciding to, usually via one or two templates running their own scale.
+2. **Collapse weights first** — the highest-leverage change, and the most visible.
+3. **Map sizes to roles, not to a scale.** Roles may share a size; a size with no role gets deleted.
+4. **Set leading per curve.** Most drift is here: headings with reading leading, paragraphs with UI leading.
 5. **Add tracking only above 14px.**
 6. **Switch emphasis to weight + colour.** Then delete the italic font file.
 
 ## Checklist
 
-- [ ] Two weights loaded and used. No 600/700 above the readable floor.
-- [ ] Every size in the codebase maps to a named role.
-- [ ] **Every template is on the same ladder** — no page type opens a step above the others.
-- [ ] Roles sharing a size separate on weight, leading, colour or a rule — and each on a *different* one.
-- [ ] Nothing inside a section outranks the heading it sits under.
-- [ ] Leading follows display / reading / UI curves — check headings specifically.
+- [ ] Two weights loaded and used; no 600/700 above the readable floor.
+- [ ] Every size maps to a named role.
+- [ ] **Every template on the same ladder**; no page type opens a step above the others.
+- [ ] Roles sharing a size separate on weight, leading, colour or a rule — each a *different* one.
+- [ ] Nothing in a section outranks its heading.
+- [ ] Leading follows the display / reading / UI curves; check headings especially.
 - [ ] Negative tracking above 14px only; positive on sub-10px and near-caps.
 - [ ] No `font-style: italic` in output; `em` maps to colour.
 - [ ] `<strong>` is 500, not 700.
-- [ ] `tabular-nums` set globally; any live-updating number verified stable.
-- [ ] No role changes size responsively — or if one does, you can say which measure forces it.
-- [ ] Single-line UI text uses `leading-none` inside fixed-height boxes.
-- [ ] Fonts self-hosted, with `display: swap` and a **metric-matched** generated fallback.
-- [ ] A second family only where it carries a genuine second register — and system-stacked unless it carries reading copy.
-- [ ] Imported HTML prose scoped to one class, mapped onto existing roles, with `> :first-child` margin reset.
-- [ ] Code blocks and tables scroll in their own box; the page body never scrolls sideways.
-- [ ] Active/selected states carry weight or colour *and* one more signal.
+- [ ] `tabular-nums` global; live-updating numbers verified stable.
+- [ ] No role resizes responsively, or you can name the measure that forces it.
+- [ ] Single-line UI text in fixed-height boxes uses `leading-none`.
+- [ ] Fonts self-hosted, `display: swap`, with a **metric-matched** generated fallback.
+- [ ] A second family only for a real second register; system-stacked unless it carries reading copy.
+- [ ] Imported HTML prose: one scoped class, existing roles, `> :first-child` margin reset.
+- [ ] Code blocks and tables scroll in their own box, never the page body.
+- [ ] Active/selected states: weight or colour *and* one more signal.

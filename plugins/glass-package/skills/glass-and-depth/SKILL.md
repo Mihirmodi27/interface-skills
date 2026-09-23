@@ -1,97 +1,73 @@
 ---
 name: glass-and-depth
-description: The exact glass material from modimihir.com — the Glass package, to copy as-is. Build translucent "glass" surfaces that read as real floating material rather than as glassmorphism — blur scaled to how little you know about the backdrop, saturation to stop the blur going grey, tint that carries legibility when the blur is compromised, and the depth cues a translucent surface can't float without (a hairline edge, a layered shadow stack, continuous corners). Also covers gradient 1px strokes, glows that read as emission, and one-pass sheens. Use when building or reviewing frosted navigation, floating menus, sheets, drop-ups, hover cards, tooltips, modal panels, gradient borders or any backdrop-filter surface; when glass looks muddy, cloudy, flat, or unreadable; when a gradient shifts or shimmers as its box resizes; when stacking glass over glass; when text over a translucent surface fails contrast; and when implementing reduced-transparency, high-contrast, reduced-motion, or no-backdrop-filter fallbacks.
+description: The exact glass material from modimihir.com — the Glass package, to copy as-is. Material, not glassmorphism: blur scaled to backdrop uncertainty, saturation against greying, a tint for legibility when blur fails, and depth cues (hairline, layered shadows, continuous corners). Also gradient 1px strokes, emissive glows, one-pass sheens. Use when building or reviewing frosted navigation, floating menus, sheets, drop-ups, hover cards, tooltips, modal panels, gradient borders or any backdrop-filter surface; when glass looks muddy, cloudy, flat, or unreadable; when a gradient shifts or shimmers as its box resizes; when stacking glass over glass; when text over a translucent surface fails contrast; and when implementing reduced-transparency, high-contrast, reduced-motion, or no-backdrop-filter fallbacks.
 ---
 
 # Glass and Depth
 
 > **Glass package.** This is the glass material running on [modimihir.com](https://modimihir.com), with its real values, meant to be copied whole. For the same principles fitted to your project's own names, values and character, use `surfaces-and-depth` from the adaptable set. When both are installed and the project's `DESIGN.md` names a preset other than `glass`, that skill leads and this one is only a worked example.
 
-Translucent surfaces done so they read as **material** rather than as an effect.
-
-The failure mode has a name — glassmorphism — and a cause: doing blur and a white tint, and stopping there. That produces a cloudy rectangle. Real glass in an interface is **four properties working at once**, plus three depth cues that have nothing to do with transparency:
+Glassmorphism is blur and a white tint alone: a cloudy rectangle. Glass that reads as **material** is **four properties working at once**, plus three depth cues that have nothing to do with transparency:
 
 | | Property | Job |
 |---|---|---|
-| 1 | `blur()` | Suppress the backdrop so the surface's own content can be read |
-| 2 | `saturate()` | Undo the desaturation blur causes — the difference between *translucent* and *dirty* |
-| 3 | A tint | Carry legibility, especially when the blur is compromised |
+| 1 | `blur()` | Suppress the backdrop so the surface's content reads |
+| 2 | `saturate()` | Undo blur's desaturation — *translucent*, not *dirty* |
+| 3 | A tint | Carry legibility, especially when blur is compromised |
 | 4 | A hairline edge | Say exactly where the surface ends |
 | 5 | A layered shadow | Say it's above something |
 | 6 | Continuous corners | Say it's an object |
 
-Drop any one and it stops being convincing. Drop 2 and it's muddy. Drop 4 and the edge is mush. Drop 5 and it's a flat patch rather than a floating panel.
-
-Reference implementation: the floating navigation, menus and sheets on [modimihir.com](https://modimihir.com).
+Without 2 it's muddy, without 4 the edge is mush, without 5 it's a flat patch; drop any one and it stops convincing.
 
 ## 1. Blur scales with uncertainty about the backdrop
 
-Not with importance, and not with size. The question is: **how much do you know about what's behind this?**
+Not with importance or size, but with **how little you know about what's behind it**.
 
 | Tier | Blur | Saturate | Tint | Backdrop | Used for |
 |---|---|---|---|---|---|
-| `folder-glass` | **8px** | 1.4 | gradient, 55%→34% | Content you *want* recognised | A frosted pocket with cards peeking behind |
+| `folder-glass` | **8px** | 1.4 | gradient, 55%→34% | Content you *want* recognised | A frosted pocket, cards peeking behind |
 | `glass-nav` | **20px** | 1.8 | 72% | Arbitrary page content | Fixed chrome that content scrolls under |
 | `glass-panel` | **24px** | 1.8 | **97%** | Anything, including other glass | A floating menu that must stay legible |
 
-**8px on the pocket** — you want to see the cards behind it, recognisably. Blur is softening, not obscuring. That's why its saturation is lower too (1.4): the cards behind it are the subject, and over-saturating them would make the pocket louder than its contents.
+The pocket's cards should stay recognisable: 8px softens rather than obscures, and 1.4 saturation keeps the pocket quieter than its contents. Paragraphs, photographs and image walls scroll under fixed chrome; 20px leaves less to compete with its icons. The panel, least in control of its backdrop, gets the most defensive 24px.
 
-**20px on fixed chrome** — a paragraph, a photograph, or a full-bleed image wall can scroll under it. More blur means less of that survives to compete with the nav's own icons.
-
-**24px on the panel** — the most defensive value, for the surface with the least control over its backdrop.
-
-> **A finding from the reference implementation:** it also defines a fourth material, `glass-menu` (16px / 1.8 / 72%), for "a menu over a surface you already know" — and nothing uses it. Every menu in the site turned out to need `glass-panel`'s defensive tint instead. It's dead CSS. Three tiers is the real system; if you're copying this, copy three.
+> **A finding from the reference implementation:** a fourth material, `glass-menu` (16px / 1.8 / 72%), for "a menu over a surface you already know", is dead CSS: every menu needed `glass-panel`'s defensive tint. Copy three tiers.
 
 ## 2. `saturate()` is not optional
 
-This is the single highest-leverage line in the whole skill.
-
-Blur averages neighbouring pixels. Averaging colours pulls them toward grey — that's just what averaging does. So a blurred backdrop is *always* less saturated than the original, and the more you blur, the greyer it gets. Blur-plus-tint alone gives you the characteristic cheap-frosted-glass wash.
+The highest-leverage line here. Blur averages pixels, pulling colour toward grey, so a blurred backdrop is *always* greyer than the original, more so the more you blur.
 
 ```css
 backdrop-filter: blur(20px) saturate(1.8);
 ```
 
-1.8 puts the life back. The backdrop stays recognisably colourful through the surface, which is what makes the eye read *translucent* instead of *dirty*.
-
-Apple's platform materials do exactly this, which is why iOS glass looks like glass. It costs nothing — it's the same filter pass.
-
-Rule of thumb: **1.8 where you're suppressing the backdrop, 1.4 where you're only softening it.** Above ~2.0 colours start to look radioactive.
+1.8 restores colour so it reads *translucent*, not *dirty*: free, same pass, as in Apple's materials. **1.8 where you're suppressing the backdrop, 1.4 where you're only softening it**; above ~2.0 colours look radioactive.
 
 ## 3. The tint carries legibility when the blur can't
 
-`glass-panel` sits at **97% opacity** while still carrying a 24px blur. That looks self-contradictory until you know the constraint:
+`glass-panel` pairs a 24px blur with **97% opacity** because:
 
 > A `transform` on an ancestor weakens or breaks `backdrop-filter` in its subtree.
 
-`glass-panel` is used on menus whose wrapper *scales open*. Throughout that animation the blur is compromised — it samples the wrong backdrop, or nothing. So the tint has to be doing the work, and the blur is a bonus that lands once the animation settles.
+Its menus' wrappers *scale open*, and meanwhile the blur samples the wrong backdrop or nothing, so the tint does the work. **When you can't rely on the blur, thicken the tint.** Never ship a 72% surface whose blur is broken; it's unreadable over busy content.
 
-**The generalisable rule: when you can't rely on the blur, thicken the tint.** Never ship a 72% surface whose blur is broken; it's unreadable over busy content.
-
-Where you *do* have the choice, fix it structurally instead — the animating wrapper and the glass surface must be different elements:
+Better, where you can: make the animating wrapper and glass surface different elements.
 
 ```tsx
 <DropMenu open={open}>            {/* animates scale + y */}
   <ul className="glass-panel …">  {/* carries the blur, never transformed */}
 ```
 
-This is the same class of bug as a transform capturing `position: fixed` descendants. When something filtered or positioned behaves inexplicably, check every ancestor for `transform`, `filter`, `perspective`, `contain` and `will-change`.
+Same bug class as a transform capturing `position: fixed` descendants: when anything filtered or positioned misbehaves, check every ancestor for `transform`, `filter`, `perspective`, `contain` and `will-change`.
 
 ## 4. Glass over glass needs a tier gap
 
-In the reference implementation a settings box (`glass-panel`) opens *directly above* the navigation dock (`glass-nav`). Two translucent surfaces, overlapping.
-
-Two things this teaches:
-
-**Stacked blurs don't compose the way you'd hope.** The upper surface blurs whatever it samples — which is the lower surface's *already-blurred* output. You don't get twice the frost, you get an indeterminate mush that depends on stacking contexts and browser.
-
-**Two surfaces at the same tint read as one object.** If the drop-up box were also 72%, it would look like the dock had simply grown taller. The 97% tint is what makes it read as a *separate* panel that has appeared above the dock.
-
-So: **when glass overlaps glass, the tiers must differ visibly.** Take the upper surface to a much heavier tint, or make it opaque. Don't stack two surfaces of the same material and expect a hierarchy.
+The settings box (`glass-panel`) opens right above the dock (`glass-nav`). **Stacked blurs don't compose:** the upper blurs the lower's already-blurred output, giving not twice the frost but mush that varies by stacking context and browser. **Two surfaces at one tint read as one object:** at 72% the drop-up would look like the dock growing taller; at 97% it's a separate panel. So **when glass overlaps glass, the tiers must differ visibly**: a much heavier tint on the upper surface, or opaque.
 
 ## 5. Depth cues: glass alone doesn't float
 
-A blurred, tinted rectangle is a *patch*. Three non-transparency cues turn it into an object.
+A blurred, tinted rectangle is a *patch*; three more cues make it an object.
 
 ### The hairline
 
@@ -99,13 +75,11 @@ A blurred, tinted rectangle is a *patch*. Three non-transparency cues turn it in
 className="glass-nav rounded-2xl border-[0.5px] border-gray-alpha-400 p-1"
 ```
 
-`0.5px` renders as a true sub-pixel hairline on retina and rounds up to 1px elsewhere — it degrades to the next weight rather than disappearing.
-
-**Use the translucent ramp, not a solid grey.** A solid `gray-400` border on a translucent surface doesn't participate in what's behind it, so it reads as a pasted-on frame. `gray-alpha-400` sits *on* whatever's there and stays correct over a white page or a photograph. (See the **glass-color** skill for the ramp.)
+`0.5px` is a true hairline on retina and rounds up to 1px elsewhere, degrading rather than disappearing. **Use the translucent ramp** (see **glass-color**), **not a solid grey:** a solid `gray-400` ignores the backdrop and reads as a pasted-on frame; `gray-alpha-400` sits *on* whatever's there, white page or photograph.
 
 ### The shadow stack
 
-Four layers modelling one light source above the element — and it belongs in **one class**, not inline:
+Four layers, one light source above, in **one class**, not inline:
 
 ```css
 .dock-shadow {
@@ -124,13 +98,11 @@ Four layers modelling one light source above the element — and it belongs in *
 }
 ```
 
-The **inset highlight** does more for the floating impression than any of the shadows — it's the specular catch where a raised surface faces the light. The **contact shadow** is what makes it look *resting on* something rather than pasted over. **Two ambient layers** instead of one, because a single large shadow reads as fog while two fall off like real penumbra. **Negative spread** contracts before blurring, so the shadow stays tucked under the element instead of haloing past its edges.
+The **inset highlight**, the specular catch where a raised surface faces the light, does more for the float than any shadow. The **contact shadow** makes it *rest on* something, not sit pasted over. **Two ambient layers**: one reads as fog, two fall off like penumbra. **Negative spread** keeps it tucked, not haloing. Opacities are 2–6%: a shadow you can identify as a shadow is too strong.
 
-Opacities are 2–6%. Elevation should be felt, not seen — if you can identify the shadow as a shadow, it's too strong.
+Dark mode is a **different** shadow, not a re-tint: shadows ~10× stronger (4% black on `#0b0b0b` is invisible), highlight ~6× weaker (0.6 white on dark is a glowing edge, not a catch light).
 
-Dark mode is a **different** shadow, not the same one re-tinted: shadows go up ~10× (4% black on `#0b0b0b` is mathematically invisible) while the inset highlight drops ~6× (0.6 white on a dark surface reads as a glowing edge, not a catch light).
-
-**Extract it the moment it appears twice.** In the reference implementation this was a ~400-character string repeated inline across the dock, its drop-ups and a preference box, each copy needing a dark-mode twin kept in step. A four-layer shadow is both the most-copied value in a system like this and the hardest to eyeball a divergence in — nobody spots a `0.04` that became `0.05` in one of five places. It's also a value that *can't* be a design token, because it isn't a colour (see §6 of **glass-color**), so a class is the only place it can live.
+**Extract it the moment it appears twice.** This ~400-character string was once inline in five places here, each with a dark twin; nobody spots a `0.04` that became `0.05` in one. Not being a colour, it *can't* be a design token (§6 of **glass-color**), so a class is its only home.
 
 ### Continuous corners
 
@@ -138,13 +110,13 @@ Dark mode is a **different** shadow, not the same one re-tinted: shadows go up ~
 *, *::before, *::after { corner-shape: superellipse(1.5); }
 ```
 
-A `border-radius` quarter-circle has constant curvature that drops abruptly to zero at the straight edge. A superellipse varies curvature continuously into the edge — which is why an iOS icon looks softer than a same-radius CSS rectangle. `superellipse(k)` uses exponent 2^k, so 1.5 lands about halfway to a full squircle. Unsupported browsers get normal rounding.
+A `border-radius` quarter-circle's curvature drops abruptly to zero at the edge; a superellipse eases into it, as an iOS icon does. `superellipse(k)` uses exponent 2^k, so 1.5 is about halfway to a full squircle. Unsupported browsers get normal rounding.
 
 → Every elevation tier, the nesting radius rule, why each layer is there: `references/depth-cues.md`
 
 ## 6. A gradient edge, without a wrapper or a mask
 
-The hairline in §5 is one flat colour. Occasionally a surface wants an edge that *changes* down its height — the reference implementation's one chromatic panel runs deep navy at the top to a pale blue at the bottom. The usual answers are a wrapper div with the gradient as its background and the content inset by 1px, or an SVG mask. Both are worse than the CSS that already exists:
+For an edge that *changes* down its height (the one chromatic panel runs deep navy to pale blue), skip the wrapper div inset by 1px and the SVG mask:
 
 ```css
 .sv-panel {
@@ -160,23 +132,17 @@ The hairline in §5 is one flat colour. Occasionally a surface wants an edge tha
 }
 ```
 
-Two background layers on one box: the fill clipped to the padding edge, the gradient clipped to the border edge. The transparent border is what lets the second layer show through as a stroke.
-
-**`background-origin: border-box` is the load-bearing line.** Without it the gradient is *sized* to the padding box even while being clipped to the border box, so the stroke gets the wrong end of the ramp on all four sides. It's a one-word omission that produces a result which looks almost right, which is the worst kind.
+Fill clipped to the padding edge, gradient to the border edge, showing through the transparent border. **`background-origin: border-box` is the load-bearing line:** without it the gradient is sized to the padding box but clipped to the border box, so every side gets the wrong end of the ramp: almost right, the worst kind of wrong.
 
 ### Anchor gradient stops in pixels, not percentages
 
-This is the part that generalises furthest, and it took a visible bug to find.
+Percentage stops rescale **whenever the box resizes**. A 46px bar opening to 250px ran the whole navy-to-pale sweep inside 46px, *louder* than the panel it became, and shimmered as the ramp re-fitted each frame. In pixels (`0px / 120px / 240px`) the top holds still and the colour grows downward: free, and the better reveal.
 
-Percentage stops are relative to the box, so **the ramp rescales whenever the box resizes.** On a panel that opens from a 46px bar to a 250px panel, the closed state ran the entire navy-to-pale sweep inside its own 46px height — coming out *louder* than the panel it opened into, which is backwards — and it shimmered through the whole open animation as the ramp re-fitted itself frame by frame.
-
-Anchored in pixels (`0px / 120px / 240px`), the top of the stroke holds still and the colour simply grows downward as the panel opens. That costs nothing and is the better reveal.
-
-The rule: **a gradient on anything that changes size should be anchored in absolute units.** Percentages are right for a fixed box and wrong for a disclosure, a resizable panel, or anything animating its height.
+**On anything that changes size, anchor gradients in absolute units.** Percentages suit a fixed box, not a disclosure, a resizable panel or anything animating its height.
 
 ### Weight the glow to the sides
 
-A coloured shadow has a failure mode: it reads as *a drop shadow that happens to be blue* rather than as light coming off the panel. Four shadows rather than one fixes it:
+One coloured shadow reads as *a drop shadow that happens to be blue*; four read as light off the panel:
 
 ```css
 box-shadow:
@@ -186,13 +152,11 @@ box-shadow:
   0 10px 24px -16px rgba(47, 90, 196, 0.3);   /* below */
 ```
 
-The two horizontal casts are what make it read as emission. Same negative-spread trick as the elevation stack, so the glow stays tucked rather than haloing.
-
-It lifts on hover **and stays lifted while the panel is open** — `.sv-panel:hover, .sv-panel[data-open="true"]` — so the colour is reporting the same state the chevron is. Transition it at 220ms, and turn the transition off under `prefers-reduced-motion`.
+The horizontal casts make it emission. It lifts on hover **and stays lifted while open** (`.sv-panel:hover, .sv-panel[data-open="true"]`), so the colour reports the chevron's state. Transition at 220ms, off under `prefers-reduced-motion`.
 
 ### One pass of light, not a loop
 
-If a label shimmers as the panel opens, clip a moving gradient to the text and run it **once**:
+To shimmer a label as the panel opens, clip a moving gradient to it and run it **once**:
 
 ```css
 .sv-sheen {
@@ -205,19 +169,17 @@ If a label shimmers as the panel opens, clip a moving gradient to the text and r
 }
 ```
 
-Two rules. **Drop the class on `animationend`**, so the label goes back to being painted text rather than sitting on a clipped background forever — `background-clip: text` with `color: transparent` is a text-selection and forced-colours hazard to leave in place. And **never loop it**: a repeating shimmer claims the thing is still working, which it isn't. Under reduced motion, kill the animation and the background image and set the plain accent colour.
+**Drop the class on `animationend`**: left in place, `background-clip: text` with `color: transparent` is a text-selection and forced-colours hazard. **Never loop it**: a repeating shimmer claims work is still happening. Under reduced motion, drop animation and background image for plain accent colour.
 
 ## 7. Text over glass is the real accessibility problem
 
-**You cannot compute the contrast ratio of text on a translucent surface**, because the effective background depends on what's behind it — which is arbitrary page content, or a photograph.
+**Contrast on a translucent surface can't be computed**: the effective background is whatever is behind it. In order of preference:
 
-Three ways to make it safe, in order of preference:
+1. **Raise the tint until it's effectively opaque behind text.** Hence `glass-panel` at 97%, where contrast against the tint *is* computable.
+2. **Only high-contrast text on glass:** here, icons at `quiet`→`gray-1000` (not `gray-600`, 2.38:1 on white) and 13–14px rows at `gray-900`/`gray-1000`. Nothing muted, nothing small.
+3. **No reading copy on glass.** No paragraph on the site sits on a translucent surface. Glass is chrome.
 
-1. **Raise the tint until the surface is effectively opaque behind text.** This is why `glass-panel` is 97%. At that opacity you *can* compute contrast, against the tint colour.
-2. **Only put high-contrast text on glass.** In the reference implementation, glass surfaces carry icons at `gray-600`→`gray-1000` and 13–14px rows at `gray-900`/`gray-1000`. Nothing muted, nothing small.
-3. **Don't put reading copy on glass at all.** No paragraph in the reference implementation sits on a translucent surface. Glass is for chrome.
-
-The trap to avoid: measuring contrast against the tint colour as if the surface were opaque, when it's at 72%. That number is fiction — the real ratio is worse everywhere the backdrop is light.
+The trap: measuring against the tint as if a 72% surface were opaque. That number is fiction: the real ratio is worse wherever the backdrop is light.
 
 ## 8. Fallbacks
 
@@ -237,9 +199,7 @@ The trap to avoid: measuring contrast against the tint colour as if the surface 
 }
 ```
 
-**Both halves are required.** Dropping the filter alone leaves a 72% tint over live content — *worse* than the glass was. Swapping the tint alone still pays the full cost of the blur.
-
-This is why the glass tints are **runtime `:root` variables and not build-time tokens**: a media query has to be able to replace them at runtime. (One of them is a gradient, too, which no colour-token system accepts.)
+**Both halves are required.** Filter alone leaves a 72% tint over live content, *worse* than the glass; tint alone still pays for the blur. Hence **runtime `:root` variables, not build-time tokens**: a media query must replace them. (One is a gradient, too, which no colour-token system accepts.)
 
 ### `prefers-contrast: more`
 
@@ -249,11 +209,11 @@ This is why the glass tints are **runtime `:root` variables and not build-time t
 }
 ```
 
-Translucent chrome leans on its hairline to define its edge. At high contrast that hairline has to become a real border — the *surface* is fine, the *boundary* has to be unambiguous.
+Translucent chrome's edge is its hairline, so at high contrast it becomes a real border: the surface stays, the boundary turns unambiguous.
 
 ### `@supports` — the gap in the reference implementation
 
-Being honest about this one: the reference implementation has **no `@supports` guard**, so in a browser without `backdrop-filter` the surfaces fall back to a bare 72% tint with no blur — legible, but weak. Nearly every current browser supports it, so it's a small risk; it's still the right thing to add:
+The reference implementation has **no `@supports` guard**, so without `backdrop-filter` it gets a bare 72% tint: legible, but weak. Support is near universal; the guard is still right:
 
 ```css
 .glass-nav { background: var(--color-gray-100); }   /* opaque baseline */
@@ -266,64 +226,62 @@ Being honest about this one: the reference implementation has **no `@supports` g
 }
 ```
 
-Opaque first, glass as the enhancement. Test both conditions — Safari shipped the prefixed version for years.
+Opaque first, glass as the enhancement. Test both conditions: Safari shipped only the prefix for years.
 
-**Don't hand-write `-webkit-backdrop-filter`.** Safari still needs the prefix, but let the build add it. Lightning CSS (what Tailwind v4 uses) and Autoprefixer both prefix from your browser targets — and Lightning CSS treats a hand-written `-webkit-backdrop-filter` beside the standard one as a duplicate and keeps only the *last* declaration. Written in the conventional order, standard first, that ships the prefixed property alone, which Firefox ignores: every glass surface quietly loses its blur there, and nothing looks wrong in Chrome or Safari. The reference implementation has exactly this bug. If there's no build step at all, write the prefixed line first and the standard one last. Either way, check the *compiled* CSS for both.
+**Don't hand-write `-webkit-backdrop-filter`.** Safari needs it, but Lightning CSS (Tailwind v4's) and Autoprefixer add it from your browser targets, and Lightning CSS keeps only the *last* of a hand-written pair. Standard first, the usual order, ships the prefix alone, so Firefox silently loses every blur while Chrome and Safari look fine; the reference implementation has this bug. With no build step, write the prefixed line first. Either way, check the *compiled* CSS for both.
 
 ## 9. Performance
 
-`backdrop-filter` is genuinely expensive: for every frame, the browser copies the region behind the element, filters it, and composites. It scales with **area**, and it re-runs whenever anything behind it changes — including scroll.
-
-What makes it affordable in the reference implementation:
+`backdrop-filter` copies, filters and composites the region behind every frame. Cost scales with **area** and recurs whenever the backdrop changes, scroll included. It stays affordable here with:
 
 - **Small surfaces.** A dock a few hundred pixels wide, not a full-viewport overlay.
-- **Few of them.** Three or four on screen at most, and the menus unmount when closed rather than sitting invisible (glass costs something even at `opacity: 0`).
-- **No animated blur.** The blur radius never changes. Animating it forces a re-filter every frame at a new radius.
+- **Few of them.** Three or four at most; closed menus unmount (glass costs even at `opacity: 0`).
+- **No animated blur.** Animating the radius re-filters every frame at a new radius.
 
-What to avoid: full-page glass overlays, glass on list items (one per row), animating `blur()`, and glass over a video or an animating canvas.
+Avoid full-page overlays, glass on list items (one per row), animating `blur()`, and glass over video or animating canvas.
 
 → Cost model, containment, what to measure: `references/performance-and-fallbacks.md`
 
 ## 10. When not to use glass
 
-Glass says "this floats above your content, and the content continues underneath." If that isn't true, it's the wrong material.
+Glass says "this floats above your content, and the content continues underneath." Otherwise it's the wrong material:
 
 - **A page section.** It's not floating; it's the page.
-- **A card in a grid.** Nothing meaningful is behind it. Use a solid surface and a shadow.
+- **A card in a grid.** Nothing meaningful is behind it; use a solid surface and a shadow.
 - **Anything holding reading copy.** See §7.
-- **Over a solid single-colour background.** The blur has nothing to reveal — you're paying for a filter to produce a flat tint. Just use the tint.
-- **When the content behind it must stay readable.** Then you want a shadow, not a blur.
+- **Over a solid single-colour background.** The blur reveals nothing; use the tint.
+- **When the content behind must stay readable.** Use a shadow, not a blur.
 
-The reference implementation uses glass in exactly four places, all of them floating chrome: the nav dock, the settings drop-up, the mobile sheet, and one decorative pocket. Everything else is opaque.
+The site uses glass in four places, all floating chrome: the nav dock, the settings drop-up, the mobile sheet, one decorative pocket. Everything else is opaque.
 
 ## Assets
 
-- `assets/glass.css` — the three material classes with all fallbacks, plus the `@supports` guard the reference implementation is missing, the `.dock-shadow` elevation class, and the gradient-stroke panel. Pairs with `glass-color/assets/color-tokens.css`, which declares the tints and the `--sv-*` stops.
-- `assets/GlassPanel.tsx` — the wrapper/surface split, hairline and stacking, as a component.
+- `assets/glass.css` — the three materials, all fallbacks, the missing `@supports` guard, `.dock-shadow`, the gradient-stroke panel. Pairs with `glass-color/assets/color-tokens.css` (tints, `--sv-*` stops).
+- `assets/GlassPanel.tsx` — wrapper/surface split, hairline and stacking, as a component.
 
 ## Checklist
 
-- [ ] `saturate()` on every `backdrop-filter` — 1.8 suppressing, 1.4 softening.
-- [ ] Blur chosen by how little you know about the backdrop, not by size or importance.
-- [ ] Three tiers, not one blur value reused everywhere.
-- [ ] Tint thickened wherever the blur is compromised by an ancestor transform.
+- [ ] `saturate()` on every `backdrop-filter`: 1.8 suppressing, 1.4 softening.
+- [ ] Blur set by backdrop uncertainty, not size or importance.
+- [ ] Three tiers, not one blur everywhere.
+- [ ] Tint thickened where an ancestor transform compromises blur.
 - [ ] Animating wrapper and glass surface are different elements.
-- [ ] Overlapping glass surfaces sit at visibly different tints.
-- [ ] Every glass surface has a hairline **and** a shadow, not one alone.
-- [ ] Hairline uses the translucent ramp, not a solid grey.
-- [ ] Shadow is layered (inset highlight + contact + ambient), with negative spread.
-- [ ] The shadow stack lives in **one class**, not repeated inline — with its dark twin beside it.
+- [ ] Overlapping glass at visibly different tints.
+- [ ] Hairline **and** shadow on every glass surface.
+- [ ] Hairline on the translucent ramp, not a solid grey.
+- [ ] Layered shadow (inset highlight + contact + ambient), negative spread.
+- [ ] Shadow stack in **one class**, not inline, dark twin beside it.
 - [ ] Dark shadows ~10× stronger, dark inset highlight ~6× weaker.
-- [ ] A gradient stroke uses `background-origin: border-box` and a transparent border.
-- [ ] Gradient stops are in **pixels** on anything that resizes or animates its height.
-- [ ] A coloured glow is weighted to the sides, or it just reads as a tinted drop shadow.
-- [ ] A sheen runs once, drops its class on `animationend`, and is off under reduced motion.
-- [ ] No reading copy on glass; no muted or small text on glass.
+- [ ] Gradient stroke: `background-origin: border-box`, transparent border.
+- [ ] Gradient stops in **pixels** on anything that resizes or animates height.
+- [ ] Coloured glow weighted to the sides.
+- [ ] Sheen runs once, unclassed on `animationend`, off under reduced motion.
+- [ ] No reading copy, and no muted or small text, on glass.
 - [ ] `prefers-reduced-transparency` swaps tint **and** drops filter, and comes last.
 - [ ] `prefers-contrast: more` promotes the hairline.
 - [ ] `@supports` guard with an opaque baseline.
-- [ ] Source writes only `backdrop-filter`; the *compiled* CSS carries both it and `-webkit-backdrop-filter`.
+- [ ] Source has only `backdrop-filter`; *compiled* CSS adds `-webkit-backdrop-filter`.
 - [ ] Glass tints are runtime `:root` variables, not build-time tokens.
-- [ ] Closed menus unmount rather than sitting invisible.
+- [ ] Closed menus unmount, never sit invisible.
 - [ ] No animated blur radius; no full-viewport glass.
-- [ ] Each use is genuinely floating chrome — not a card, section, or flat background.
+- [ ] Each use is floating chrome, not card, section or flat background.

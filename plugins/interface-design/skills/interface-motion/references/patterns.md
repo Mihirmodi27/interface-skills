@@ -1,10 +1,10 @@
 # Patterns
 
-The recurring components of a motion system, each with the detail that makes it work. Code uses role placeholders (`<duration.state>`) and generic custom properties; swap in the names `DESIGN.md` maps them to.
+Code uses role placeholders (`<duration.state>`) and generic custom properties; swap in the names `DESIGN.md` maps them to.
 
 ## The shared highlight
 
-One highlight element per group, animating its position and size to whichever item is hovered or focused. It never remounts.
+One highlight per group, animating its position and size to whichever item is hovered or focused. It never remounts.
 
 ```tsx
 // Motion. The same shape works with GSAP quickTo or React Spring's useSpring.
@@ -28,16 +28,16 @@ const enter = (el: HTMLElement) =>
 
 Six details, each a bug without it:
 
-- **`initial={false}`** (or, outside Motion, setting the first position with no transition) — otherwise the highlight flies in from the corner on first paint.
-- **Offsets, not `getBoundingClientRect()`.** `offsetLeft` / `offsetTop` are relative to the positioned parent, which is the space the highlight lives in. Viewport rectangles need subtraction and break if the page scrolls between measure and render.
-- **`isolation: isolate` on the group, `z-index: -1` on the highlight** — behind the items, but inside the group's stacking context, so it can't drop behind the group's own surface.
-- **`pointer-events: none`** — the highlight sits under the pointer by definition; without this it steals the enter event and oscillates.
-- **Focus alongside hover** — keyboard users get the same feedback, and the highlight stops being a mouse decoration.
-- **Leave on the group, not the items** — per-item leave fires in the gaps and blanks the highlight between items.
+- **`initial={false}`** (outside Motion, set the first position with no transition), or the highlight flies in from the corner on first paint.
+- **Offsets, not `getBoundingClientRect()`.** `offsetLeft` / `offsetTop` are relative to the positioned parent the highlight lives in; viewport rectangles need subtraction and break if the page scrolls between measure and render.
+- **`isolation: isolate` on the group, `z-index: -1` on the highlight**: behind the items but inside the group's stacking context, so it can't drop behind the group's own surface.
+- **`pointer-events: none`**: the highlight sits under the pointer by definition, and would otherwise steal the enter event and oscillate.
+- **Focus alongside hover**, so keyboard users get the same feedback.
+- **Leave on the group, not the items**: per-item leave fires in the gaps and blanks the highlight between items.
 
-A tooltip rides the same state on one axis: an outer element animates `x` to the item's centre; an inner element is statically `translate: -50% 0`. Animating a plain coordinate is clean; animating `calc(centre - 50%)` asks the library to interpolate mixed units.
+A tooltip rides the same state on one axis: an outer element animates `x` to the item's centre; an inner one is statically `translate: -50% 0`. A plain coordinate animates cleanly; `calc(centre - 50%)` asks the library to interpolate mixed units.
 
-**Current versus hovered.** When an item is also the current one, it shows a static surface — and drops it while the group is hovered, so the travelling highlight owns the surface. Two highlights at once make the selection ambiguous. The current item keeps `text.primary` throughout, so its place is never lost.
+**Current versus hovered.** The current item's static surface drops while the group is hovered, so the travelling highlight owns the surface; two at once make the selection ambiguous. The current item keeps `text.primary` throughout, so its place is never lost.
 
 ## Layout switches and page-level shared elements
 
@@ -56,7 +56,7 @@ For an element that persists across a DOM change — a card becoming a detail vi
 - **Motion:** give both ends the same `layoutId`; the library measures and travels between them.
 - **GSAP:** `const state = Flip.getState(els); /* change the DOM */ Flip.from(state, { duration, ease });`
 
-Whichever tool: **measure the reading position while the outgoing layout is still rendered** — the item nearest the viewport's centre — and open the incoming layout on that item. And where the two ends differ in aspect ratio, cross-fade two elements each at its own aspect, sharing a centre, rather than stretching one into the other's box.
+Whichever tool, **measure the reading position while the outgoing layout is still rendered** — the item nearest the viewport's centre — and open the incoming layout on it. Where the ends differ in aspect ratio, cross-fade two elements, each at its own aspect and sharing a centre, rather than stretching one into the other's box.
 
 ## Presence: open and close
 
@@ -87,7 +87,7 @@ Whichever tool: **measure the reading position while the outgoing layout is stil
 </AnimatePresence>
 ```
 
-Scale from the edge the element is anchored to (`transform-origin` at the trigger), not from its centre; a menu that grows from its own middle appears to come from nowhere. And keep the translucent surface off the transformed element — the wrapper moves, a child carries the material.
+Scale from the edge the element is anchored to (`transform-origin` at the trigger): a menu growing from its own middle seems to come from nowhere. The wrapper moves; a child carries the translucent material.
 
 ## Fill means chosen, in code
 
@@ -101,7 +101,7 @@ The filled state is a second layer over the outline, at the same coordinates, cr
 @media (prefers-reduced-motion: reduce) { .icon .fill, .icon .detail { transition: none; } }
 ```
 
-Where the solid shape would swallow an interior line, knock it out with a mask — the silhouette in white (fill and stroke, so it matches the outline exactly), the interior lines in black at the outline's stroke width — rather than deleting it. The same rule applies to whatever the project chose instead of fill: a solid chip, a weight step. One treatment, one meaning.
+Where the solid shape would swallow an interior line, knock it out with a mask rather than deleting it: the silhouette in white (fill and stroke, matching the outline exactly), the interior lines in black at the outline's stroke width. A solid chip or weight step chosen instead of fill follows the same rule: one treatment, one meaning.
 
 ## Hover intent
 
@@ -115,15 +115,15 @@ useEffect(() => () => clearTimeout(timer.current), []);   // unmount
 useEffect(() => setOpen(false), [pathname]);              // navigation
 ```
 
-Bind `closeSoon` to leaving the trigger *and* the panel, and `cancelClose` to entering either. Where trigger and panel are adjacent, a hover bridge is cheaper: padding on the wrapper that spans the visual gap, so the pointer never leaves the hover region.
+Bind `closeSoon` to leaving the trigger *and* the panel, `cancelClose` to entering either. Any `setTimeout` driving UI state is cleared on unmount and reset on navigation, or a menu opened on one page reappears 100ms into the next. Where they're adjacent, a hover bridge is cheaper: padding on the wrapper spanning the visual gap, so the pointer never leaves the hover region.
 
 ## Press
 
-`transform: scale(<press>)` on `:active`, with `transition-duration: 0` into the pressed state and `duration.state` back out. Respond to `pointerdown`, not `click`. In `product`, prefer the `surface.pressed` step to a scale: a toolbar of twenty buttons that each shrink is noise.
+`transform: scale(<press>)` on `:active`, `transition-duration: 0` in and `duration.state` back out, on `pointerdown`, not `click`. In `product`, prefer the `surface.pressed` step: a toolbar of twenty shrinking buttons is noise.
 
 ## Theme cross-fade
 
-A universal colour transition left permanently in the stylesheet makes every hover on the site `duration.theme` and sluggish. Apply it only for the toggle:
+A universal colour transition left in the stylesheet makes every hover on the site `duration.theme` and sluggish. Apply it only for the toggle:
 
 ```ts
 root.classList.add("theme-transition");
@@ -141,14 +141,14 @@ setTimeout(() => root.classList.remove("theme-transition"), THEME_MS + 40);
 }
 ```
 
-The `!important` has to beat each component's own transition for that window, and the removal stops it poisoning everything after. The theme mechanism itself, and first-paint without a flash, belong to `color-and-theming`.
+The `!important` beats each component's own transition for that window; removing the class stops it poisoning everything after. The theme mechanism and flash-free first paint belong to `color-and-theming`.
 
 ## Sound, if the preset allows it
 
-Synthesise short sounds with Web Audio rather than shipping files — no request, no decode latency, so the sound is simultaneous with the input. Then, non-negotiably:
+Sound is off wherever the user didn't choose to be there. Where it exists, synthesise it with Web Audio rather than shipping files — no request, no decode latency, so it lands with the input — and, non-negotiably:
 
-- **Arm the context on every activation gesture:** `pointerdown`, `keydown` and `touchstart`. Hover is activation in no engine, and a keyboard Enter dispatches `click`, not `pointerdown` — so a pointer-only unlock leaves keyboard users in silence for ever. `wheel` activates nothing; leave it out.
-- **Hover sounds for `pointerType === "mouse"` only**, deduplicated per element. A touch tap fires `pointerover` just before `click`, and plays both.
-- **Dense surfaces opt out of hover sound** with an attribute on the container. Above about three ticks a second it stops being feedback.
-- **A visible, persisted mute**, checked at the top of playback so it applies to in-flight input; storage access wrapped so it can't throw.
+- **Arm the context on every activation gesture:** `pointerdown`, `keydown` and `touchstart`. Hover is activation in no engine, and a keyboard Enter dispatches `click`, not `pointerdown`, so a pointer-only unlock leaves keyboard users in silence for ever. `wheel` activates nothing; leave it out.
+- **Hover sounds for `pointerType === "mouse"` only**, deduplicated per element: a touch tap fires `pointerover` just before `click`, and plays both.
+- **Dense surfaces opt out of hover sound** with an attribute on the container; above about three ticks a second it stops being feedback.
+- **A visible, persisted mute**, checked at the top of playback rather than at the listener, so it applies to in-flight input; storage access wrapped so it can't throw.
 - **Two sounds is a texture; five is a soundtrack.** Press and, at most, hover.

@@ -1,33 +1,29 @@
 # The display tier
 
-Only `expressive` has one. It is the single oversized moment on a landing or campaign page — the headline a visitor reads first and may be the only thing they read. This file derives its size instead of guessing it, and covers what changes about leading, tracking, weight, wrapping and loading at that size.
+Only `expressive` has one: the single oversized headline on a landing or campaign page, read first and perhaps alone. This file derives its size and covers leading, tracking, weight, wrapping and loading at that size.
 
 ## Why it isn't body × ratio
 
-Every other role is sized against its neighbours: a heading is some distance above the body, a meta line some distance below. A display headline isn't read against its neighbours. It is read against **the space it fills**. Its job is to hold a line of a certain length across a certain column, and the right size is whatever does that. Take it from the body with a ratio and you get a number that is either timid in a wide hero or wraps to five lines on a phone.
-
-So the inputs are the column and the headline, not the ladder.
+Every other role is sized against its neighbours; a display headline is read against **the space it fills**, holding a line of a certain length across a certain column. Taken from the body by ratio, it is timid in a wide hero or five lines on a phone. The inputs are the column and the headline, not the ladder.
 
 ## The derivation
 
-**1. Decide characters per line.** A display line should hold roughly 12–24 characters, and a headline should run two or three lines at most. Fewer than 12 and every line break becomes a design decision; more than 24 and it's a large paragraph. Pick a target for the widest column and for the narrowest:
+**1. Decide characters per line.** Roughly 12–24, over two or three lines at most; under 12 every break is a design decision, over 24 it's a large paragraph. Pick a target for each end:
 
 - widest: 18–24 characters (two lines of a 40-character headline)
 - narrowest: 12–16 characters (three lines on a phone)
 
-Use the project's real headlines. If they come from a CMS and vary, use the 90th-percentile length, not the average — the long ones are the ones that break the hero.
+Use real headlines; from a CMS, the 90th-percentile length, not the average — the long ones break the hero.
 
-**2. Measure the family's average advance.** The width of an average character, in `em`, for the weight you will set it in. Grotesques run about 0.5–0.55em, condensed faces 0.4–0.45, wide faces 0.6 and over. Measure it rather than trust a table:
+**2. Measure the family's average advance**, in `em`, at the weight you will set. Grotesques run about 0.5–0.55em, condensed faces 0.4–0.45, wide faces 0.6 and over — but measure, with real headline copy for its real mix of spaces, capitals and round letters:
 
 ```js
-// In the browser, after the font has loaded.
+// After the font has loaded.
 const ctx = document.createElement("canvas").getContext("2d");
 ctx.font = `300 100px "Your Display Family"`; // the real weight; canvas can't read var()
 const sample = "Invoices that chase themselves, so you don't have to";
 const advance = ctx.measureText(sample).width / sample.length / 100; // em per character
 ```
-
-A sample of real headline copy beats the alphabet, because it has the family's real mix of spaces, capitals and round letters.
 
 **3. Divide.** For each end of the range:
 
@@ -51,15 +47,15 @@ From 47px at 375 to 92px at 1280: slope 0.0497 (4.97vw), intercept 28.35px (1.77
 --text-display: clamp(2.9375rem, 1.772rem + 4.97vw, 5.75rem);
 ```
 
-The `rem` intercept is not a nicety. Text sized in `vw` alone ignores zoom and fails WCAG 1.4.4. Keep the maximum at no more than about 2.5 × the minimum as well; past that, a 200% zoom can't double the rendered size inside the clamp.
+The intercept is required: text sized in `vw` alone ignores zoom and fails WCAG 1.4.4. Keep the maximum within about 2.5 × the minimum, or a 200% zoom can't double the size inside the clamp.
 
-**5. If the hero isn't the viewport, use container units.** A display line inside a card, a split hero or a sidebar layout should be derived from its container, not the window. Set `container-type: inline-size` on the hero and use `cqi` in place of `vw`, with the same arithmetic against container widths.
+**5. If the hero isn't the viewport, use container units.** In a card, split hero or sidebar layout, set `container-type: inline-size` on the hero and use `cqi` for `vw`, against container widths.
 
-**6. Check the gap to the title.** At both ends, display should be at least 1.5 × `type.title`. Closer than that and it reads as "the title got bigger", which is the failure this tier exists to avoid: two roles, one size relationship. If the gap is too small, lower the title rather than raising display — the display size is derived, the title is a choice.
+**6. Check the gap to the title.** At both ends display is at least 1.5 × `type.title`; closer, it reads as "the title got bigger". If the gap is too small, lower the title rather than raising display: display is derived, the title is a choice.
 
 ### The same headline in three families
 
-The column and the character targets held constant (960px at 20 characters, 343px at 14); only the family changes.
+Column and character targets held constant (960px at 20 characters, 343px at 14):
 
 | Family | Advance | Phone | Desktop | `clamp()` (375 → 1280) |
 |---|---|---|---|---|
@@ -67,46 +63,46 @@ The column and the character targets held constant (960px at 20 characters, 343p
 | Neutral grotesque | 0.52em | 47px | 92px | `clamp(2.9375rem, 1.772rem + 4.97vw, 5.75rem)` |
 | Wide serif | 0.60em | 41px | 80px | `clamp(2.5625rem, 1.55rem + 4.31vw, 5rem)` |
 
-A condensed face earns a larger size for the same line — that is what condensing is for — and a wide one a smaller size. A ratio off the body would have given all three the same number and broken two of them.
+A condensed face earns a larger size for the same line, a wide one a smaller; a ratio off the body would have given all three one number and broken two.
 
 ## Leading at display sizes
 
-0.95–1.05. The x-height is large enough that a tight line box reads generously, and a headline at body leading reads as separate lines rather than one object. Two checks before going below 1:
+0.95–1.05: the x-height makes a tight line box read generously, and at body leading a headline reads as separate lines, not one object. Before going below 1:
 
-- **Accents and descenders.** A line box under 1 can clip diacritics on the line above and descenders on the line below, especially with `overflow: hidden` on the hero. Test with "Ågj" and a capital with a ring.
-- **Mixed scripts.** A headline that may be translated into a script with taller marks needs the top of the range.
+- **Accents and descenders.** Under 1, a line box can clip diacritics above and descenders below, especially with `overflow: hidden` on the hero. Test with "Ågj" and a ringed capital.
+- **Mixed scripts.** A headline that may be translated into a script with taller marks takes the top of the range.
 
 ## Tracking at display sizes
 
-−0.03 to −0.045em, measured in `em` so it scales with the fluid size. The looser the family's default spacing and the larger the size, the more it needs. A variable family with an optical-size (`opsz`) axis tightens its own spacing and thins its details as it grows; set `font-optical-sizing: auto` and start at the gentle end of the range, because the family has already done half the work.
+−0.03 to −0.045em, in `em` so it scales with the fluid size; looser families and larger sizes need more. A variable family with an optical-size (`opsz`) axis tightens and thins itself: set `font-optical-sizing: auto` and start at the gentle end.
 
-Never apply display tracking to the title or heading "for consistency". Tracking corrects for size; the title is a different size.
+Never give the title or heading display tracking "for consistency": tracking corrects for size, and the title is a different size.
 
 ## Weight at display sizes
 
-`weight.display` is its own role because the right weight at 90px is rarely the right weight at 20. Above about 48px a 400 starts to look heavy, and a 300 — illegitimate anywhere text is read at length — becomes the one place a light weight belongs. The opposite is also defensible: a heavy display weight as brand voice. Either way, it is one weight with one job, and it isn't reused below the display tier.
+`weight.display` is its own role because the right weight at 90px is rarely right at 20. Above about 48px a 400 looks heavy, and a 300 — illegitimate wherever text is read at length — belongs here; a heavy weight as brand voice is also defensible. Either way it is one weight, one job, never reused below the tier.
 
-A separate display family (`family.display`) is allowed in `expressive` when it carries a register the text family can't — a brand wordmark's voice, a serif headline over a sans text. It is still one family for one role; if it starts appearing in section headings, the page has two display tiers.
+A separate `family.display` is allowed in `expressive` for a register the text family can't carry — a wordmark's voice, a serif headline over sans text. One family, one role: in section headings, it makes two display tiers.
 
 ## Wrapping
 
-Set `text-wrap: balance` on display and title, so a two-line headline doesn't end in a single orphaned word. Don't insert manual `<br>`s to fix a break at one width; they are wrong at every other. If one phrase must not break, use a non-breaking space inside it.
+`text-wrap: balance` on display and title, so a headline doesn't end in an orphan. No manual `<br>`s: right at one width, wrong at every other. A phrase that must not break gets a non-breaking space.
 
 ## Loading a display face
 
-A display swap is the most visible swap there is: the one string that carries the frame changes shape under the reader, and a two-line headline can become three and push the whole hero down. Everything in `numerals-and-loading.md` applies with more force:
+A display swap is the most visible there is: a two-line headline can become three and push the hero down. Everything in `numerals-and-loading.md` applies with more force:
 
-- Preload the display file for the hero's weight; it is on the critical path of the first frame.
+- Preload the display file for the hero's weight; it is on the first frame's critical path.
 - Metric-match its fallback on `size-adjust` **and** the vertical overrides; a width-only match still changes line height.
-- Subset it. A display face rendering a dozen words needs Latin at most, often less.
+- Subset it. A dozen words need Latin at most, often less.
 
 ## One display moment
 
-Law 3 applies: display is the page's loudest thing, and there is one of it. A landing page that sets every section's opener at display size has flattened its own hierarchy — each section is shouting at the same volume, so none is heard. Section openers are `type.heading`; if they need more presence, give them space, not size.
+Law 3: there is one loudest thing. Every section opener at display size flattens the hierarchy — all shout, none is heard. Openers are `type.heading`; for presence, give them space, not size.
 
 ## Failures worth recognising
 
-- **The big title.** Display at 1.2 × title. Readers can't tell a hero from a page heading; the page looks under-designed rather than restrained.
-- **The phone wall.** Display derived at desktop only, clamped at 64px minimum, and a 40-character headline runs five lines on a phone before anything else is visible.
-- **The zoom fail.** `font-size: 7vw`. It looks right at every width and doesn't change at 200% zoom.
-- **The reflow.** A self-hosted display face with no metric-matched fallback. The headline sets in the fallback, swaps, gains a line, and the call to action jumps 90px as the visitor reaches for it.
+- **The big title.** Display at 1.2 × title: hero and page heading blur, and the page looks under-designed, not restrained.
+- **The phone wall.** Derived at desktop only, clamped at 64px minimum: a 40-character headline fills a phone with five lines.
+- **The zoom fail.** `font-size: 7vw`. Right at every width, unchanged at 200% zoom.
+- **The reflow.** No metric-matched fallback: the headline swaps, gains a line, and the call to action jumps 90px as the visitor reaches for it.

@@ -6,38 +6,29 @@ Three user preferences, each with a different correct response. None of them mea
 
 ### The principle
 
-The preference exists because vestibular disorders make large-area or accelerating motion physically unpleasant — nausea, dizziness, migraine. It is not a preference for a static interface. A user who sets it still needs to know that a menu opened.
-
-So: **substitute, don't subtract.** For every animation, ask what it was communicating, and find the cheapest way to still communicate it.
+Vestibular disorders make large-area or accelerating motion physically unpleasant — nausea, dizziness, migraine. The preference is not a request for a static interface: the user still needs to know a menu opened. So **substitute, don't subtract**: for every animation, ask what it communicated and find the cheapest way to still communicate it.
 
 | Original | Reduced-motion path | Reasoning |
 |---|---|---|
-| Spring slide (highlight, tooltip) | 150ms tween | The state change is the message; the physics is decoration. |
+| Spring slide (highlight, tooltip) | 150ms tween | The state change is the message; physics is decoration. |
 | Squash-and-stretch open | Plain 150ms fade | Presence still communicated, no scaling. |
 | Blur crossfade | Crossfade with `blur(0px)` | Blur is the vestibular trigger; the fade isn't. |
-| Reveal-on-scroll | Off entirely, content visible | The animation *is* the whole effect. Nothing to degrade to. |
+| Reveal-on-scroll | Off entirely, content visible | The animation *is* the effect; nothing to degrade to. |
 | Route fade | Off entirely | Ditto. |
-| Card lift on hover | No hover variant at all | Motion is the entire interaction; static is correct. |
+| Card lift on hover | No hover variant at all | Motion is the whole interaction; static is correct. |
 | Smooth scroll | `behavior: "auto"` | Programmatic scrolling is a large-area motion. |
 | Theme crossfade | Instant swap | Whole-viewport colour interpolation. |
-| Press scale | **Keep it** | 8% on a 40px button, 0ms. Below any threshold of concern. |
-| A once-a-session greeting | Never plays at all | It's a flourish by definition. Don't substitute a quieter one — skip it. |
-| First-open theatre (staggered lines) | Same open, zero-length transitions | The disclosure still opens; the choreography doesn't run. |
-| A GPU dissolve between images | Fall back to the plain `<img>` | The same path as no-WebGL, already built. |
+| Press scale | **Keep it** | 8% on a 40px button, 0ms: below any threshold of concern. |
+| A once-a-session greeting | Never plays at all | A flourish by definition; skip it, don't soften it. |
+| First-open theatre (staggered lines) | Same open, zero-length transitions | The disclosure opens; the choreography doesn't run. |
+| A GPU dissolve between images | Fall back to the plain `<img>` | The no-WebGL path, already built. |
 | Icon fill crossfade | Instant swap (`motion-reduce:transition-none`) | The state is the message; the 200ms fade isn't. |
 
 ### In JavaScript
 
-`useReducedMotion()` from Motion returns a live boolean.
+`useReducedMotion()` from Motion returns a live boolean. Branch the *transition*, keep the animation — `reduce ? { duration: 0.15 } : SLIDE` — so the highlight still moves to the hovered row, on a flat 150ms curve.
 
-```tsx
-const reduce = useReducedMotion();
-const tween = reduce ? { duration: 0.15 } : SLIDE;
-```
-
-Branch the *transition*, keep the animation. The highlight still moves to the hovered row — it just gets there on a flat 150ms curve.
-
-For a variant-driven interaction where motion is the whole point, drop the trigger:
+Where motion is the whole point of a variant-driven interaction, drop the trigger:
 
 ```tsx
 <m.div
@@ -49,9 +40,9 @@ For a variant-driven interaction where motion is the whole point, drop the trigg
 >
 ```
 
-Not `whileHover="rest"` — passing `undefined` means no hover variant is registered at all, so Motion doesn't set up the listener.
+Not `whileHover="rest"`: `undefined` registers no hover variant, so Motion doesn't set up the listener.
 
-For the presence case, branch the offsets themselves:
+For presence, branch the offsets themselves:
 
 ```tsx
 initial={reduce ? { opacity: 0 } : { opacity: 0, scaleY: 0.82, scaleX: 0.94, y: away }}
@@ -61,7 +52,7 @@ exit={reduce
   : { opacity: 0, scaleY: 0.9, scaleX: 0.97, y: away, transition: CLOSE }}
 ```
 
-Note the exit keeps `CLOSE` in both branches — 130ms `easeIn` is already flat, so it needs no substitute.
+The exit keeps `CLOSE` in both branches: 130ms `easeIn` is already flat, so it needs no substitute.
 
 ### Blur is the trigger, not the fade
 
@@ -75,9 +66,7 @@ const blur = reduce ? "blur(0px)" : "blur(4px)";
 >
 ```
 
-A single variable swaps the effect from blur-crossfade to plain crossfade. Animating `blur(0px)` → `blur(0px)` is a no-op the browser optimises away, so this costs nothing and needs no second code path.
-
-(Also note the asymmetry here: 280ms in, 180ms out. Same principle as springs — entrances can take their time, exits shouldn't.)
+One variable turns a blur-crossfade into a plain crossfade; `blur(0px)` → `blur(0px)` is a no-op the browser optimises away, so there's no cost and no second code path. (Note the asymmetry: 280ms in, 180ms out.)
 
 ### In CSS
 
@@ -85,13 +74,13 @@ A single variable swaps the effect from blur-crossfade to plain crossfade. Anima
 .reveal { opacity: 0; transform: translateY(8px); transition: opacity 300ms …, transform 300ms …; }
 .reveal[data-in] { opacity: 1; transform: translateY(0); }
 
-/* Off entirely — and note it sets the FINAL state, not the initial one. */
+/* Off entirely — and it sets the FINAL state, not the initial one. */
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 ```
 
-The order matters: the override comes after, so it wins. And it resolves to `opacity: 1` — the danger with any reveal-on-scroll is leaving content permanently at `opacity: 0` when the mechanism is disabled.
+The override comes after, so it wins, and it resolves to `opacity: 1`: the danger with any reveal-on-scroll is content left at `opacity: 0` when the mechanism is disabled.
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -99,7 +88,7 @@ The order matters: the override comes after, so it wins. And it resolves to `opa
 }
 ```
 
-The theme crossfade inverts the pattern — the whole rule is *inside* `no-preference`, so it's opt-in:
+The theme crossfade inverts the pattern — the whole rule sits *inside* `no-preference`, so it's opt-in:
 
 ```css
 @media (prefers-reduced-motion: no-preference) {
@@ -109,23 +98,15 @@ The theme crossfade inverts the pattern — the whole rule is *inside* `no-prefe
 
 ### Tailwind's `motion-reduce:` variant
 
-For CSS transitions on utility-styled elements:
-
 ```tsx
 className="transition-transform duration-200 ease-geist motion-reduce:transition-none"
 ```
 
-Apply it to every `transition-*` that moves something. Colour-only transitions don't strictly need it (a 150ms colour fade isn't a vestibular trigger) but there's no harm in consistency.
+Apply it to every `transition-*` that moves something. Colour-only ones don't strictly need it (a 150ms colour fade isn't a vestibular trigger), but consistency costs nothing.
 
 ### Imperative APIs don't read the preference
 
-The one that's easy to miss:
-
-```tsx
-el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-```
-
-Programmatic smooth scrolling moves the entire viewport — one of the strongest triggers there is. Same for `window.scrollTo({ behavior: "smooth" })` and `Element.animate()`. Anything you call from JavaScript needs the branch passed in explicitly.
+The easy one to miss: `scrollIntoView` needs `behavior: reduce ? "auto" : "smooth"` passed in, because programmatic smooth scrolling moves the entire viewport, one of the strongest triggers there is. So do `window.scrollTo({ behavior: "smooth" })`, `Element.animate()`, and anything else called from JavaScript.
 
 ### Testing it
 
@@ -134,11 +115,11 @@ Programmatic smooth scrolling moves the entire viewport — one of the strongest
 - Windows: Settings → Accessibility → Visual effects → Animation effects
 - Chrome DevTools: Rendering panel → "Emulate CSS prefers-reduced-motion"
 
-Test with it **on** for a full pass through the site. The failure mode you're looking for isn't jank — it's a menu that appears with no transition at all, or a section that never becomes visible.
+Do a full pass with it **on**. The failure you're looking for isn't jank; it's a menu that appears with no transition at all, or a section that never becomes visible.
 
 ## `prefers-reduced-transparency`
 
-Backdrop blur is expensive and, for some users, makes text over it hard to read. The response is to replace translucent surfaces with opaque ones — not to remove the surface.
+Backdrop blur is expensive and, for some users, makes the text over it hard to read. Replace translucent surfaces with opaque ones; don't remove the surface.
 
 ```css
 @media (prefers-reduced-transparency: reduce) {
@@ -156,9 +137,7 @@ Backdrop blur is expensive and, for some users, makes text over it hard to read.
 }
 ```
 
-Two halves, both required: swap the tint to a solid token *and* drop the filter. Dropping the filter alone leaves a translucent tint over the content; swapping the tint alone still pays for the blur.
-
-Ordering: because the block re-declares custom properties, it must come *after* both theme blocks so it wins in either theme.
+Both halves are required. Dropping the filter alone leaves a translucent tint over the content; swapping the tint alone still pays for the blur. Because the block re-declares custom properties, it must come *after* both theme blocks to win in either theme.
 
 ## `prefers-contrast: more`
 
@@ -170,23 +149,23 @@ Ordering: because the block re-declares custom properties, it must come *after* 
 }
 ```
 
-Translucent chrome relies on a hairline border to define its edge. At high contrast that hairline needs to become a real border — the surface itself is fine, but the boundary has to be unambiguous.
+Translucent chrome defines its edge with a hairline border. At high contrast that hairline becomes a real border: the surface is fine, but the boundary must be unambiguous.
 
-Both of these preferences are covered in full — including the `@supports` baseline, the cost model behind the blur, and how to test them — in the **glass-and-depth** skill (`references/performance-and-fallbacks.md`). They appear here because they belong to the same "substitute, don't subtract" family as reduced motion.
+Both are covered in full — the `@supports` baseline, the blur's cost model, testing — in the **glass-and-depth** skill (`references/performance-and-fallbacks.md`); they're here as part of the same "substitute, don't subtract" family.
 
 ### Set pieces: skip, don't soften
 
-A once-a-session greeting is the one case where the answer is genuinely "off". There's nothing it communicates that the page underneath doesn't communicate better by simply being there. Gate it in the same inline script that decides whether it plays at all, so it's settled before the first pixel rather than substituted after:
+A once-a-session greeting is the one case where the answer is "off": the page underneath communicates everything it does, better. Gate it in the inline script that decides whether it plays, so it's settled before the first pixel:
 
 ```js
 if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 ```
 
-Two consequences worth planning for. **A manual replay override must not defeat the preference** — `?intro` re-runs the greeting for development, and reduced motion still wins, because that's a preference and not a cache. And **the "seen" flag should still be written**, or the reader's first non-reduced session in another tab surprises them.
+Two consequences. **A manual replay override must not defeat the preference**: `?intro` re-runs the greeting for development, and reduced motion still wins, because it's a preference and not a cache. And **still write the "seen" flag**, or the reader's first non-reduced session in another tab surprises them.
 
 ### Client-only flags and hydration
 
-Anything that plays "the first time" reads its answer from `sessionStorage`, which the server can't see. So the flag is false on the server for everyone and true on the client for most — and that is a hydration mismatch waiting to happen.
+Anything that plays "the first time" reads `sessionStorage`, which the server can't see, so the flag is false on the server for everyone and true on the client for most — a hydration mismatch waiting to happen.
 
 **Branch transitions on it, never rendered styles.**
 
@@ -196,15 +175,14 @@ variants={{
   shut: { opacity: 0, y: 6, filter: "blur(4px)" },
   open: {
     opacity: 1, y: 0, filter: "blur(0px)",
-    // Only the transition reads the flags — a transition isn't a style, so
-    // there's nothing for hydration to disagree about.
+    // Only the transition reads the flags; a transition isn't a style.
     transition: { duration: reduce ? 0 : theatre ? 0.34 : 0.16, ease: EASE },
   },
 }}
 ```
 
-This also gives reduced motion the better shape: a zero-length transition to the *same* end state, rather than a different starting position.
+This also gives reduced motion the better shape: a zero-length transition to the *same* end state, not a different starting position.
 
 ## The general shape
 
-For each of the three: identify what the effect *communicates*, then find the cheapest thing that still communicates it. A blanket `* { animation: none !important; }` is a regression dressed as accessibility work — it strips the signals along with the decoration, and it's how you end up with a menu that has no visible open state.
+For each of the three, identify what the effect *communicates* and find the cheapest thing that still does. A blanket `* { animation: none !important; }` is a regression dressed as accessibility work: it strips the signals with the decoration, leaving a menu with no visible open state.

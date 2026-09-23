@@ -1,10 +1,10 @@
 # Prose and emphasis
 
-How the reading half of a type system is set: the blocks that share the body size and what separates each, emphasis mapped per preset, and imported prose you can't put classes on. Spacing values between blocks belong to `layout-and-hierarchy`; this file names only the ratios that are type signals.
+The reading half: blocks sharing the body size and what separates them, emphasis per preset, and imported prose. Spacing values between blocks belong to `layout-and-hierarchy`; this file names only the ratios that are type signals.
 
 ## The container sets the register
 
-One wrapper carries the reading size, leading and tier; every block inside inherits and overrides only what differs.
+One wrapper carries the reading size, leading and tier; every block inside overrides only what differs.
 
 ```css
 .prose {
@@ -15,11 +15,11 @@ One wrapper carries the reading size, leading and tier; every block inside inher
 }
 ```
 
-A paragraph that sets its own size inside `.prose` is a finding. It means one block has opted out of the column's register, and the next person to restyle the column will miss it.
+A paragraph setting its own size inside `.prose` is a finding: it has opted out of the register, and the next restyle will miss it.
 
 ## Reading blocks, and the axis each owns
 
-When several blocks share the body size, each needs a signal the others don't use (law 4). A typical set:
+Each block at body size needs a signal the others don't use (law 4). A typical set:
 
 | Block | Role | Its signal | What it must not do |
 |---|---|---|---|
@@ -29,27 +29,27 @@ When several blocks share the body size, each needs a signal the others don't us
 | Dek | `type.supporting` | `text.secondary`, tighter leading | read as the first paragraph |
 | Pull quote | project role under `type.body` | a solid bar and an indent | step down a tier — at body size it just looks de-emphasised |
 | Note | project role under `type.meta` | one size down, `text.tertiary`, a lighter rule | share the quote's rule weight |
-| Caption | `type.meta` | one size down, `text.tertiary` | sit at body size, where it competes with the next paragraph |
+| Caption | `type.meta` | one size down, `text.tertiary` | sit at body size, competing with the next paragraph |
 
-**The dek and the lead are the tightest pairing.** They are often adjacent, at one size, told apart only by tier and leading. Check that pair first when a page starts to look undifferentiated.
+**Dek and lead are the tightest pairing** — often adjacent, told apart only by tier and leading. Check them first when a page looks undifferentiated.
 
-**Two indented rules on one page must be unmistakable.** If both the quote and the note carry a left rule, make them different in weight (a heavy bar against a hairline) *and* the type inside them different in size and tier. In the Glass package the quote's bar is three times the note's rule and the note is a step smaller and two tiers quieter.
+**Two indented rules on one page must be unmistakable.** If quote and note both carry a left rule, the rules differ in weight (a heavy bar against a hairline) *and* their type in size and tier. The Glass quote's bar is three times the note's rule; the note is a step smaller and two tiers quieter.
 
-**Heading space is asymmetric, and the ratio is the type signal.** More space above a heading than below it — about 3:1 — so it belongs to the paragraph it introduces. A heading with equal space either side floats between sections. The keyline is the deliberate exception: symmetric, because it belongs to neither neighbour.
+**Heading space is asymmetric, and the ratio is the type signal**: about 3:1 above to below, so a heading belongs to what it introduces; equal space floats it between sections. The keyline is the deliberate exception, symmetric because it belongs to neither neighbour.
 
 ## Two block types worth having
 
-Both came out of the same diagnosis in the Glass package: a body of writing that was a hundred-odd paragraphs and nothing else. Not too much content — **one texture**.
+Both came from one Glass diagnosis: a hundred-odd paragraphs and nothing else. Not too much content — **one texture**.
 
-**The keyline — the one sentence a section is for.** Promote a sentence out of a paragraph and delete it from the paragraph. That discipline is what makes it work: a section that gains a keyline gets shorter. One per section, never two.
+**The keyline — the one sentence a section is for.** Promote a sentence out of its paragraph and delete it there; that discipline is the point, so a section that gains a keyline gets shorter. One per section, never two.
 
-**The note — an aside set outside the argument.** A caveat, a scope limit, a piece of provenance. Once there is somewhere for a qualification to go, the main text stops carrying qualifications it doesn't need.
+**The note — an aside outside the argument**: a caveat, a scope limit, provenance. With somewhere to go, qualifications leave the main text.
 
-A block type that only works when authored with discipline needs the discipline enforced. Validate content at build time: fail on a blank keyline or note, two keylines in one section, or a keyline that has grown back to paragraph length.
+Enforce the discipline at build time: fail on a blank keyline or note, two keylines in one section, or a keyline grown back to paragraph length.
 
 ## Quotes
 
-The bar is the whole signal once the quote is at body size, so it has to be a real one:
+At body size the bar is the whole signal, so it has to be a real one:
 
 ```css
 .quote { display: flex; gap: var(<space.tight>); }
@@ -63,15 +63,15 @@ The bar is the whole signal once the quote is at body size, so it has to be a re
 .quote cite { display: block; font-style: normal; font-size: var(<type.meta size>); color: var(<text.tertiary>); }
 ```
 
-A flex child rather than `border-inline-start`, because a border can't be rounded on its own and a squared bar reads as a table rule. With no vertical margin, flex's default stretch runs it the full height, citation included. `font-style: normal` on `cite` is required wherever italic is off: `<cite>` and `<blockquote>` carry user-agent italics a global `em` rule doesn't reach.
+A flex child, not `border-inline-start`: a border can't be rounded alone, and a squared bar reads as a table rule. With no vertical margin, flex's stretch runs it the full height, citation included. Wherever italic is off, `cite` needs `font-style: normal`: `<cite>` and `<blockquote>` carry user-agent italics a global `em` rule doesn't reach.
 
 ## Lists
 
-Drop markers a tier below the text: `li::marker { color: var(<mark>) }`. At the text colour a column of bullets pulls the eye down the left edge; quieter, it reads as structure. Ordered-list markers take `font-variant-numeric: tabular-nums` so item 10 doesn't shift its text. Space between items tighter than space after the list, so the items belong to each other more than to what follows.
+Markers sit a tier below the text: `li::marker { color: var(<mark>) }`; at text colour, bullets pull the eye down the left edge. Ordered markers take `font-variant-numeric: tabular-nums` so item 10 doesn't shift its text. Items sit closer to each other than to what follows the list.
 
 ## Emphasis, per preset
 
-Keep the semantic tags — assistive technology announces them — and map their look onto an axis the system already has.
+Keep the semantic tags — assistive technology announces them — and map their look onto an existing axis.
 
 | | editorial | product | expressive |
 |---|---|---|---|
@@ -80,7 +80,7 @@ Keep the semantic tags — assistive technology announces them — and map their
 | `<cite>`, titles of works | true italic, or the `<em>` mapping | the `<em>` mapping | true italic |
 | `<b>`, `<i>` | same as `strong`, `em` | same | same |
 
-Mapping `<em>` onto a quieter tier gives a two-directional emphasis — strong advances, em recedes — which a bold-only system can't express. It suits interfaces without a usable italic. Where the family has a real italic drawn for text, use it: an editorial system without italic loses the convention readers rely on for titles and terms.
+`<em>` on a quieter tier gives two-directional emphasis — strong advances, em recedes — that a bold-only system can't, and suits interfaces without a usable italic. Where the family has a real text italic, use it: editorial without italic loses the convention readers rely on for titles and terms.
 
 Three rules hold whatever the mapping:
 
@@ -90,12 +90,12 @@ strong, b { font-weight: var(<weight.strong>); }   /* not the UA's 700 */
 ```
 
 - **Never heavier than a heading.** `<strong>` at 700 under a 500 heading outranks it (law 3, inside a line).
-- **Short.** At heading weight and body size, a long strong run reads as a keyline or heading that failed to get its own line. Anything longer than a few words wants to be its own block.
+- **Short.** Longer than a few words, it wants to be its own block (law 9).
 - **Weight only on states that don't follow the pointer.** Emphasis that changes on hover shifts the line.
 
 ## Prose you can't put classes on
 
-Markdown rendered to HTML, a CMS rich-text field, a README. It arrives as a string, so there's nothing to hang a class on and no component to vary. Style by element inside one scoped class and map every element onto a role you already have:
+Markdown, a CMS rich-text field, a README: a string with nothing to hang a class on. Style by element inside one scoped class, each element mapped onto an existing role:
 
 ```css
 .prose-imported { font-size: var(<type.body size>); line-height: var(<type.body leading>); }
@@ -113,13 +113,13 @@ Markdown rendered to HTML, a CMS rich-text field, a README. It arrives as a stri
 .prose-imported li::marker { color: var(<mark>); font-variant-numeric: tabular-nums; }
 ```
 
-What this has to get right that authored prose doesn't:
+What this must get right that authored prose doesn't (add a role only where the document needs something your pages don't):
 
-- **An `h1` inside the document is not the page's title.** The page already has one. Map a document `h1` to `type.heading`, or the imported text outranks the page it sits on.
-- **The first child's top margin goes.** A document starting with a heading otherwise pushes a heading's worth of space above nothing.
-- **Three heading levels, not two.** Documents nest deeper than designed pages; `h4` gets a real role instead of a browser default.
-- **Code blocks and tables scroll inside their own box.** They are the two unbounded things Markdown has and designed pages don't. Wrap each `<table>` in a scrolling element at render time; the page body must never scroll sideways.
-- **Your own markers.** A UA disc at body size is usually heavier than anything else on the page.
-- **Only mapped elements.** An element you haven't mapped — `<dl>`, `<kbd>`, `<sup>` — falls through to the browser. List what the source can emit and map each, or strip it at render.
+- **A document `h1` is not the page's title.** Map it to `type.heading`, or the imported text outranks its page.
+- **The first child's top margin goes**, or an opening heading pushes its space above nothing.
+- **Three heading levels, not two.** Documents nest deeper than designed pages: `h3` takes `type.subheading`, and `h4` a real role, not a browser default.
+- **Code blocks and tables scroll inside their own box**, being Markdown's two unbounded things. Wrap each `<table>` in a scrolling element at render time; the page never scrolls sideways.
+- **Your own markers.** A UA disc at body size is usually the heaviest thing on the page.
+- **Only mapped elements.** Unmapped ones — `<dl>`, `<kbd>`, `<sup>` — fall through to the browser. List what the source can emit and map each, or strip it at render.
 
-The principle: **imported prose is a guest in the type system, not a second one.** Add a role for it only where the document needs something the pages genuinely don't — and then it's a project role with a row in `DESIGN.md` like any other.
+**Imported prose is a guest in the type system, not a second one.** A role added for it — only where the document needs something the pages don't — is a project role with a `DESIGN.md` row like any other.

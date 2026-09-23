@@ -1,17 +1,17 @@
 # Elevation recipes
 
-The ladder, the bundle each level carries, and how to derive the shadow for any preset and either theme. Values here are starting points in the shape the laws require; the preset dials in `SKILL.md` set their strength, and `DESIGN.md` records what the project actually chose.
+Starting values for each level's bundle and shadow; `SKILL.md`'s Dials set their strength, `DESIGN.md` the project's choice.
 
 ## The bundle, part by part
 
 | Part | Comes from | Job | Fails as |
 |---|---|---|---|
-| Surface | `surface.page`, `surface.raised`, `surface.inverse` (`color-and-theming`) | Says which object this is | A level indistinguishable from the one below, especially in dark themes |
-| Edge | `border.default` or `border.layered`, at a `hairline.*` weight (`layout-and-hierarchy`) | Says exactly where it ends | Mushy outline; vanishes in forced colours if it was only a shadow |
-| Shadow | This skill | Says it is above, and how far | Fog, halo, or a shape the eye reads as a second object |
-| Layer | `z.*` (`layout-and-hierarchy`) | Makes the paint order agree with the shadow | A shadow cast over something that is painted on top of it |
+| Surface | `surface.page`, `surface.raised`, `surface.inverse` (`color-and-theming`) | Which object this is | Indistinguishable from the level below, especially in dark themes |
+| Edge | `border.default` or `border.layered`, at a `hairline.*` weight (`layout-and-hierarchy`) | Exactly where it ends | Mushy outline; vanishes in forced colours if it was only a shadow |
+| Shadow | This skill | That it is above, and how far | Fog, halo, or a shape read as a second object |
+| Layer | `z.*` (`layout-and-hierarchy`) | Makes paint order agree with the shadow | A shadow cast over something painted on top of it |
 
-Check the four together. A component that has three of them right and borrows the fourth from another level is the most common depth bug there is, and no single-property lint will catch it.
+Check the four together: three right and one borrowed is the commonest depth bug, and no single-property lint catches it.
 
 ## The four levels
 
@@ -22,13 +22,13 @@ Check the four together. A component that has three of them right and borrows th
 | `elevation.floating` | Summoned, dismissed on its own | `surface.raised` (dark: one step lighter) | `border.default` / `border.layered` | Contact + 1–2 ambient, optional highlight | `z.popover` | No — a transparent catcher at `z.dismiss` |
 | `elevation.overlay` | Blocks until answered | `surface.raised` (dark: two steps lighter) | `border.default` | Contact + 2 ambient, longest | `z.overlay` | Yes |
 
-Sticky chrome is raised in behaviour but sits high on the z ladder, because content passes under it. That is the one place the level and the layer name differ, and it's why the layer is part of the bundle rather than derived from the level.
+Sticky chrome is raised in behaviour but high on the z ladder, because content passes under it — the one place level and layer differ, and why the layer is part of the bundle.
 
-A tooltip is floating, transient: no contact layer, a short ambient, and — if it sits on `surface.inverse` — the same shadow in both themes, because the tooltip's own surface is what the shadow has to separate from the page.
+A tooltip is floating and transient: no contact layer, a short ambient and, on `surface.inverse`, one shadow for both themes, its own surface being what the shadow separates.
 
 ## Building a shadow
 
-Start from one number, `Y`, the near-ambient offset for the level, and derive the layers from it. Keeping the proportions fixed is what makes the levels read as one light at different heights rather than as four unrelated shadows.
+Derive every layer from `Y`, the level's near-ambient offset; fixed proportions read as one light at different heights.
 
 ```
 contact        0  1px   1px   0      α × 0.35
@@ -37,7 +37,7 @@ far ambient    0  3Y    4Y   −Y      α            (floating and overlay only)
 inset highlight  inset 0 1px 0 white at h       (optional, per preset)
 ```
 
-`α` is the level's peak opacity, from the Dials. Typical `Y`: raised 2px, floating 8px, overlay 16px. A worked floating shadow at `Y = 8px`, `α = 0.06`:
+`α` is the level's peak opacity, from the Dials. Typical `Y`: raised 2px, floating 8px, overlay 16px. At `Y = 8px`, `α = 0.06`:
 
 ```css
 --elevation-floating:
@@ -47,15 +47,13 @@ inset highlight  inset 0 1px 0 white at h       (optional, per preset)
   0 24px 32px -8px rgb(0 0 0 / 0.06);
 ```
 
-**Why each proportion.** Blur at twice the offset keeps the penumbra soft without detaching from the element. Spread at minus half the offset contracts the shadow so its visible extent stays roughly under the element's footprint, displaced downward — tucked, not haloed. Opacity rising with distance models ambient occlusion: the far layer is larger and fainter per pixel, so it needs slightly more alpha to register at all.
+**Why each proportion.** Blur at twice the offset keeps the penumbra soft without detaching; spread at minus half keeps the shadow under the footprint, displaced downward — tucked, not haloed. Opacity rises with distance, as ambient occlusion: the larger far layer is fainter per pixel, so needs slightly more alpha.
 
-**The contact layer is for resting things.** Permanent chrome and cards get it. Transient surfaces — tooltips, drag previews in flight — don't: they hover.
-
-**The inset highlight is optional per preset.** It's the specular catch along the top edge where a raised face meets the light, and it contributes more to "floating" than any drop layer. Product systems usually leave it out, because a bright top line on every menu in a dense screen adds noise without adding information.
+**The contact layer is for resting things**, chrome and cards; tooltips and drag previews in flight hover, and skip it. **The inset highlight**, the specular catch on the top edge, is optional per preset; product usually omits it, a bright line on every menu in a dense screen being noise.
 
 ## Per preset
 
-Light-theme floating shadows at the dial strengths. Raised and overlay follow from the `Y` values above.
+Light-theme floating shadows at the dial strengths; raised and overlay follow from the `Y` values above.
 
 | Preset | Floating recipe (light) |
 |---|---|
@@ -63,15 +61,15 @@ Light-theme floating shadows at the dial strengths. Raised and overlay follow fr
 | `product` | `0 1px 1px rgb(0 0 0 / 0.04), 0 12px 24px -8px rgb(0 0 0 / 0.10)` — edges carry the rest |
 | `expressive` | `inset 0 1px 0 rgb(255 255 255 / 0.6), 0 1px 2px rgb(0 0 0 / 0.06), 0 10px 20px -6px rgb(0 0 0 / 0.10), 0 32px 48px -12px rgb(0 0 0 / 0.16)` |
 
-Editorial runs three levels and rarely needs raised. Product runs all four, relies on `border.default` for most of the separation, and keeps its shadows short so dense screens don't fill with grey. Expressive may add one decorative level — a large branded pocket, a hero card — named for what it is, with its own bundle.
+Product leans on `border.default` with short shadows, so dense screens don't fill with grey. Expressive may add one decorative level — a branded pocket, a hero card — named, with its own bundle.
 
 ## Dark theme: a different recipe
 
-Three things change, and none of them is "the same shadow, darker":
+Three things change; none is "the same shadow, darker":
 
-1. **The surface lifts.** Each level above the page is lighter by the Dials' OKLCH step. Page 0.18 → raised 0.22 → floating 0.26 → overlay 0.30 at a +0.04 step. That lift carries most of the separation.
-2. **The drop layers get about eight to ten times the opacity**, capped around 0.6. A 4% black shadow on a near-black page is mathematically invisible — there's almost no luminance below the surface to darken into.
-3. **The highlight drops to a sixth.** `0.5` white along the top of a dark surface reads as a lit wire; `0.08` defines the edge without lighting it.
+1. **The surface lifts** by the Dials' OKLCH step: page 0.18 → raised 0.22 → floating 0.26 → overlay 0.30 at +0.04. It carries most of the separation.
+2. **Drop layers get about eight to ten times the opacity**, capped around 0.6. A 4% black shadow on a near-black page is invisible.
+3. **The highlight drops to a sixth.** `0.5` white along a dark top edge reads as a lit wire; `0.08` defines the edge without lighting it.
 
 ```css
 [data-theme="dark"] {
@@ -83,13 +81,11 @@ Three things change, and none of them is "the same shadow, darker":
 }
 ```
 
-Never put the page at pure black. `#000` leaves the drop layers no room at all, so only the surface step separates anything, and the lightest level has to climb further to be seen.
-
-After deriving, check each level with its shadow switched off. If floating and raised are indistinguishable by surface and edge alone, the dark step is too small.
+A `#000` page leaves drop layers no room, so only the surface step separates and the top level must climb further. Then switch shadows off: if surface and edge can't tell floating from raised, the dark step is too small.
 
 ## Shadows on tinted grounds
 
-Neutral black shadows are right on neutral pages. On a tinted ground — a warm off-white, a brand-coloured band — black darkens the ground toward grey and reads as dirt. Take the shadow colour from the ground's hue instead:
+On a tinted ground — warm off-white, a brand band — neutral black reads as dirt. Take the shadow from the ground's hue:
 
 ```css
 --shadow-ink: oklch(from var(--surface-page) 0.25 calc(c * 1.5) h);
@@ -97,23 +93,42 @@ Neutral black shadows are right on neutral pages. On a tinted ground — a warm 
                     0 2px 4px -1px rgb(from var(--shadow-ink) r g b / 0.08);
 ```
 
-Where relative colour syntax isn't available, pick the ink by hand: the ground's hue at low lightness and slightly higher chroma. Record it under the surface role it belongs to, so a later re-tint of the ground moves the shadow with it.
+Without relative colour syntax, pick it by hand (the ground's hue, low lightness, slightly more chroma) and record it under its surface role, so re-tinting the ground moves the shadow.
 
-## Edges that survive animation and preferences
+## Edges that survive
 
-An element that animates by transform — a card in a reordering stack — can't take a border change without shifting layout. Use `outline: 1px solid <border.default>; outline-offset: -1px`: it doesn't affect layout, and unlike a `0 0 0 1px` shadow ring, it survives forced colours, where every `box-shadow` is removed.
-
-A surface that deliberately shows no edge in normal rendering carries `border: 1px solid transparent`. Forced colours paints it in the system text colour, so the surface keeps its boundary for exactly the users who asked for boundaries.
+A card animating by transform, as in a reordering stack, can't change its border without shifting layout; use `outline: 1px solid <border.default>; outline-offset: -1px`, which, unlike a `0 0 0 1px` shadow ring, survives forced colours. An edgeless surface carries `border: 1px solid transparent` — a boundary for exactly the users who asked for one.
 
 ## Moving between levels
 
-- **Hover on a raised card** may deepen the shadow — that's raised's own hover state, defined beside raised. If it lifts far enough to overlap a neighbour, it also takes `z.raised`, or the next sibling paints over its shadow.
-- **Drag** moves the element to floating, whole: floating's shadow and layer, and its surface in dark themes. Drop moves it back.
-- **A popover promoted to a dialog** — a "view details" that becomes modal — changes to overlay, and gains a scrim at the same moment.
+- **Hover on a raised card** may deepen the shadow, as raised's own state; if the lift overlaps a neighbour it also takes `z.raised`, or the next sibling paints over it.
+- **Drag** moves it to floating, whole — shadow, layer, dark surface — and drop moves it back.
+- **A popover promoted to a dialog** changes to overlay and gains a scrim at the same moment.
 
 ## One definition per level
 
-A layered shadow belongs in one place — a custom property per level per theme, or a class — and every use points at it. Inline copies drift, and nobody can see a `0.04` that became `0.05` in the fourth of five. In utility-class stacks the arbitrary-value form is also a hazard: spaces must become underscores and commas must stay unspaced, and a typo produces a class the build silently drops — no shadow, no error. Name the level once and use the name.
+One custom property per level per theme, or one class, never inline copies. Utility arbitrary values add a hazard: spaces become underscores, commas stay unspaced, and a typo yields a class the build silently drops — no shadow, no error.
+
+## A worked example
+
+**Tally**, a fictional invoicing app on `product` with `app/(marketing)/**` on `expressive`, whose tokens call surfaces `canvas` and `panel` and the edge `line`: four opaque levels in the app, one chrome tier on the marketing header.
+
+```css
+:root {
+  --elevation-raised:   0 1px 1px rgb(20 20 30 / 0.04), 0 2px 6px -2px rgb(20 20 30 / 0.06);
+  --elevation-floating: 0 1px 1px rgb(20 20 30 / 0.05), 0 12px 24px -8px rgb(20 20 30 / 0.10);
+  --elevation-overlay:  0 1px 1px rgb(20 20 30 / 0.06), 0 24px 48px -12px rgb(20 20 30 / 0.16);
+  --scrim: rgb(20 20 30 / 0.40);
+}
+[data-theme="dark"] {
+  --color-panel:        oklch(0.25 0.01 270);   /* canvas is 0.21; each level +0.04 */
+  --color-panel-float:  oklch(0.29 0.01 270);   /* proposed: surface.floating */
+  --elevation-floating: 0 1px 1px rgb(0 0 0 / 0.40), 0 12px 24px -8px rgb(0 0 0 / 0.55);
+  --scrim: rgb(0 0 0 / 0.60);
+}
+```
+
+The theme-varying value stays a runtime custom property: Tailwind v4 `@theme inline { --shadow-floating: var(--elevation-floating); }`, so the utility follows each theme; v3 `boxShadow: { floating: 'var(--elevation-floating)' }`; a JS theme object `shadows.floating: 'var(--elevation-floating)'`.
 
 ## Recording it
 

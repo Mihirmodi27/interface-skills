@@ -9,11 +9,11 @@ Motion accepts either vocabulary:
 { type: "spring", stiffness: 620, damping: 19, mass: 0.85 }  // physical controls
 ```
 
-**`bounce` + `duration`** is what you want most of the time. `bounce` is 0 (no overshoot, critically damped) to 1 (very springy); `duration` is roughly how long until it settles. You can reason about both directly, and `duration` gives you a predictable arrival time — which matters when a spring has to feel coordinated with a bezier transition elsewhere on the page.
+**`bounce` + `duration`** is what you want most of the time: `bounce` runs from 0 (critically damped, no overshoot) to 1 (very springy), and `duration`, roughly the settle time, gives a predictable arrival — which matters when a spring must feel coordinated with a bezier elsewhere on the page.
 
-**`stiffness` + `damping` + `mass`** is what you want when the *relationship between two springs* is the point. You can't express "this axis is lighter and less damped than that one" in bounce/duration terms — the squash-and-stretch effect in §4 of the skill needs the physical vocabulary to exist at all.
+**`stiffness` + `damping` + `mass`** is for when the *relationship between two springs* is the point: "this axis is lighter and less damped than that one" can't be said in bounce/duration terms, so the squash-and-stretch in §4 of the skill needs it.
 
-Use the one that expresses the intent. Mixing them across a codebase is fine.
+Use whichever expresses the intent; mixing them across a codebase is fine.
 
 ## The three springs, and how they were arrived at
 
@@ -26,11 +26,9 @@ const SLIDE = {
 } as const;
 ```
 
-`bounce: 0.2` is deliberately near the floor of "perceptibly springy." This element is a highlight sliding under a row of icons — it's *a thing moving*, not *a thing arriving*. Bounce implies arrival, a moment of settling. A highlight that bounces at every stop draws attention to the highlight instead of to the item it's marking.
+`bounce: 0.2` sits near the floor of "perceptibly springy". A highlight sliding under icons is *a thing moving*, not *a thing arriving*; bounce implies arrival, and a highlight bouncing at every stop draws attention from the item it marks.
 
-`duration: 0.4` is longer than it sounds, because the spring covers most of the distance in the first ~150ms and spends the tail settling. Perceptually it lands about as fast as a 200ms tween while remaining smoothly re-targetable.
-
-The `opacity` override is the essential part. See below.
+`duration: 0.4` is longer than it sounds: the spring covers most of the distance in the first ~150ms and spends the tail settling, landing about as fast as a 200ms tween while staying re-targetable. The `opacity` override is essential; see below.
 
 ### LIFT — cards rising out of a folder
 
@@ -38,9 +36,7 @@ The `opacity` override is the essential part. See below.
 const LIFT = { type: "spring", bounce: 0.28, duration: 0.5 } as const;
 ```
 
-More bounce, more time. This is the one genuinely playful moment in the system: hovering a folder on the home page makes four preview cards rise out of a frosted pocket. It's a delight beat, so it gets 40% more bounce and 25% more duration than anything else.
-
-That it's the *only* such moment is why it works. In a system where the baseline is restraint, one exuberant interaction reads as craft. Three of them read as a template.
+The one playful moment: hovering a folder on the home page lifts four preview cards out of a frosted pocket, a delight beat with 40% more bounce and 25% more duration than anything else. Being the *only* one is why it works — against restraint, one exuberant interaction reads as craft; three read as a template.
 
 ### GROW / CROSS — the disagreeing pair
 
@@ -55,9 +51,9 @@ const CROSS = { type: "spring", stiffness: 380, damping: 30 } as const;
 | damping | 19 | 30 | GROW resists less → overshoots |
 | mass | 0.85 | 1 (default) | GROW is lighter → accelerates faster |
 
-Every one of the three differences pushes the same direction: GROW is fast and loose, CROSS is slow and controlled. Applied to `scaleY` and `scaleX` of one panel, the result is that mid-flight the panel is briefly **taller and narrower** than its resting size, then settles — squash and stretch, emerging from physics rather than authored keyframes.
+All three push the same way — GROW fast and loose, CROSS slow and controlled — so on `scaleY` and `scaleX` of one panel it's briefly **taller and narrower** than at rest, then settles: squash and stretch from physics, not keyframes.
 
-`y` rides `GROW` alongside `scaleY`. Travel and vertical scale must share a spring or the panel's anchored edge visibly detaches from the trigger during the overshoot.
+`y` rides `GROW` alongside `scaleY`. Travel and vertical scale must share a spring, or the panel's anchored edge visibly detaches from the trigger during the overshoot.
 
 ## Tuning, practically
 
@@ -72,7 +68,7 @@ Change one variable at a time, and know which symptom maps to which control:
 | Too eager, no weight | ↑ mass |
 | Overshoots visibly on opacity | you forgot to split opacity out |
 
-Rough correspondence between the vocabularies, for a `mass: 1` spring: `bounce ≈ 1 − damping / (2·√stiffness)`. Useful for intuition, not for conversion — just pick one vocabulary per spring and tune in it.
+For a `mass: 1` spring, roughly `bounce ≈ 1 − damping / (2·√stiffness)`. Useful for intuition, not conversion: pick one vocabulary per spring and tune in it.
 
 ## Always split opacity out of a spring
 
@@ -85,11 +81,9 @@ Rough correspondence between the vocabularies, for a `mass: 1` spring: `bounce �
   opacity: { duration: 0.16, ease: "easeOut" } }
 ```
 
-A spring overshoots. Overshooting a position means momentum, which is what you want. Overshooting `opacity` means going past 1 (clamped, so: nothing) or past 0 toward negative (clamped, so: a visible hitch as it comes back). Either way you get a flicker at the tail of a fade.
+Overshooting `opacity` goes past 1 (clamped: nothing) or past 0 (clamped: a visible hitch on the way back) — either way, a flicker at the tail of a fade.
 
-Practically: **position wants physics, opacity wants a curve.** 160ms `easeOut` on the way in — faster than the position spring, so the element is fully visible while it's still settling into place, which is what makes the settle readable.
-
-Motion lets you override per-property inside a transition object, which makes this a one-line fix. The same applies to `filter` (blur), `color`, and anything else without a spatial interpretation.
+**Position wants physics, opacity wants a curve.** 160ms `easeOut` on the way in outpaces the position spring, so the element is fully visible while it settles, which makes the settle readable. Motion's per-property overrides make it a one-line fix, and the same goes for `filter` (blur), `color`, and anything else without a spatial interpretation.
 
 ## Closing is not a spring
 
@@ -97,13 +91,11 @@ Motion lets you override per-property inside a transition object, which makes th
 const CLOSE = { duration: 0.13, ease: "easeIn" } as const;
 ```
 
-Three deliberate choices:
-
 - **A tween, not a spring.** Nothing should overshoot on the way out.
-- **`easeIn`** — starts slow, accelerates away. The mirror of the entrance's deceleration, and it reads as the element *leaving* rather than being deleted.
-- **130ms**, well under the state tier. The user has already decided; the animation is now just standing between them and their next action.
+- **`easeIn`** accelerates away, mirroring the entrance's deceleration, so the element reads as *leaving* rather than being deleted.
+- **130ms**, under the state tier. The user has decided; the animation only stands between them and their next action.
 
-The asymmetry generalises: **entrances can have character, exits should get out of the way.**
+**Entrances can have character; exits should get out of the way.**
 
 ## Where springs are wrong
 
@@ -114,11 +106,4 @@ The asymmetry generalises: **entrances can have character, exits should get out 
 
 ## Reduced-motion substitutes
 
-Every spring has a flat replacement at the state-tier duration:
-
-```tsx
-const reduce = useReducedMotion();
-const tween = reduce ? { duration: 0.15 } : SLIDE;
-```
-
-150ms, no easing specified (linear-ish default is fine at that length), no overshoot. The state change stays legible — you still see the highlight move to the new row — but nothing accelerates or oscillates. See `reduced-motion.md` for the complete set.
+Every spring has a flat replacement at the state-tier duration: 150ms, default easing, no overshoot. The highlight still moves to the new row; nothing accelerates or oscillates. See `reduced-motion.md` for the complete set.
