@@ -11,19 +11,29 @@ Both install together cleanly — their skill names don't overlap — and the in
 
 ## Installing
 
-**Shell** — nothing to install first:
+Two choices: **what** to install — a whole package, or single skills — and **which coding agent** it's for. The skills are plain `SKILL.md` folders, so they work in Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, Windsurf and any other agent that reads skills.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/Mihirmodi27/interface-skills/main/install.sh | sh
+### A whole package
+
+**In Claude Code, as a plugin** — the recommended way. The repo is a marketplace with one plugin per package, and `/plugin update` keeps them current. Type these into Claude Code:
+
+```
+/plugin marketplace add Mihirmodi27/interface-skills
+/plugin install interface-design@interface-skills     # Customize
+/plugin install glass-package@interface-skills        # Glass package
 ```
 
-**npx** — same installer, if you already have Node:
+Install one or both.
+
+**In any agent, with the installer** — nothing to install first:
 
 ```sh
 npx github:Mihirmodi27/interface-skills
+# or, without Node:
+curl -fsSL https://raw.githubusercontent.com/Mihirmodi27/interface-skills/main/install.sh | sh
 ```
 
-Either one asks:
+It asks two questions — which package, and which agent (choose one or several) — then copies the skills into each agent's own folder:
 
 ```
 Which skills?
@@ -32,34 +42,67 @@ Which skills?
   2) Customize — the same practices, fitted to your project's own names and values
   3) Both
 
-Choose 1, 2 or 3 [2]:
+Which tool?
+
+  1) Claude Code
+  2) Codex
+  3) Cursor
+  …
 ```
 
-and installs into `./.claude/skills`. `--package glass|custom|both` answers the question up front (and is what to use in CI, where there's no terminal to ask on — it installs the customizable set otherwise). Skill names install just those skills from either package. `--user` writes to `~/.claude/skills` so they're available in every project, `--dir` puts them somewhere else entirely, and `--force` overwrites copies you already have — without it, anything already installed is left alone:
+Flags answer the questions up front, which is also what to use in CI:
+
+| Flag | Does |
+|---|---|
+| `--package glass\|custom\|both` | Which package. With no terminal to ask on, `custom` |
+| `--tool <tool>[,<tool>…]` | Which agents, from the table below. With no terminal, `claude-code` |
+| `--user` | Install for every project on this machine, not just this one |
+| `--dir <path>` | Install into one folder of your choosing, whatever the agent |
+| `--force` | Overwrite skills that are already there — otherwise they're left alone |
+| `--update` | Refresh everything already installed, with no questions — see [Upgrading from 1.x](#upgrading-from-1x) |
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Mihirmodi27/interface-skills/main/install.sh | sh -s -- --package both --user
-npx github:Mihirmodi27/interface-skills glass-and-depth color-and-theming
-./install.sh --help
+npx github:Mihirmodi27/interface-skills --package both --tool codex,cursor
+curl -fsSL https://raw.githubusercontent.com/Mihirmodi27/interface-skills/main/install.sh | sh -s -- --package glass --tool claude-code --user
 ```
 
-`--update` refreshes whatever is already installed in the folder, with no question — see [Upgrading from 1.x](#upgrading-from-1x). Arguments go after `sh -s --` when the script is piped, because everything before that belongs to `sh` rather than to the script.
+Piped into `sh`, arguments go after `sh -s --`, because everything before that belongs to `sh`.
 
-**As Claude Code plugins** — the repo is a marketplace with one plugin per package, and `/plugin update` keeps them current:
+### Single skills
 
+With the [`skills` CLI](https://github.com/vercel-labs/skills), naming the agent:
+
+```sh
+npx skills add Mihirmodi27/interface-skills --skill typographic-system --agent claude-code
+npx skills add Mihirmodi27/interface-skills --skill glass-and-depth --agent codex
 ```
-/plugin marketplace add Mihirmodi27/interface-skills
-/plugin install interface-design@interface-skills
-/plugin install glass-package@interface-skills
-```
 
-Install one or both. Or copy a directory by hand — a skill is just a folder:
+**Name the agent.** Left to its defaults the CLI puts the files in `.agents/skills` and only symlinks them into each agent's folder — so a Claude Code user ends up with an `.agents` directory and a link. With one `--agent`, it copies the skill straight into that agent's folder. Leave `--agent` off only when you want its full list of agents to choose from. `npx skills add Mihirmodi27/interface-skills --list` shows every skill in the repo.
+
+The installer takes skill names too, from either package: `npx github:Mihirmodi27/interface-skills glass-and-depth color-and-theming --tool cursor`. Or copy a folder by hand — a skill is just a folder:
 
 ```sh
 cp -R plugins/interface-design/skills/typographic-system  /path/to/project/.claude/skills/
 ```
 
-Skills load on demand — Claude reads the frontmatter `description` to decide when one is relevant, so you don't need to invoke them by name.
+### Where each agent looks
+
+Both routes use the same agent ids and folders:
+
+| Agent | `--tool` / `--agent` | This project | Every project (`--user`) |
+|---|---|---|---|
+| Claude Code | `claude-code` | `.claude/skills` | `~/.claude/skills` |
+| Codex | `codex` | `.agents/skills` | `~/.codex/skills` |
+| Cursor | `cursor` | `.agents/skills` | `~/.cursor/skills` |
+| Gemini CLI | `gemini-cli` | `.agents/skills` | `~/.gemini/skills` |
+| GitHub Copilot | `github-copilot` | `.agents/skills` | `~/.copilot/skills` |
+| OpenCode | `opencode` | `.agents/skills` | `~/.config/opencode/skills` |
+| Windsurf | `windsurf` | `.windsurf/skills` | `~/.codeium/windsurf/skills` |
+| Any other agent that reads `.agents/skills` | `agents` (installer only) | `.agents/skills` | `~/.agents/skills` |
+
+Agents that share `.agents/skills` share one copy. `CLAUDE_CONFIG_DIR`, `CODEX_HOME` and `XDG_CONFIG_HOME` move their folders as they would for the agent itself. The skills CLI knows some forty more agents; the installer covers the common ones.
+
+Skills load on demand — the agent reads each skill's `description` to decide when it's relevant, so you don't need to invoke them by name.
 
 ## Customize: the adaptable set
 

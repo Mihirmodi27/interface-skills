@@ -41,7 +41,7 @@ Seven sizes above the floor; ceiling 24 ÷ 17 = 1.41. Four roles share 17px, eac
 
 ## Product
 
-Body 14px, chrome at 13. UI and data roles dominate; the third weight is for a job, not range.
+Body 14px, chrome at 13. UI and data roles dominate; two weights, with strong at 500, so a heading is found by size and tier without going heavy.
 
 | Role | Size | Leading | Tracking | Weight | Tier | Separates on |
 |---|---|---|---|---|---|---|
@@ -50,20 +50,20 @@ Body 14px, chrome at 13. UI and data roles dominate; the third weight is for a j
 | `type.subheading` | 14 | 1.4 | 0 | strong | `text.primary` | weight |
 | `type.body` | 14 | 1.5 | 0 | regular | `text.primary` | the baseline |
 | `type.supporting` | 14 | 1.45 | 0 | regular | `text.secondary` | tier |
-| `type.ui` | 13 | 1 / 1.4 | 0 | regular; `weight.medium` when active | `text.secondary` | size, curve |
-| `type.data` | 13 | 1 | 0 | regular; totals `weight.medium` | `text.primary` | tabular figures |
-| `type.label` | 12 | 1.3 | 0 | medium | `text.secondary` | weight |
+| `type.ui` | 13 | 1 / 1.4 | 0 | regular; strong when active | `text.secondary` | size, curve |
+| `type.data` | 13 | 1 | 0 | regular; totals strong | `text.primary` | tabular figures |
+| `type.label` | 12 | 1.3 | 0 | regular | `text.secondary` | tier |
 | `type.meta` | 12 | 1.4 | 0 | regular | `text.tertiary` | tier |
-| section label (project role under `type.label`) | 11 | 1.2 | +0.05em, caps | medium | `text.tertiary` | case |
+| group label (project role under `type.label`) | 12 | 1.3 | 0, sentence case | regular | `text.tertiary` | a hairline rule beneath |
 | `type.code` | 12.5 | 1.5 | 0 | regular, mono | `text.secondary` | family |
 
-Six sizes plus code; ceiling 20 ÷ 14 = 1.43, and the dial allows up to 22 if a dashboard title needs it. The 12.5 compensates for a family rather than serving a role: monospace runs wide and steps down to fill the same measure.
+Five sizes plus code; ceiling 20 ÷ 14 = 1.43, and the dial allows up to 22 if a dashboard title needs it. The 12.5 compensates for a family rather than serving a role: monospace runs wide and steps down to fill the same measure.
 
 Two product rules. A dense table (a ledger, a log) may drop `type.ui` and `type.data` to 12px together, never one alone, or row and figures stop sharing a baseline rhythm. And an app's page title labels where you are; don't raise it to announce a feature.
 
 ### Worked example: Tally
 
-**Tally**, a fictional invoicing app: preset `product`, with `app/(marketing)/** → expressive`; a grotesque with a large x-height, `tnum`, no italic, weights 400/500/600. The app shell is the ladder above, in tokens.
+**Tally**, a fictional invoicing app: preset `product`, with `app/(marketing)/** → expressive`; a grotesque with a large x-height, `tnum`, no italic, weights 400 and 500. The app shell is the ladder above, in tokens.
 
 ```css
 :root {
@@ -76,17 +76,15 @@ Two product rules. A dense table (a ledger, a log) may drop `type.ui` and `type.
   --text-ui: 0.8125rem;     /* 13px type.ui */
   --text-meta: 0.75rem;     /* 12px type.meta · type.label */
   --text-code: 0.78125rem;  /* 12.5px type.code */
-  --text-caps: 0.6875rem;   /* 11px section-label */
 
   --weight-regular: 400;
-  --weight-medium: 500;     /* active tab, column totals, type.label */
-  --weight-strong: 600;     /* headings, <strong> */
+  --weight-strong: 500;     /* headings, active tab, column totals, <strong> */
 }
 body { font: var(--weight-regular) var(--text-body)/1.5 var(--font-sans); font-synthesis: none; }
 .data, td, time { font-variant-numeric: tabular-nums; }  /* product: global in the app shell */
 ```
 
-`type.subheading` and `type.label` share the body and meta sizes and separate on weight; `type.data` has no size of its own. The marketing area adds a derived `type.display` and a larger ladder, while `type.ui` and `type.meta` stay identical across the boundary (law 2).
+`type.subheading` shares the body size and separates on weight; `type.label` and the group label share the meta size and separate on tier and the group label's rule; `type.data` has no size of its own. The marketing area adds a derived `type.display` and a larger ladder, while `type.ui` and `type.meta` stay identical across the boundary (law 2).
 
 Its display tier is the neutral-grotesque derivation in `display-tier.md` — 960 ÷ (20 × 0.52) and 343 ÷ (14 × 0.52), between 375px and 1280px viewports: 47 → 92px at 1.0 leading and −0.035em. Against a 28–40px expressive `type.title`, it stays above 1.5× at both ends.
 

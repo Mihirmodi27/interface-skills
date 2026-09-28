@@ -1,6 +1,6 @@
 ---
 name: surfaces-and-depth
-description: Decide how a surface says where it sits — flat, raised, floating or modal — and build each level as one bundle of surface, edge, shadow and layer. Covers one-light layered shadows, dark themes that lift by lightening, scrims, gradient strokes, glows, and translucency as an optional material: when it earns its place, how blur, saturation and tint keep it legible, and its reduced-transparency, high-contrast, forced-colours and no-support fallbacks. Works in the project's tokens via DESIGN.md. Use when building or reviewing cards, sticky headers, menus, popovers, tooltips, dialogs, sheets or drawers; choosing or tuning shadows; when depth looks flat, muddy or inconsistent; when dark mode loses its layers; when deciding whether a surface should be translucent at all; when text over one fails contrast; or when adding any backdrop-filter or elevation fallback.
+description: "Decide how a surface says where it sits — flat, raised, floating or modal — and build each level as one bundle of surface, edge, shadow and layer. Covers one-light layered shadows, dark themes that lift by lightening, scrims, gradient strokes, glows, and translucency as an optional material: when it earns its place, how blur, saturation and tint keep it legible, and its reduced-transparency, high-contrast, forced-colours and no-support fallbacks. Works in the project's tokens via DESIGN.md. Use when deciding whether something should be a card at all, when a screen feels boxy, tiled or template-like, when building or reviewing cards, sticky headers, menus, popovers, tooltips, dialogs, sheets or drawers; choosing or tuning shadows; when depth looks flat, muddy or inconsistent; when dark mode loses its layers; when deciding whether a surface should be translucent at all; when text over one fails contrast; or when adding any backdrop-filter or elevation fallback."
 ---
 
 # Surfaces and Depth
@@ -28,13 +28,25 @@ Mixing parts is the bug the ladder prevents: a card given the menu's shadow on h
 
 Every rung is used. The Glass package's fourth translucent tier, for "a menu over a surface you already know", never found a user. A dead rung is worse than an absent one: the next person assumes it is load-bearing.
 
-### 2. Depth needs an edge as well as a shadow
+### 2. Content sits on the page; a card is for one object
+
+**Sections, lists, tables and figures sit on the page, unboxed; a card — a surface with its own edge — is reserved for one object the reader acts on or takes in whole, and a card never holds another card.** A box says "this is a thing". Put one round every section, stat and list and every region claims to be a thing, so none is; each nesting adds an edge, a padding and a radius, and a screen built of boxes in boxes reads as a template however good its type. The grouping a box pretends to provide is space's job (`layout-and-hierarchy`), and a heading with a hairline under it does it better.
+
+In order of preference:
+
+1. **Unboxed** — a heading row, then the content straight on `surface.page`: rows parted by `border.divider`, figures by vertical hairlines, never an edge round the group.
+2. **A card** — one object: a decision awaiting approval, a document, a side rail. A rail with two topics is one card in two parts, parted by a divider; several items of one kind (three pending approvals) share one card the same way, not a card each.
+3. **A note** — an aside or caveat takes a hairline rule on its leading edge, not a tinted box.
+
+A tinted strip behind a group label, a bordered callout and a tile per figure are boxes by other names. The test: take the edge away. If the grouping still reads from space and the heading, the edge was decoration; if it no longer reads as one object, it wasn't a card's job either — fix the spacing.
+
+### 3. Depth needs an edge as well as a shadow
 
 **Any surface above `elevation.flat` has an edge that says where it ends, not only a shadow that says it is above.** A shadow is a soft gradient and cannot draw a boundary; without an edge the outline is mush, worst in dark themes, where shadows have almost no headroom. The edge is `border.default` on an opaque surface; on a translucent one or any backdrop it doesn't control, the translucent `border.layered`, since a solid grey edge there reads as a pasted-on frame.
 
 `forced-colors` drops every `box-shadow` but keeps the edge, so a surface designed with no visible edge still carries `1px solid transparent`, painted in the system text colour. `elevation.flat` has no shadow: an edge or a surface step, never a faint shadow posing as a border.
 
-### 3. A shadow models one light, in layers, and lives in one definition
+### 4. A shadow models one light, in layers, and lives in one definition
 
 **A shadow is a contact layer plus one or two ambient layers from a single light above, with negative spread, felt rather than seen.** The faint 1px contact layer makes a surface look *resting on* something; two ambient layers fall off like a penumbra where one large blur reads as fog; negative spread keeps each tucked under the element — without it, stock presets look like glows. An optional inset top highlight does more for floating than any drop layer. Higher levels get more and longer layers; a transient tooltip drops the contact layer — it hovers.
 
@@ -42,17 +54,17 @@ Strength follows **what is immediately behind the surface**, not the theme: a to
 
 Nobody spots a `0.04` that became `0.05` in one of five copies, so **a layered shadow has one definition per level, extracted the moment it appears twice**, which every use points at.
 
-### 4. Dark themes lift surfaces by lightening them
+### 5. Dark themes lift surfaces by lightening them
 
 **In a dark theme each level above the page is lighter than the one beneath it; the shadow is a secondary cue.** Raised means more contrast against the page, so the direction flips: light-theme raised surfaces match the page or sit slightly darker; dark-theme ones are lighter, because a black shadow on a near-black page has nowhere to go, and strengthening shadows alone leaves every level looking like the page. The dark shadow is its own per-theme recipe — drop layers at roughly ten times the opacity, the highlight at a fraction of its strength — and the page is never `#000`, which gives shadows nothing to sit on. Hence the Glass package's dark chrome tint, lighter than its dark page, and shadow opacities of 2–6% in light, 30–60% in dark.
 
-### 5. Translucency has to be earned, and usually isn't
+### 6. Translucency has to be earned, and usually isn't
 
 **A translucent surface claims that content continues underneath and that seeing it helps. Where either half is false, the surface is opaque.** It holds for chrome that content scrolls under and for a floating layer whose context helps the reader. It fails for:
 
 - **A section, panel or sidebar in the flow** — it's the page, not floating.
 - **A card in a grid or a row in a list** — nothing meaningful is behind it, and a filter per row is the worst cost profile.
-- **Anything holding reading copy** (law 9).
+- **Anything holding reading copy** (law 10).
 - **A flat, single-colour backdrop** — nothing to reveal; use the tint.
 - **Content behind that must stay readable** — that wants an opaque, shadowed surface beside it, not a blur over it.
 - **Video, canvas or anything animating** — the filter re-runs every backdrop frame.
@@ -60,7 +72,7 @@ Nobody spots a `0.04` that became `0.05` in one of five copies, so **a layered s
 
 The Glass package, built around the material, uses it in four places, all floating chrome: the ceiling, not the target.
 
-### 6. Blur scales with uncertainty about the backdrop
+### 7. Blur scales with uncertainty about the backdrop
 
 **Blur radius is set by how little you know about what's behind the surface, not by its size or importance.**
 
@@ -72,15 +84,15 @@ The Glass package, built around the material, uses it in four places, all floati
 
 Role-tier ranges, not dial values; the preset picks which tiers exist (Dials). Cost scales with area, not radius, so don't trim blur to save frames.
 
-### 7. Blur needs saturation
+### 8. Blur needs saturation
 
 **Every `backdrop-filter` blur carries a `saturate()` correction.** Blur averages colours toward grey, and blur plus a pale tint alone is the cloudy, dirty wash "glassmorphism" describes; the correction is free in the same pass. Go lower where the backdrop is itself the subject; above about 2.0, colours turn radioactive.
 
-### 8. The tint carries legibility when the blur can't
+### 9. The tint carries legibility when the blur can't
 
 **A translucent surface is legible from its tint alone; the blur is a bonus.** A `transform`, `filter`, `perspective`, `contain: paint` or `will-change` on an ancestor weakens or breaks `backdrop-filter` beneath it — a menu's scaling wrapper does, for the whole animation — and a 72% tint without its blur is unreadable over a busy page. Animate one element and filter another; failing that, thicken the tint, as the Glass package's floating panel does at 97%. The same ancestors trap `position: fixed` descendants, so check the whole ancestor chain when either misbehaves.
 
-### 9. Translucent text is checked against the worst backdrop
+### 10. Translucent text is checked against the worst backdrop
 
 **Text contrast on a translucent surface is measured against the tint composited over the lightest *and* darkest backdrop it can land on — never against the tint as if opaque.** A 72% near-white tint is near-white over a white page and mid-grey over a dark photograph: `text.tertiary` clears 5.1:1 on one and manages 2.6:1 on the other, as scrolling carries it between them. The opaque-tint number is a fiction.
 
@@ -88,33 +100,33 @@ Make it true, in order: raise the tint until it is effectively opaque behind tex
 
 → The compositing arithmetic and a worked check: `references/translucent-materials.md`
 
-### 10. Translucency over translucency needs a tier gap
+### 11. Translucency over translucency needs a tier gap
 
 **Where one translucent surface overlaps another, the upper one is a visibly different tier — much heavier tint, or opaque.** Stacked blurs don't compose, and two surfaces at one tint read as one object: a panel over a dock at the dock's tint looks like the dock grew. At most one meaningful blur in any vertical stack.
 
-### 11. A scrim says "modal", and only modal
+### 12. A scrim says "modal", and only modal
 
-**`elevation.overlay` brings a `scrim`; nothing below it does.** It says the rest of the interface is paused: a menu with one falsely claims to be modal; a dialog without one looks like a menu that won't close. A floating layer's outside-click catcher is transparent. The scrim darkens toward the ground's hue, stronger in dark themes, where dimming near-black barely registers and the overlay's surface step (law 4) does most of the separating. A blurred scrim — a full-viewport filter, the costliest surface there is — appears only where the preset allows and never animates its radius.
+**`elevation.overlay` brings a `scrim`; nothing below it does.** It says the rest of the interface is paused: a menu with one falsely claims to be modal; a dialog without one looks like a menu that won't close. A floating layer's outside-click catcher is transparent. The scrim darkens toward the ground's hue, stronger in dark themes, where dimming near-black barely registers and the overlay's surface step (law 5) does most of the separating. A blurred scrim — a full-viewport filter, the costliest surface there is — appears only where the preset allows and never animates its radius.
 
-### 12. Gradients on resizing elements are anchored in pixels
+### 13. Gradients on resizing elements are anchored in pixels
 
 **A gradient stroke or fill on an element that changes size places its stops in absolute units, and a gradient stroke is two background layers on one box.** Percentage stops rescale with the box: a Glass package panel opening from a 46px bar to 250px ran its whole navy-to-pale sweep inside the closed bar — louder closed than open — and shimmered as it grew. Anchored at `0px / 120px / 240px`, the top holds still and the colour grows downward. The stroke also needs `background-origin: border-box`, or every side gets the wrong end of the ramp — which looks almost right.
 
 → The stroke's two layers, with no wrapper or mask: `references/translucent-materials.md`
 
-### 13. Light is emitted from the sides and passes once
+### 14. Light is emitted from the sides and passes once
 
 **A coloured glow is weighted to the sides so it reads as emission; a sheen crosses once and then stops.** One centred coloured shadow is a drop shadow that happens to be blue. A glow reporting a state — hovered, open — holds as long as the state. A looping sheen claims the thing is still working, so it runs once and is removed: `background-clip: text` with transparent text left in place is a selection and forced-colours hazard. Under reduced motion: no sweep, the plain colour.
 
-### 14. Every material has its fallbacks, and they come last
+### 15. Every material has its fallbacks, and they come last
 
 **Each material ships an opaque baseline, then the material inside `@supports`, then its `prefers-reduced-transparency`, `prefers-contrast: more` and `forced-colors` rules — after every theme block that sets the same properties.** The order is the law: opaque first makes the non-supporting path the default, and so the tested one; preferences re-declare the same properties at the same specificity, so a reduced-transparency block above the dark-theme block wins in one theme only.
 
-Reduced transparency needs both halves, an opaque surface *and* no filter: filter only leaves a thin tint over live content, tint only still pays for the blur. High contrast promotes the edge to a real border and leaves the surface alone; forced colours needs law 2's edge. Read the *compiled* CSS: a prefixing pipeline may treat a hand-written `-webkit-backdrop-filter` for Safari as a duplicate and drop the standard property Firefox needs — as the Glass package's own advice did to the site it documents.
+Reduced transparency needs both halves, an opaque surface *and* no filter: filter only leaves a thin tint over live content, tint only still pays for the blur. High contrast promotes the edge to a real border and leaves the surface alone; forced colours needs law 3's edge. Read the *compiled* CSS: a prefixing pipeline may treat a hand-written `-webkit-backdrop-filter` for Safari as a duplicate and drop the standard property Firefox needs — as the Glass package's own advice did to the site it documents.
 
 → The full fallback block, in order: `references/fallbacks-and-performance.md`
 
-### 15. Translucency has a budget, counted in area
+### 16. Translucency has a budget, counted in area
 
 **A `backdrop-filter` costs its area on every frame its backdrop changes — for chrome over a scrolling page, every frame of every scroll.** The budget is a count of surfaces and a ceiling on their size, per preset (Dials). Closed menus unmount, since at `opacity: 0` or `visibility: hidden` a filtered element still pays its pass; blur radius never animates; nothing filtered sits over video. Transitioning `box-shadow` repaints every frame too: across a list, put the lifted shadow on a pseudo-element and fade its opacity.
 
@@ -122,11 +134,13 @@ Reduced transparency needs both halves, an opaque surface *and* no filter: filte
 
 | Dial | editorial | product | expressive |
 |---|---|---|---|
-| Translucency | Chrome only (a sticky header, a dock), or none | None — borders and opaque surfaces do the work | Brand material, each use named |
+| Content by default | Unboxed | Unboxed; a card only for one object | Unboxed; a card for one object or a named brand object |
+| Cards nested in cards | Never | Never | Never |
+| Translucency | Chrome only (a sticky header, a dock), or none | None — hairlines and opaque surfaces do the work | Brand material, each use named |
 | Translucent tiers | ≤ 2 (chrome, defensive) | 0 | ≤ 3 |
 | Translucent surfaces on screen at once | ≤ 3, none wider than the reading measure except fixed chrome | 0 | ≤ 4; full-viewport only as a static overlay scrim |
 | Elevation levels in use | 3: flat, floating, overlay (raised only for sticky chrome) | 4: flat, raised, floating, overlay | 4, plus at most one named decorative level |
-| `elevation.flat` separates by | Space or a surface step; edges rare | `border.default` | Surface step or edge, per brand |
+| `elevation.flat` separates by | Space or a surface step; edges rare | Space, and hairlines between rows (`border.divider`) — never an edge round a group | Surface step or edge, per brand |
 | Floating shadow, peak layer opacity (light / dark) | 6% / 50% | 10% / 55% | 16% / 60% |
 | Shadow layers on floating | Contact + 2 ambient + inset highlight | Contact + 1 ambient | Contact + 2 ambient + inset highlight |
 | Dark surface lift per level (OKLCH L) | +0.05 | +0.04 | +0.06 |
@@ -148,6 +162,7 @@ Reduced transparency needs both halves, an opaque surface *and* no filter: filte
 **1. Classify every real component**, not a hypothetical list:
 
 ```
+One object the reader acts on or takes in whole?         no  → unboxed on the page (law 2). Stop.
 Scrolls with its neighbours, part of the page flow?      → elevation.flat. Edge or surface step. Stop.
 Picked up, dragged, or stuck while content passes under? → elevation.raised
 Summoned over content, dismissed on its own?             → elevation.floating  (no scrim)
@@ -160,16 +175,16 @@ Then, for raised and above, the material:
   Carries text below text.primary over an unknown backdrop?          yes → the defensive tier
   It or an ancestor animates a transform?                            yes → split wrapper/surface, or defensive
   Over another translucent surface?                                  yes → a tier gap, or opaque
-  Otherwise → material.translucent at the tier law 6 gives its backdrop.
+  Otherwise → material.translucent at the tier law 7 gives its backdrop.
 ```
 
-**2. Build each level as a bundle**: surface from `color-and-theming` (`surface.raised`, `surface.inverse`, the dark lift from the Dials), edge from `border.default` or `border.layered` at a `hairline.*` weight, shadow per law 3 at the preset's strength, layer from `layout-and-hierarchy`'s `z.*` ladder; one shadow per level per theme.
+**2. Build each level as a bundle**: surface from `color-and-theming` (`surface.raised`, `surface.inverse`, the dark lift from the Dials), edge from `border.default` or `border.layered` at a `hairline.*` weight, shadow per law 4 at the preset's strength, layer from `layout-and-hierarchy`'s `z.*` ladder; one shadow per level per theme.
 
 **3. Derive the dark theme separately**: lift each surface by the dial's step, rebuild the shadow at dark opacities with a weaker highlight, and check the edge alone still separates each level from the one below.
 
-**4. Add materials last**, fallbacks in order (law 14), counted against the budget.
+**4. Add materials last**, fallbacks in order (law 15), counted against the budget.
 
-**5. Measure** every text tier on every translucent surface against its worst backdrop (law 9) with `design-system-setup`'s `contrast.mjs`; the focus ring at 3:1 on each level's surface.
+**5. Measure** every text tier on every translucent surface against its worst backdrop (law 10) with `design-system-setup`'s `contrast.mjs`; the focus ring at 3:1 on each level's surface.
 
 → Bundle tables per preset and theme, shadow derivation and a worked example: `references/elevation-recipes.md`
 → Blur, saturation, tint, gradient strokes, glows and sheens: `references/translucent-materials.md`
@@ -184,9 +199,12 @@ rg -n "backdrop-filter|backdrop-blur|-webkit-backdrop" src
 rg -n "prefers-reduced-transparency|prefers-contrast|forced-colors|@supports" src
 rg -n "z-index|z-\[|\bz-[0-9]" src
 rg -n "background-clip:\s*text|animation:.*infinite" src
+rg -n "border rounded|rounded-\S+ border|border-\S+ rounded|<Card\b" src   # boxes: count per screen
 ```
 
 Then collect evidence per law:
+
+- **Boxes**, per screen: every edged or shadowed region, and what it holds. A card round a section, a list, a table or a single figure, a card inside a card, a tile per stat, a tinted strip behind a label — each is a finding. Screenshot the screen and count edges; a working screen rarely needs more than a few cards.
 
 - **Distinct shadows**, clustered: more than levels means improvised ones; list each stray with its file.
 - **Bundles** for each component above flat: a shadow with no edge, a floating shadow on a flat element, a modal without a scrim, a menu with one — each is a finding.
@@ -206,6 +224,8 @@ One line per finding in `## Open issues`, with evidence: *"`.search-popover` has
 
 ## Checklist
 
+- [ ] Sections, lists, tables and figures sit on the page; a card holds exactly one object, and no card holds a card.
+- [ ] Several objects of one kind, or a rail's topics, share one card parted by dividers; asides are a ruled note, not a tinted box.
 - [ ] Each surface on one `elevation.*` level, chosen by what it does, bundle and `z.*` included.
 - [ ] No borrowed parts: a lifted hover or drag moves the whole bundle, layer included.
 - [ ] Every level in the ladder is used.

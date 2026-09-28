@@ -10,7 +10,10 @@
     "typography",
     "motion",
     "css",
-    "tailwind"
+    "tailwind",
+    "agent-skills",
+    "codex",
+    "cursor"
   ],
   "homepage": "https://github.com/Mihirmodi27/interface-skills#readme",
   "repository": {

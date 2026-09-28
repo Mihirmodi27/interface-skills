@@ -61,7 +61,7 @@ A faint `border.layered` goes first. Promote the edge to `text.primary` and leav
 
 ## Forced colours
 
-System colours replace backgrounds and borders, and every `box-shadow` goes, leaving only law 2's edge — `1px solid transparent` on an edgeless surface, painted as `CanvasText`. **`background-clip: text` with transparent text** can render as nothing, which is why a sheen removes its class when it ends.
+System colours replace backgrounds and borders, and every `box-shadow` goes, leaving only law 3's edge — `1px solid transparent` on an edgeless surface, painted as `CanvasText`. **`background-clip: text` with transparent text** can render as nothing, which is why a sheen removes its class when it ends.
 
 Leave `forced-color-adjust: none` alone unless a component is broken without it; the user chose their colours.
 

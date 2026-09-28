@@ -1,6 +1,6 @@
 ---
 name: typographic-system
-description: Build and audit a type system for any interface — sizes assigned to roles, not read off a ratio; one job per weight and family; leading and tracking corrected for size; roles separated on another axis once size runs out; emphasis on existing axes; tabular numerals; classless imported prose; UI copy apart from reading copy; fonts that load without moving text. Applied in the project's own tokens and character (editorial, product or expressive) via its DESIGN.md. Use when setting or extending a type scale, choosing sizes, weights, leading or tracking, adding a display tier to a landing page, styling headings, leads, deks, captions, labels, table figures or imported Markdown, fixing templates that feel like different sites, loading or pairing fonts, or reviewing typography that feels noisy, flat or inconsistent.
+description: "Build and audit a type system for any interface — sizes assigned to roles, not read off a ratio; one job per weight and family; leading and tracking corrected for size; roles separated on another axis once size runs out; emphasis on existing axes; tabular numerals; classless imported prose; UI copy apart from reading copy; fonts that load without moving text. Applied in the project's own tokens and character (editorial, product or expressive) via its DESIGN.md. Use when setting or extending a type scale, choosing sizes, weights, leading or tracking, adding a display tier to a landing page, styling headings, leads, deks, captions, labels (including replacing uppercase eyebrows), table figures or imported Markdown, fixing templates that feel like different sites, loading or pairing fonts, or reviewing typography that feels noisy, flat or inconsistent."
 ---
 
 # Typographic System
@@ -120,13 +120,13 @@ The mapping covers user-agent styles: `<cite>`, `<blockquote>`, `<b>`, `<th>` an
 | `type.display` | none | none | one per page, derived from the measure; ≥ 1.5 × `type.title` at every width |
 | Distinct sizes above the floor (excluding display and code) | ≤ 7 | ≤ 7 | ≤ 8 |
 | Readable floor | 12px | 11px | 12px |
-| Weights | 2: `weight.regular`, `weight.strong` | 3: regular, `weight.medium`, strong | 2 for text, plus `weight.display` |
+| Weights | 2: `weight.regular`, `weight.strong` | 2: `weight.regular` 400, `weight.strong` at 500; a third only for a recorded job | 2 for text, plus `weight.display` |
 | Families | one, plus a system-stack mono | one, plus mono (webfont only if code or IDs are the product) | up to two (`family.display`), plus mono |
 | Leading, reading | 1.6–1.75 | 1.45–1.55 | 1.5–1.65 |
 | Leading, headings | 1.2–1.3 | 1.25–1.35 | title 1.1–1.2; display 0.95–1.05 |
 | Leading, multi-line UI | 1.4 | 1.3–1.4 | 1.4 |
 | Tracking at the top of the ladder | −0.02em | −0.01em | display −0.03 to −0.045em |
-| Uppercase labels | none | section labels only, +0.05em | eyebrows, +0.06–0.1em |
+| Uppercase labels | none | none: sentence case, separated by tier and a rule | eyebrows, +0.06–0.1em |
 | Italic | true italic, if the family ships one, for `em` and titles of works | none: `em` → `text.secondary` | true italic allowed as a display voice |
 | Numerals | tabular wherever numbers align or update; proportional in prose | tabular globally; slashed zero on IDs and codes | proportional in display, tabular in data |
 | Responsive sizes | none | none | display and title fluid via `clamp()` |
@@ -136,7 +136,7 @@ The mapping covers user-agent styles: `<cite>`, `<blockquote>`, `<b>`, `<th>` an
 
 **Display.** Derived from the headline and the column, not body × ratio; within 1.5× of `type.title` it is a big title, not a tier. → Derivation, bounds, leading, tracking and weight: `references/display-tier.md`
 
-**Weights.** Product earns a third weight because dense UI has a middle job: an active tab, a column total, a label holding its own against a 600 heading. Adding one costs a font file and a check that every weight still has exactly one job. Expressive's `weight.display` can go *lighter* than regular (`references/display-tier.md`).
+**Weights.** Product runs two, with `weight.strong` at 500 rather than 600: on a dense screen headings are found by size, tracking and tier, and a 600 heading forces a middle weight for tabs, totals and labels to hold their own against it — how a product ends up with three weights and a noisy page. Keep strong at 500 and the active tab, the column total and the row title all take it. A third weight needs a job the two can't carry, recorded in `DESIGN.md`; it costs a font file and a check that every weight still has exactly one job. Expressive's `weight.display` can go *lighter* than regular (`references/display-tier.md`).
 
 **Leading.** The reading range moves with the measure — long lines need more leading for the eye to find the next — so wide measures sit at the top. Product sits lowest: short reading copy, narrow measure.
 
@@ -144,7 +144,7 @@ The mapping covers user-agent styles: `<cite>`, `<blockquote>`, `<b>`, `<th>` an
 
 **Readable floor.** Product can go to 11px because its reader is fluent and glancing — a column header, a unit, a keyboard hint; editorial and expressive readers are not, and an 11px caption goes unread.
 
-**Uppercase labels.** Capitals are a texture; a page of them is signage. Product uses them once, for section labels in dense chrome, where case separates a group label from same-size rows beneath; expressive for an eyebrow. Both track positive (law 7); editorial doesn't need them.
+**Uppercase labels.** Capitals are a texture; a page of them is signage. Uppercase eyebrows over every section and column are what a template looks like, so product sets labels in sentence case and separates a group label from the same-size rows beneath it by tier (`text.tertiary`) and a hairline rule, not case. Expressive may use capitals for an eyebrow, tracked positive (law 7); editorial doesn't need them.
 
 **Italic.** The Glass package's ban is about its family, whose italic fights the letterforms, not about italic. Editorial with a good true italic should use it; product rarely has reading copy long enough to need one, and saves a file.
 
@@ -177,7 +177,7 @@ node <design-system-setup>/scripts/scan.mjs . --ignore <prose and example dirs>
 rg -o "text-\[[^\]]+\]|font-size:\s*[^;]+" src | sort | uniq -c | sort -rn
 rg -o "font-(thin|light|normal|medium|semibold|bold|black)|font-weight:\s*\d+" src | sort | uniq -c
 rg -n "italic|<i>|<cite|<blockquote" src
-rg -n "tracking-|letter-spacing" src
+rg -n "tracking-|letter-spacing|uppercase|text-transform" src
 rg -n "tabular-nums|tnum|font-variant-numeric" src
 rg -n "@font-face|fonts.googleapis|font-display|size-adjust|next/font|fontsource" .
 rg -n "dangerouslySetInnerHTML|v-html|innerHTML|\{@html|marked|remark|markdown-it" src
@@ -190,7 +190,7 @@ Evidence per law:
 - **Pairs (3).** Section blocks' size and weight against their heading; grep `type.lead`, quote and stat styles.
 - **Axes (4).** Each role's signal on shared sizes; one with no signal of its own is a collision.
 - **Weights and families (5).** Loaded against used; weights with no nameable job; webfonts for a handful of spans.
-- **Leading and tracking (6, 7).** Headings or rows with reading leading, tracked body copy, `px` letter-spacing.
+- **Leading and tracking (6, 7).** Headings or rows with reading leading, tracked body copy, `px` letter-spacing, uppercase labels the preset doesn't allow.
 - **Emphasis (9).** `font-synthesis` unset over a missing style, `<strong>` heavier than headings, UA italics on `cite` and `blockquote`.
 - **Numerals (10).** Tables, prices, timers, counters or date columns without tabular figures; live numbers, watched for a second.
 - **Imported prose (11).** Every HTML injection point, scoped and mapped or falling back to the browser.

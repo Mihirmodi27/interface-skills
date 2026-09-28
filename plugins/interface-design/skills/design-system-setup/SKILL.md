@@ -1,6 +1,6 @@
 ---
 name: design-system-setup
-description: Fit the interface skills to a project by writing its DESIGN.md — map the existing interface's tokens and the names it already uses (type, colour, spacing, radii, elevation, motion) onto the canonical roles the adaptable interface-design set works in, pick a preset (editorial, product, expressive or glass) from what the reader is doing, and list where the code breaks the laws. Use when starting interface work on a project that has no DESIGN.md, when another interface skill finds DESIGN.md missing, when the user asks to set up, document, extract, audit or reconcile a design system, when adopting these skills on an existing codebase, when tokens have drifted from what DESIGN.md says, or when choosing a design character for a new project.
+description: "Fit the interface skills to a project by writing its DESIGN.md — map the existing interface's tokens and the names it already uses (type, colour, spacing, radii, elevation, motion) onto the canonical roles the adaptable interface-design set works in, pick a preset (editorial, product, expressive or glass) from what the reader is doing, and list where the code breaks the laws. Use when starting interface work on a project that has no DESIGN.md, when another interface skill finds DESIGN.md missing, when the user asks to set up, document, extract, audit or reconcile a design system, when adopting these skills on an existing codebase, when tokens have drifted from what DESIGN.md says, or when choosing a design character for a new project."
 ---
 
 # Design System Setup
@@ -33,11 +33,12 @@ The scan reads source text, so it can't see a value computed at runtime, a class
 
 For each canonical role in `roles.md`: which of the project's names does that job, and with what value? Map by usage, not by name — a `gray-500` that every caption uses *is* `text.tertiary`.
 
-Four places projects have quietly broken a law:
+Five places projects have quietly broken a law:
 
 - **One token doing two jobs.** A grey used for borders and text: a border needs 3:1, text 4.5:1, and one value rarely serves both. Record the coupling as an open issue; don't split it yet.
 - **A job with no token.** Captions at six greys, durations typed inline. Propose a name in the project's style (`design-md.md` says how to detect it) and mark it `proposed`.
 - **Roles the list doesn't have.** A `keyline`, a `pull-quote`, a `kicker`: record each as a project role under its nearest canonical parent, with what separates it — size, weight, leading, colour or a rule. If nothing does, that's a finding.
+- **Boxes as the default.** Every section, stat and list in a card, cards inside cards, a bento grid of unlike sections, tinted strips behind labels, uppercase eyebrows, several chip shapes, a second highlight hue, done states in success colour. Count the boxes per main screen and list each that holds more than one object (`surfaces-and-depth` law 2, `layout-and-hierarchy` law 3). If the user has a reference interface they've already approved, screenshot each main screen beside it; the gaps are open issues.
 - **Values on no ladder.** Twenty-three font sizes, fourteen radii. Cluster them by usage, propose the ladder, list the strays that could snap to a neighbour unseen.
 
 Compute contrast; don't estimate it:
@@ -50,7 +51,7 @@ node <this skill>/scripts/contrast.mjs --ladder "#ffffff" "#16161a" "#4b4b52" "#
 
 ## 3. Choose the preset
 
-From what the reader is mostly doing — reading, working, or being persuaded — propose `editorial`, `product` or `expressive` (`presets.md`). Offer `glass` only if the Glass package skills (`glass-typography` and its siblings) are installed, among your available skills or in `.claude/skills/` or `~/.claude/skills/`; it fills the dials from their values, under the project's existing names wherever it has them.
+From what the reader is mostly doing — reading, working, or being persuaded — propose `editorial`, `product` or `expressive` (`presets.md`). Offer `glass` only if the Glass package skills (`glass-typography` and its siblings) are installed, among your available skills or in your agent's skills folder (`.claude/skills/`, `.agents/skills/`, or the global one in your home directory); it fills the dials from their values, under the project's existing names wherever it has them.
 
 State the evidence: *"Mostly long-form pages under `app/blog`, two weights in use, one accent — this reads as `editorial`."* Mixed projects get a base preset plus areas: `product`, with `app/(marketing)/** → expressive`.
 
@@ -94,6 +95,7 @@ Each skill in the set reads `DESIGN.md`, finds its section, and works in the pro
 - [ ] The project's names are unchanged; new names are `proposed` and in the project's style.
 - [ ] Project roles sit under a canonical parent, each with the signal that separates it.
 - [ ] Tokens doing two jobs are listed as issues, not silently split.
+- [ ] Boxes per main screen counted; every card holding more than one object, every nested card and every tile grid listed as an issue.
 - [ ] Every text tier has a measured ratio per theme against its worst surface, and the ladder strictly descends.
 - [ ] The preset is justified by evidence about the reader; mixed projects list areas by path.
 - [ ] `glass` was offered only with the Glass package installed.

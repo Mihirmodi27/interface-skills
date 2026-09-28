@@ -61,7 +61,7 @@ Light-theme floating shadows at the dial strengths; raised and overlay follow fr
 | `product` | `0 1px 1px rgb(0 0 0 / 0.04), 0 12px 24px -8px rgb(0 0 0 / 0.10)` — edges carry the rest |
 | `expressive` | `inset 0 1px 0 rgb(255 255 255 / 0.6), 0 1px 2px rgb(0 0 0 / 0.06), 0 10px 20px -6px rgb(0 0 0 / 0.10), 0 32px 48px -12px rgb(0 0 0 / 0.16)` |
 
-Product leans on `border.default` with short shadows, so dense screens don't fill with grey. Expressive may add one decorative level — a branded pocket, a hero card — named, with its own bundle.
+Product leans on `border.default` with short shadows, so dense screens don't fill with grey. Because content is unboxed (`SKILL.md` law 2), the few cards a product screen keeps may draw their edge as a half-pixel ring at the head of the shadow stack (`0 0 0 0.5px <border.default>`) rather than a border — quieter beside rows parted by hairlines, still an edge. It keeps `border: 1px solid transparent` for forced colours (below). Expressive may add one decorative level — a branded pocket, a hero card — named, with its own bundle.
 
 ## Dark theme: a different recipe
 

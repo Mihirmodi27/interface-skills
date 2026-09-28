@@ -30,12 +30,12 @@ Derive the ladder from the nestings, and write the subtraction into the token so
 | Role | editorial | product | expressive (round) | expressive (sharp) |
 |---|---|---|---|---|
 | `radius.pill` | full | full | full | full, or 0 |
-| `radius.small` | 4px | 2px | 8px | 0 |
+| `radius.small` | 4px | 2–4px | 8px | 0 |
 | `radius.control` | 8px | 4–6px | 12px | 0 |
-| `radius.card` | 12px | 8px | 20px | 0 |
-| `radius.container` | 16px | 12px | 28px | 0 |
+| `radius.card` | 12px | 8–10px | 20px | 0 |
+| `radius.container` | 16px | 12–16px | 28px | 0 |
 
-Product runs smallest because dense surfaces tile, and large radii leave triangular gaps between adjacent panels. Expressive may go either way, but never mixes round and square components or keeps four near-identical radii that are really one.
+Product's controls run smallest, since dense rows of them sit close together. Its cards and containers may go as round as editorial's: with content unboxed (`SKILL.md` law 3) the few cards don't tile edge to edge, which is where large radii leave triangular gaps — one more reason not to build a mosaic of panels. Pick the low end where cards sit side by side, the high end where one card sits on open page. Expressive may go either way, but never mixes round and square components or keeps four near-identical radii that are really one.
 
 **Radius scales with size, not importance**, and sub-proportionally: a 400px panel gets a larger radius than a 40px button because it is larger, but a proportional one reads as a lozenge. **`radius.pill` is for things with no top and bottom** — tags, dots, toggles, progress tracks. A paragraph in a pill-ended card collides with the curve.
 

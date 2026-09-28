@@ -35,10 +35,10 @@ When the evidence doesn't settle it, propose one, say what evidence you used, an
 
 *The interface is a tool, and the reader is fluent in it.* Density, predictability and scannability beat atmosphere. Signal has to survive a screen full of data.
 
-- **Type** — tighter, smaller steps; UI and data roles dominate. Up to three weights where a dense table needs a middle one. Tabular figures anywhere numbers align.
-- **Colour** — neutral ground with a real status palette (danger, warning, success, info), each a foreground/background pair. One accent for primary action and focus. Colour for meaning, never for decoration.
-- **Layout** — an app shell rather than a single measure: navigation, content, and inspector regions, each with its own width rules. Tighter spacing, still grouped asymmetrically. Prose inside the product (settings help, empty-state copy) still sits at a reading measure.
-- **Surfaces** — a clear, small elevation ladder: flat panels, raised cards, floating menus, modal overlays. Borders do more work than shadows.
+- **Type** — tighter, smaller steps; UI and data roles dominate. Two weights, strong at 500; labels in sentence case, never uppercase eyebrows. Tabular figures anywhere numbers align.
+- **Colour** — near-monochrome neutral ground with a real status palette (danger, warning, success, info), each a foreground/background pair. One accent hue for primary action and focus, and no second highlight hue. Colour marks what needs a person, not what is finished. Colour for meaning, never for decoration.
+- **Layout** — an app shell rather than a single measure: a collapsible sidebar holding all navigation (no top bar), content, and inspector regions, each with its own width rules. Sections stack, each opened by its heading; no bento mosaics or stat tiles. Tighter spacing, still grouped asymmetrically. Prose inside the product (settings help, empty-state copy) still sits at a reading measure.
+- **Surfaces** — content unboxed on the page, rows parted by hairlines; a card only for one object, never a card in a card. A clear, small elevation ladder: flat page, raised cards, floating menus, modal overlays. Hairlines do more work than shadows.
 - **Motion** — shortest of the three. State feedback is near-instant; nothing delays a repeated action. Springs only where something is dragged or thrown.
 
 ## `expressive`

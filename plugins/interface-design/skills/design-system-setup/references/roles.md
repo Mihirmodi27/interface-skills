@@ -32,7 +32,7 @@ Sizes, leading, tracking and weight all hang off these. Owned by `typographic-sy
 | `type.data` | Numerals that must align — tables, prices, stats. Often `type.ui` or `type.body` plus tabular figures rather than its own size |
 
 Families: `family.text`, `family.display` (only if different), `family.mono`.
-Weights: `weight.regular`, `weight.strong`. Two optional ones, each only where the preset allows it: `weight.medium`, a middle weight for dense UI (an active tab, a column total), and `weight.display`, the display tier's own weight, never reused below it.
+Weights: `weight.regular`, `weight.strong`. Two optional ones, each only where the preset allows it: `weight.medium`, a middle weight for dense UI where a project records a job the other two can't carry, and `weight.display`, the display tier's own weight, never reused below it.
 
 ## Colour
 

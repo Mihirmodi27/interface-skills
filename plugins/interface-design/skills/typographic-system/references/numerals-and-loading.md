@@ -53,7 +53,7 @@ If not, set `type.data` in the mono or a sibling family that has it, and record 
 - **Fixed decimals within a column.** 12.5 above 3.25 misaligns even in tabular figures; show both to two places.
 - **Units in the header, not the cells.** "Amount (GBP)" over bare figures, not a currency sign pushing each row's digits out of line. A sign that must be in the cell gets its own column, or pad with a figure space (U+2007), one tabular digit wide.
 - **A real minus.** U+2212 (−) is a plus's width, on the maths axis; a hyphen is narrower and low, and misaligns negatives by a hair.
-- **Totals take a weight, not a size.** In `product`, `weight.medium` separates a totals row without breaking the column's rhythm.
+- **Totals take a weight, not a size.** In `product`, `weight.strong` separates a totals row without breaking the column's rhythm.
 
 ## Loading
 
