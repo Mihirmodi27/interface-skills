@@ -41,13 +41,13 @@ Seven sizes above the floor; ceiling 24 ÷ 17 = 1.41. Four roles share 17px, eac
 
 ## Product
 
-Body 14px, chrome at 13. UI and data roles dominate; two weights, with strong at 500, so a heading is found by size and tier without going heavy.
+Body 14px, chrome at 13. UI and data roles dominate; two weights, with strong at 500, so a heading is found by size and tier without going heavy — or a recorded third for headings (below).
 
 | Role | Size | Leading | Tracking | Weight | Tier | Separates on |
 |---|---|---|---|---|---|---|
-| `type.title` | 20 | 1.3 | −0.01em | strong | `text.primary` | size |
-| `type.heading` | 16 | 1.35 | 0 | strong | `text.primary` | size |
-| `type.subheading` | 14 | 1.4 | 0 | strong | `text.primary` | weight |
+| `type.title` | 20 | 1.3 | −0.02em | strong | `text.primary` | size |
+| `type.heading` | 16 | 1.35 | −0.02em | strong | `text.primary` | size |
+| `type.subheading` | 14 | 1.4 | −0.02em | strong | `text.primary` | weight, tracking |
 | `type.body` | 14 | 1.5 | 0 | regular | `text.primary` | the baseline |
 | `type.supporting` | 14 | 1.45 | 0 | regular | `text.secondary` | tier |
 | `type.ui` | 13 | 1 / 1.4 | 0 | regular; strong when active | `text.secondary` | size, curve |
@@ -57,9 +57,27 @@ Body 14px, chrome at 13. UI and data roles dominate; two weights, with strong at
 | group label (project role under `type.label`) | 12 | 1.3 | 0, sentence case | regular | `text.tertiary` | a hairline rule beneath |
 | `type.code` | 12.5 | 1.5 | 0 | regular, mono | `text.secondary` | family |
 
-Five sizes plus code; ceiling 20 ÷ 14 = 1.43, and the dial allows up to 22 if a dashboard title needs it. The 12.5 compensates for a family rather than serving a role: monospace runs wide and steps down to fill the same measure.
+Five sizes plus code; ceiling 20 ÷ 14 = 1.43, and the dial allows up to 22 if a dashboard title needs it. The 12.5 compensates for a family rather than serving a role: monospace runs wide and steps down to fill the same measure. Only a product that shows code has the row; IDs, codes and times otherwise stay in the text face, tabular with a slashed zero.
 
-Two product rules. A dense table (a ledger, a log) may drop `type.ui` and `type.data` to 12px together, never one alone, or row and figures stop sharing a baseline rhythm. And an app's page title labels where you are; don't raise it to announce a feature.
+Headings from 14px take −0.02em as a role signal (the tracking dial); a figure or title at 24px and over, if the ladder has one, takes −0.04em. `type.ui`, `type.label` and the reading roles stay at 0.
+
+Two product rules. A dense table (a ledger, a log) may drop `type.ui` and `type.data` to 12px together, never one alone, or row and figures stop sharing a baseline rhythm. And an app's page title labels where you are; don't raise it to announce a feature. In a header bar it is chrome — the nav's size and weight, 13/500 — while the title of the open record or pane is the heading and takes the heading weight; one page setting its header title at 14/600 reads as a bug.
+
+### Three weights: quiet, lifted, heading
+
+The recorded third weight, for a dense screen where most lines share two or three sizes and each needs a quiet and a lifted voice. Weight is chosen by what the text is doing in that spot; the table goes into `DESIGN.md` as written, one row per size in use. A records app's:
+
+| Size | Quiet, 400 | Lifted, 500 | Heading, 600 |
+|---|---|---|---|
+| 20 | — | — | the open record's title |
+| 16 | — | — | pane, dialog and section headings |
+| 14 | body, descriptions, a board card's title | a list row's title | `type.subheading`; unread row title (the state weight) |
+| 13 | a row's second line, a card's time | nav items, header-bar page title, tabs, buttons, table header labels | — |
+| 12 | timestamps, hints, captions | a group label's count | — |
+
+Its rules: nothing inside a row, card or folder goes above 500 but the state weight; lift by one step, never on two neighbouring lines; every title in a set takes one weight. A board's card titles sit a step lighter than a list's row titles: a board shows many titles at once, and at 500 the whole board reads heavy.
+
+Expect the first pass to be a step too heavy everywhere. Correct it one step at a time per context, then sweep (`type-audit.md`) — a partial step-down is worse than none.
 
 ### Worked example: Tally
 

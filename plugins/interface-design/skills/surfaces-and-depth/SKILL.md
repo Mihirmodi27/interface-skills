@@ -1,6 +1,6 @@
 ---
 name: surfaces-and-depth
-description: "Decide how a surface says where it sits — flat, raised, floating or modal — and build each level as one bundle of surface, edge, shadow and layer. Covers one-light layered shadows, dark themes that lift by lightening, scrims, gradient strokes, glows, and translucency as an optional material: when it earns its place, how blur, saturation and tint keep it legible, and its reduced-transparency, high-contrast, forced-colours and no-support fallbacks. Works in the project's tokens via DESIGN.md. Use when deciding whether something should be a card at all, when a screen feels boxy, tiled or template-like, when building or reviewing cards, sticky headers, menus, popovers, tooltips, dialogs, sheets or drawers; choosing or tuning shadows; when depth looks flat, muddy or inconsistent; when dark mode loses its layers; when deciding whether a surface should be translucent at all; when text over one fails contrast; or when adding any backdrop-filter or elevation fallback."
+description: "Decide how a surface says where it sits — flat, raised, floating or modal — and build each level as one bundle of surface, edge, shadow and layer. Covers one-light layered shadows, dark themes that lift by lightening, scrims, gradient strokes, glows, and translucency as an optional material: when it earns its place, how blur, saturation and tint keep it legible, and its reduced-transparency, high-contrast, forced-colours and no-support fallbacks. Works in the project's tokens via DESIGN.md. Use when deciding whether something should be a card at all, when a screen feels boxy, tiled or template-like, when building or reviewing cards, sticky headers, menus, popovers, tooltips, dialogs, confirmations, sheets, drawers or an art panel; choosing or tuning shadows; when depth looks flat, muddy or inconsistent; when dark mode loses its layers; when deciding whether a surface should be translucent at all; when text over one fails contrast; or when adding any backdrop-filter or elevation fallback."
 ---
 
 # Surfaces and Depth
@@ -16,7 +16,7 @@ Read `DESIGN.md` at the project root: `## Profile` for the preset and any areas 
 - **The task would break a law or move a dial off its preset:** say so and ask; if the user confirms, record it with its reason under `## Decisions`.
 - **Preset `glass`:** the values are in `DESIGN.md`; the `glass-and-depth` skill, if installed, has the exact recipes behind them.
 
-Boundaries: the radius ladder and nesting rule, hairline weights and the z-index ladder are `layout-and-hierarchy`'s; surface, edge and tint colours, and why translucent tints are runtime values, `color-and-theming`'s; the timing of anything that lifts, glows or opens, `interface-motion`'s. This skill picks which a surface takes and checks they agree.
+Boundaries: the radius ladder and nesting rule, hairline weights and the z-index ladder are `layout-and-hierarchy`'s; surface, edge and tint colours, and why translucent tints are runtime values, `color-and-theming`'s; the timing of anything that lifts, glows or opens, `interface-motion`'s; a confirmation's flow and a sign-in page's layout, `product-patterns`'. This skill picks which a surface takes and checks they agree.
 
 ## Laws
 
@@ -25,6 +25,8 @@ Boundaries: the radius ladder and nesting rule, hairline weights and the z-index
 **Every surface sits on exactly one level — `elevation.flat`, `.raised`, `.floating` or `.overlay` — and takes that level's surface, edge, shadow and z-layer together: four spellings of one fact.** The level follows what the thing *does* — sits in the flow, is lifted or stuck, is summoned and dismissed, or blocks until answered — not how important it feels.
 
 Mixing parts is the bug the ladder prevents: a card given the menu's shadow on hover but not its layer is painted over by the next sibling, clipping the lift. A state change moves the whole bundle — a dragged card becomes floating in all four parts — while a hover that deepens a raised card's shadow is raised's own hover state.
+
+A level is also one component. Every dialog is the system's dialog, a destructive confirmation included: a one-off with its own red icon circle, red heading and padding reads as out of the system however right its level. The danger goes on the one action that does it (`color-and-theming`); surface, edge, shadow and scrim stay the overlay's.
 
 Every rung is used. The Glass package's fourth translucent tier, for "a menu over a surface you already know", never found a user. A dead rung is worse than an absent one: the next person assumes it is load-bearing.
 
@@ -42,7 +44,7 @@ A tinted strip behind a group label, a bordered callout and a tile per figure ar
 
 ### 3. Depth needs an edge as well as a shadow
 
-**Any surface above `elevation.flat` has an edge that says where it ends, not only a shadow that says it is above.** A shadow is a soft gradient and cannot draw a boundary; without an edge the outline is mush, worst in dark themes, where shadows have almost no headroom. The edge is `border.default` on an opaque surface; on a translucent one or any backdrop it doesn't control, the translucent `border.layered`, since a solid grey edge there reads as a pasted-on frame.
+**Any surface above `elevation.flat` has an edge that says where it ends, not only a shadow that says it is above.** A shadow is a soft gradient and cannot draw a boundary; without an edge the outline is mush, worst in dark themes, where shadows have almost no headroom. The edge is `border.default` on an opaque surface; on a translucent one or any backdrop it doesn't control, the translucent `border.layered`, since a solid grey edge there reads as a pasted-on frame. Where the preset draws the edge as a half-pixel ring at the head of the shadow stack (Dials), it is still the edge: `prefers-contrast: more` swaps in a real 1px border, whose whole job there is a boundary you can find.
 
 `forced-colors` drops every `box-shadow` but keeps the edge, so a surface designed with no visible edge still carries `1px solid transparent`, painted in the system text colour. `elevation.flat` has no shadow: an edge or a surface step, never a faint shadow posing as a border.
 
@@ -60,7 +62,7 @@ Nobody spots a `0.04` that became `0.05` in one of five copies, so **a layered s
 
 ### 6. Translucency has to be earned, and usually isn't
 
-**A translucent surface claims that content continues underneath and that seeing it helps. Where either half is false, the surface is opaque.** It holds for chrome that content scrolls under and for a floating layer whose context helps the reader. It fails for:
+**A translucent surface claims that content continues underneath and that seeing it helps. Where either half is false, the surface is opaque.** It holds for chrome that content scrolls under, for a floating layer whose context helps the reader, and for art — a frosted pocket on an illustration, whose backdrop is drawn, still and meant to be seen. Art earns it more often than chrome: nobody reads through it. A product keeps its art, generative or illustrated, translucent or not, to one inset panel — the half of a sign-in page beside an unboxed form — and never frosts over art that is still moving. It fails for:
 
 - **A section, panel or sidebar in the flow** — it's the page, not floating.
 - **A card in a grid or a row in a list** — nothing meaningful is behind it, and a filter per row is the worst cost profile.
@@ -108,6 +110,10 @@ Make it true, in order: raise the tint until it is effectively opaque behind tex
 
 **`elevation.overlay` brings a `scrim`; nothing below it does.** It says the rest of the interface is paused: a menu with one falsely claims to be modal; a dialog without one looks like a menu that won't close. A floating layer's outside-click catcher is transparent. The scrim darkens toward the ground's hue, stronger in dark themes, where dimming near-black barely registers and the overlay's surface step (law 5) does most of the separating. A blurred scrim — a full-viewport filter, the costliest surface there is — appears only where the preset allows and never animates its radius.
 
+Modal also hands back what it took: **on close, focus returns to whatever opened it.** A dialog opened from state — a row's menu item, a shortcut, a selection — has no trigger for the primitive to fall back to, so store the opener before opening and restore it, or the next Tab starts from the top of the page.
+
+→ Restoring focus, including when the opener is gone: `references/elevation-recipes.md`
+
 ### 13. Gradients on resizing elements are anchored in pixels
 
 **A gradient stroke or fill on an element that changes size places its stops in absolute units, and a gradient stroke is two background layers on one box.** Percentage stops rescale with the box: a Glass package panel opening from a 46px bar to 250px ran its whole navy-to-pale sweep inside the closed bar — louder closed than open — and shimmered as it grew. Anchored at `0px / 120px / 240px`, the top holds still and the colour grows downward. The stroke also needs `background-origin: border-box`, or every side gets the wrong end of the ramp — which looks almost right.
@@ -136,11 +142,12 @@ Reduced transparency needs both halves, an opaque surface *and* no filter: filte
 |---|---|---|---|
 | Content by default | Unboxed | Unboxed; a card only for one object | Unboxed; a card for one object or a named brand object |
 | Cards nested in cards | Never | Never | Never |
-| Translucency | Chrome only (a sticky header, a dock), or none | None — hairlines and opaque surfaces do the work | Brand material, each use named |
-| Translucent tiers | ≤ 2 (chrome, defensive) | 0 | ≤ 3 |
-| Translucent surfaces on screen at once | ≤ 3, none wider than the reading measure except fixed chrome | 0 | ≤ 4; full-viewport only as a static overlay scrim |
+| Translucency | Chrome only (a sticky header, a dock), or none | None on chrome or content — hairlines and opaque surfaces do the work; art only | Brand material, each use named |
+| Translucent tiers | ≤ 2 (chrome, defensive) | Soften, on art only | ≤ 3 |
+| Translucent surfaces on screen at once | ≤ 3, none wider than the reading measure except fixed chrome | 0, or 1 on art | ≤ 4; full-viewport only as a static overlay scrim |
 | Elevation levels in use | 3: flat, floating, overlay (raised only for sticky chrome) | 4: flat, raised, floating, overlay | 4, plus at most one named decorative level |
 | `elevation.flat` separates by | Space or a surface step; edges rare | Space, and hairlines between rows (`border.divider`) — never an edge round a group | Surface step or edge, per brand |
+| Edge above `elevation.flat` | A `hairline.*` border | A 0.5px `border.default` ring at the head of the shadow stack; a real 1px border under `prefers-contrast: more` | A border, or a named gradient stroke |
 | Floating shadow, peak layer opacity (light / dark) | 6% / 50% | 10% / 55% | 16% / 60% |
 | Shadow layers on floating | Contact + 2 ambient + inset highlight | Contact + 1 ambient | Contact + 2 ambient + inset highlight |
 | Dark surface lift per level (OKLCH L) | +0.05 | +0.04 | +0.06 |
@@ -149,7 +156,9 @@ Reduced transparency needs both halves, an opaque surface *and* no filter: filte
 | Corner shape | Round; `superellipse(1.5)` as enhancement | Round | Round or `superellipse(1.5–2)` |
 | Gradient strokes and glows | At most one, as the colour system's exception | None | Allowed, each named for its job |
 
-**Translucency.** Moving up a preset trades contrast certainty, a fallback path and a filter pass per surface for atmosphere. Fluent, daily product readers gain nothing from atmosphere and lose a lot to a header dimming to mid-grey over a data table. Editorial allows it on chrome because seeing the page being read scroll under keeps the reader oriented.
+**Translucency.** Moving up a preset trades contrast certainty, a fallback path and a filter pass per surface for atmosphere. Fluent, daily product readers gain nothing from atmosphere and lose a lot to a header dimming to mid-grey over a data table. Editorial allows it on chrome because seeing the page being read scroll under keeps the reader oriented. Product's one opening is art: its backdrop is drawn, still and carries no text, so the material costs no contrast, and keeping it there is what lets the rest of the product stay opaque.
+
+**Edge.** A ring inside the shadow sits quieter than a border beside rows parted by hairlines and moves with the shadow as one definition; it is still law 3's edge, so the contrast swap and the transparent border for forced colours go with it.
 
 **Levels in use.** Editorial pages mostly have nothing to pick up, so `elevation.raised` has no job; inventing one makes cards look liftable when they aren't. Product's dense screens hold draggable, sticky, floating and modal things at once. A fifth level usually means two differ too little to tell apart.
 
@@ -228,14 +237,15 @@ One line per finding in `## Open issues`, with evidence: *"`.search-popover` has
 - [ ] Several objects of one kind, or a rail's topics, share one card parted by dividers; asides are a ruled note, not a tinted box.
 - [ ] Each surface on one `elevation.*` level, chosen by what it does, bundle and `z.*` included.
 - [ ] No borrowed parts: a lifted hover or drag moves the whole bundle, layer included.
+- [ ] Every dialog, destructive confirmations included, is the system's dialog; closing one returns focus to its opener, stored when it opened from state.
 - [ ] Every level in the ladder is used.
-- [ ] Above `elevation.flat`, an edge (`border.default` opaque, `border.layered` translucent) that survives `forced-colors`.
+- [ ] Above `elevation.flat`, an edge (`border.default` opaque, `border.layered` translucent) that survives `forced-colors`; a ring edge becomes a 1px border under `prefers-contrast: more`.
 - [ ] `elevation.flat`: edge or surface step, never a faint shadow.
 - [ ] Shadows: contact plus ambient, negative spread, one light; no contact layer on transient surfaces.
 - [ ] One shadow definition per level per theme, used everywhere.
 - [ ] Shadow strength set by what's immediately behind; on a tinted ground, its hue.
 - [ ] Dark levels each lighter than the one below; page not `#000`.
-- [ ] Translucency only where content continues underneath and seeing it helps; never cards, rows, sections, reading copy, flat backdrops.
+- [ ] Translucency only where content continues underneath and seeing it helps, or on still art; never cards, rows, sections, reading copy, flat backdrops.
 - [ ] Blur set by backdrop uncertainty, always with `saturate()`.
 - [ ] Animating wrapper and filtered surface are separate, or the tint is defensive.
 - [ ] Translucent-surface text measured against the tint over the worst backdrop.

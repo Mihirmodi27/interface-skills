@@ -1,6 +1,6 @@
 # Fallbacks and performance
 
-Every material ships four more paths — no support, reduced transparency, increased contrast, forced colours; opaque surfaces need only the last — and a cost model sets its budget.
+Every material ships four more paths — no support, reduced transparency, increased contrast, forced colours; opaque surfaces need only the last, or the last two where their edge is a shadow ring — and a cost model sets its budget.
 
 ## The order
 
@@ -57,7 +57,7 @@ It also makes text contrast computable and true for the users most likely to nee
 
 ## Increased contrast
 
-A faint `border.layered` goes first. Promote the edge to `text.primary` and leave the surface — high contrast is about boundaries and text, not the material — so it composes with reduced transparency: opaque surface, strong edge.
+A faint `border.layered` goes first. Promote the edge to `text.primary` and leave the surface — high contrast is about boundaries and text, not the material — so it composes with reduced transparency: opaque surface, strong edge. A half-pixel ring edge goes the same way, swapped for a real 1px border (`elevation-recipes.md`).
 
 ## Forced colours
 

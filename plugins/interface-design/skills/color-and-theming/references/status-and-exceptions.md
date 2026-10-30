@@ -1,6 +1,6 @@
 # Status colours and chromatic exceptions
 
-A status colour says *"what state is this in?"* from a small, fixed vocabulary; an exception asks *"may this element announce itself?"* and has to earn it. Mixing them grows the palette: a success green ends up on a "new" badge because it was there.
+A status colour says *"what state is this in?"* from a small, fixed vocabulary; a hue family says what a thing is, where it lives or who; an exception asks *"may this element announce itself?"* and has to earn it. Each colour has exactly one of those jobs, written down. Mixing them grows the palette: a success green ends up on a "new" badge because it was there.
 
 ## Does the project need a status palette?
 
@@ -20,6 +20,14 @@ Banner body text stays in `text.primary` and `text.secondary`; only the icon and
 A **solid** fill — a destructive button — can often reuse the foreground: in light, a foreground at 4.5:1 on white gives white text 4.5:1 on it; in dark it takes dark `text.on-accent`-style text. Named separately: `status.danger.solid`.
 
 In `DESIGN.md`: `status.danger.fg` and `status.danger.bg`, one row each, per theme.
+
+### Destructive actions take red ground, not red decoration
+
+In a menu, a destructive item is a `status.danger.bg` row at rest and `status.danger.solid` with white text when highlighted. A red icon and red label on a neutral row is decoration, the coloured paragraph again, and reads as a one-off. It takes no icon: the verb and its place, set apart at the end of the menu, carry it without colour. Every destructive or session-ending item (delete, clear, sign out) takes this one treatment, so the reader learns it once.
+
+## Figures take colour only while they report
+
+A count or stat is in ink unless it reports a problem or progress: overdue or failed in `status.danger.fg`, pending or due soon in `status.warning.fg`, done or logged in `status.success.fg` where the preset colours done. Plain counts stay in ink, and so does every zero; "0 overdue" in red is an alarm with nothing behind it. The label beside the figure always names what it counts, so the colour confirms a word rather than replacing one. One colour per figure: a chip beside it that would compete goes neutral.
 
 ## Deriving the four
 
@@ -52,6 +60,8 @@ Name the carrier for each status and interactive state:
 |---|---|
 | A field in error | A message below it, in words, linked with `aria-describedby`; an icon; the border change is the third signal, not the first |
 | A status banner | A distinct icon *shape* per status (a cross, a triangle, a tick, an "i"), and a lead word — "Error", "Saved" |
+| A work item's state | A glyph whose shape moves with the work: empty ring, dashed ring, half, three-quarters, filled check; a cross for cancelled or failed, a "!" for blocked |
+| Priority | Bars, filled from one to three |
 | A toast | The same, plus `role="status"` or `role="alert"` so it is announced |
 | The current nav item | A marker, a rule, a fill or a weight — and `aria-current` |
 | A selected row | `surface.selected` *and* a check, a rule or a bar at the edge |
@@ -76,6 +86,39 @@ input[aria-invalid="true"] { border-color: var(--status-danger-fg); }
 
 The neutral case: a contents rail moving the current label from `text.secondary` to `text.primary` — 7.7:1 to 15:1, clear in a table, nearly invisible in daylight, to low vision, or mid-scroll. A 2px rule or marker at the edge carries the state; the colour change reinforces it.
 
+A ring that fills as work moves is legible in greyscale, so its colour only confirms what the shape says; that is what lets a product colour done without colour carrying it.
+
+## Done, and where the reader is
+
+Law 7's dial, decided by whether completion is the news:
+
+| The list is… | Done looks like | Why |
+|---|---|---|
+| A sequence the reader passes through: setup steps, passed checks, a wizard | An ink check on a neutral circle | Completion is expected; the pending item is the only news, and a column of green ticks outshouts it |
+| Work people open to see what got done: a task board, a review queue | `status.success` on a filled check | Completion is what they track. The glyph's shape already says done, and late or failed items take warning or danger, so the eye still finds what needs a person |
+| A long list of ticked checkboxes | A light grey box with an ink tick | An inverted ink or accent block per tick shouts down a long list; the tick's shape carries the state |
+| A switch | Its strong fill, on | A switch has no tick, so the fill is the state |
+
+The second row reverses the first on purpose: it is what the "too grey" product in law 7 changed on its boards. Record which lists take which row under `## Decisions`, so the next audit doesn't "fix" one into the other.
+
+Where the reader *is* stays neutral. A place in the data with one member is different: on a calendar board, today's column may take a filled `accent` with `text.on-accent`, the one time the brand marks a place rather than an action. Record it as `exception.today`; it doesn't make a second.
+
+## Hue families: colour with a job
+
+Where the reader sorts by kind, place or person at a glance, each question gets its own family, and no family answers another's.
+
+| Question | Family | Takes the colour | Never |
+|---|---|---|---|
+| What is it? | `exception.type.<name>`, one per record type | Its icon, its tag, its chart bar | Text, a state, a whole row |
+| How is it doing? | `status.*` | Its glyph, a figure (above), a field's edge, a banner's tint | A kind, a place, anything merely live |
+| Where does it live? | `exception.area.<name>`, one per folder or area | Nav icon, breadcrumb step, page-title icon | Text, a state |
+| Who? | `exception.person.<n>`, a fixed set assigned from the person's id | Avatars only, coloured rather than grey circles | Names, rows |
+
+- **Marks only.** The family colours the glyph; the words beside it stay in ink.
+- **No crossing.** A late task's type icon keeps its hue; the status glyph beside it turns. Where a family hue falls near a status hue or the accent, move its lightness or chroma until it can't be read as one, and never reuse a status value.
+- **3:1 on every ground, per theme.** A mark the reader needs is a non-text graphic: measure it with `contrast.mjs --min 3` on each surface it sits on (panel, frame, hover, selected) in each theme, and re-pick the family per theme like any accent.
+- **Listed.** Under **Exceptions** in `DESIGN.md`, each family with its question, its members and its marks: "`exception.area.*` — where a record lives. Nav icon, breadcrumb step, page-title icon. Never text, never state."
+
 ## Chromatic exceptions
 
 ### The test
@@ -94,6 +137,18 @@ Reasons that can't spread name a category with one member: "it's the only offer 
 
 Within the dial's allowance, an expressive palette still names each hue's place: "coral only on section backgrounds in the pricing band", "violet only on the one hero illustration". A hue without a written place is an uncounted exception. What weight, position and space can't make findable is usually what must be found before reading starts.
 
+### Live is not danger
+
+A recording or live state borrows nothing from `status.danger`: a red-filled record button reads as an error and as the destructive colour, and looks wrong. Live is the brand's: a well tinted with the accent, a 1px accent ring, a soft accent glow, and level bars that move with the input. Red survives only as a small live dot. The control shows Stop on hover and focus, and holds still while paused; both belong to `interface-motion`. Name it `exception.live`.
+
+### One gradient, for AI working now
+
+If a product has one gradient, it means one thing. A thin conic stroke in the accent's hues travels round the card where AI is working live, with a soft glow; everything else stays flat. Paused, the stroke stops and the glow dims; under reduced motion it holds still; under `prefers-contrast: more` it becomes a solid accent edge. Its stops are runtime values, every one moved per theme (laws 8 and 10). Name it `exception.ai-live`.
+
+### Marking AI output
+
+A small sparkle glyph in the accent beside what the AI wrote: not a robot avatar, not a coloured bubble. A bubble colours the content, which the reader judges in ink like any other, and an avatar gives a tool a face. Only the mark takes the colour, and a mark, never a fill, doesn't compete with the one action the accent marks.
+
 ### When the brand hue is also a status hue
 
 A red brand and a red danger, or a green brand and a green success, read as each other; one gives way. Usually the status moves — danger to a deeper, bluer red, success to a teal-green — because a status must be unambiguous and a brand is also recognised by shape and placement. Where the brand colour must stay on a destructive action (a red brand's "Delete"), the word, the icon and a confirmation step say "destructive". Record the choice under `## Decisions`.
@@ -104,4 +159,4 @@ It is the one planned colour, its jobs set by the dial; law 5 in `SKILL.md` cove
 
 ## Charts are a different palette
 
-Categorical series colours are neither status nor exception and need their own method (distinguishable in colour-vision deficiency, legible in both themes, ordered). Never borrow status foregrounds: a red line reads as "error" whatever it measures.
+Categorical series colours are neither status nor exception and need their own method (distinguishable in colour-vision deficiency, legible in both themes, ordered). Never borrow status foregrounds: a red line reads as "error" whatever it measures. The one overlap: series that *are* a family's members, such as record types, take that family's hues, since they answer the same question.

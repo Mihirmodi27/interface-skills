@@ -61,7 +61,7 @@ Light-theme floating shadows at the dial strengths; raised and overlay follow fr
 | `product` | `0 1px 1px rgb(0 0 0 / 0.04), 0 12px 24px -8px rgb(0 0 0 / 0.10)` — edges carry the rest |
 | `expressive` | `inset 0 1px 0 rgb(255 255 255 / 0.6), 0 1px 2px rgb(0 0 0 / 0.06), 0 10px 20px -6px rgb(0 0 0 / 0.10), 0 32px 48px -12px rgb(0 0 0 / 0.16)` |
 
-Product leans on `border.default` with short shadows, so dense screens don't fill with grey. Because content is unboxed (`SKILL.md` law 2), the few cards a product screen keeps may draw their edge as a half-pixel ring at the head of the shadow stack (`0 0 0 0.5px <border.default>`) rather than a border — quieter beside rows parted by hairlines, still an edge. It keeps `border: 1px solid transparent` for forced colours (below). Expressive may add one decorative level — a branded pocket, a hero card — named, with its own bundle.
+Product leans on `border.default` with short shadows, so dense screens don't fill with grey, and draws that edge as a ring inside the shadow on cards, menus and dialogs alike (below). Expressive may add one decorative level — a branded pocket, a hero card — named, with its own bundle.
 
 ## Dark theme: a different recipe
 
@@ -99,11 +99,56 @@ Without relative colour syntax, pick it by hand (the ground's hue, low lightness
 
 A card animating by transform, as in a reordering stack, can't change its border without shifting layout; use `outline: 1px solid <border.default>; outline-offset: -1px`, which, unlike a `0 0 0 1px` shadow ring, survives forced colours. An edgeless surface carries `border: 1px solid transparent` — a boundary for exactly the users who asked for one.
 
+**The ring edge** (`product`): the edge as the first layer of the level's one shadow definition, so edge and shadow change together and every card, menu and dialog gets the same line.
+
+```css
+:root {
+  --elevation-floating:
+    0 0 0 0.5px var(--border-default),          /* the edge */
+    0 1px 1px rgb(0 0 0 / 0.04),
+    0 12px 24px -8px rgb(0 0 0 / 0.10);
+}
+.card, .menu, .dialog { border: 1px solid transparent; box-shadow: var(--elevation-floating); }
+@media (prefers-contrast: more) {
+  .card, .menu, .dialog { border-color: var(--text-primary); }   /* a real 1px edge, as for materials */
+}
+```
+
+Half a pixel is one device pixel on a 2x screen and rounds to a faint 1px on 1x, which is the point — quieter than any border — and why the contrast preference gets a real one. Forced colours paints the transparent border.
+
 ## Moving between levels
 
-- **Hover on a raised card** may deepen the shadow, as raised's own state; if the lift overlaps a neighbour it also takes `z.raised`, or the next sibling paints over it.
+- **Hover on a raised card** may deepen the shadow, as raised's own state; if the lift overlaps a neighbour it also takes `z.raised`, or the next sibling paints over it. In `product`, hover is a surface wash and the bundle stays put; `interface-motion` says why.
 - **Drag** moves it to floating, whole — shadow, layer, dark surface — and drop moves it back.
 - **A popover promoted to a dialog** changes to overlay and gains a scrim at the same moment.
+
+## Closing an overlay
+
+A dialog hands focus back to its opener. Primitives do this for a trigger they rendered; a dialog opened from state — a row's menu item, a keyboard shortcut, a bulk selection — has none, and focus falls to `<body>`. Store the opener as it opens:
+
+```tsx
+const opener = useRef<HTMLElement | null>(null);
+const openDialog = () => { opener.current = document.activeElement as HTMLElement; setOpen(true); };
+
+<Dialog open={open} onOpenChange={setOpen}
+  onCloseAutoFocus={(e) => {                       // or the primitive's equivalent close hook
+    e.preventDefault();
+    const back = opener.current?.isConnected ? opener.current : fallback();
+    back?.focus();
+  }}>
+```
+
+- **Opened from a menu item:** the item unmounted with the menu; store the menu's trigger, not the item.
+- **The opener is gone** — the row was just deleted: `fallback()` focuses its neighbour, or the list's heading, never the page top.
+
+## The art panel
+
+Where a product keeps art (`SKILL.md` law 6) it is one inset panel: on a sign-in page, the half beside an unboxed form, from the breakpoint where both fit; phones get the form alone.
+
+- **Its own surface, not a level.** Inset by the page gutter, at `radius.container`, no shadow: it is part of the page, not above it.
+- **Its theme is scoped.** Art designed for one ground looks wrong on the other, so the panel pins a theme (`data-theme="dark"` on the panel, its tokens re-resolving inside) and reads the same in both.
+- **Generative over photographic.** A photograph or a soft gradient wash reads dated; art generated in the brand's colours reads current. Its motion is ambient (`interface-motion` law 4): the screen it lives on is an area on a preset that allows it, or the art holds one still frame, as it must under reduced motion.
+- **A frosted element sits over still art** only, as the pocket in `translucent-materials.md`, with its opaque fallback.
 
 ## One definition per level
 

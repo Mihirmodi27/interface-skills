@@ -59,10 +59,10 @@ Steps land about 0.02 apart in L in light, 0.03 in dark. Light `border.default` 
 
 ## Deriving the accent from a brand hue
 
-The brand hue is given; derive the rest per theme.
+The brand hue is given; derive the rest per theme. A logo's colour is where the hue comes from, not the accent: tuned for a mark seen once, at full strength it reads too bright across a working screen. Keep its hue and tone chroma and lightness down until white text clears 4.5:1.
 
 1. **`accent` in light.** The highest in-gamut chroma at a lightness where `text.on-accent` clears 4.5:1 — with white text, usually L 0.45–0.55. If the script reports clipping, lower the chroma, not the lightness.
-2. **`accent` in dark.** L roughly 0.72–0.78, chroma trimmed a little; `text.on-accent` usually flips to the dark `surface.page`. Measure it as a new colour.
+2. **`accent` in dark.** Either one value, L roughly 0.72–0.78 with chroma trimmed a little, with `text.on-accent` flipped to the dark `surface.page`; or, where the brand keeps white text on its fill, two: the fill near its light-theme lightness, and a lighter `accent.ink` at 4.5:1 on the dark page for links, icons and brand text, since no single value clears both. Measure each as a new colour.
 3. **Its hover.** 0.05 in L away from the page — darker in light, lighter in dark: more contrast in both.
 4. **`surface.selected`.** The accent hue at the `surface.selected` lightness, chroma about 0.03. Re-measure the *lowest* text tier on it: this fails most often, because a tint costs a little luminance.
 5. **`focus`.** The accent, if it clears 3:1 on every surface including `surface.selected`, and on the page: `outline-offset` leaves a gap of page colour, so a ring round an accent button is seen against the page.

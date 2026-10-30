@@ -254,6 +254,8 @@ Glass says "this floats above your content, and the content continues underneath
 
 The site uses glass in four places, all floating chrome: the nav dock, the settings drop-up, the mobile sheet, one decorative pocket. Everything else is opaque.
 
+**A confirmation reuses the system's panel, never a one-off.** Asking before something destructive takes the same tier, hairline and shadow as every other floating panel; a red icon in a circle over red text reads as another product. The words say what is lost and the action carries the red (**glass-color**). Focus goes in on open, to the field that must be filled rather than Cancel, and on close returns to whatever opened it, even a row or a menu item rather than a trigger the dialog knows about. → The confirmation pattern in full: `references/depth-cues.md`
+
 ## Assets
 
 - `assets/glass.css` — the three materials, all fallbacks, the missing `@supports` guard, `.dock-shadow`, the gradient-stroke panel. Pairs with `glass-color/assets/color-tokens.css` (tints, `--sv-*` stops).
@@ -285,3 +287,4 @@ The site uses glass in four places, all floating chrome: the nav dock, the setti
 - [ ] Closed menus unmount, never sit invisible.
 - [ ] No animated blur radius; no full-viewport glass.
 - [ ] Each use is floating chrome, not card, section or flat background.
+- [ ] Destructive confirmations reuse the panel; focus goes in on open and back to the opener on close.

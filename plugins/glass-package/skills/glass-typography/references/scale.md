@@ -79,3 +79,27 @@ The reference implementation uses `px` throughout (`text-[14px]`, not `text-sm` 
 The trade: `rem` respects a user's browser font-size setting and `px` doesn't, a real accessibility cost. But this hierarchy depends on precise 1px relationships in the 11–16 band, a root scaled to 20px turns them into 15px steps that break the ladder, and browser *zoom* — which everyone uses, and which scales `px` fine — already covers the need.
 
 If your audience skews toward users who set a root font size — documentation, government, healthcare — use `rem` and accept a looser ladder. Convert at a fixed 16px root: 18px → 1.125rem, 14px → 0.875rem, 13px → 0.8125rem. Never mix the two systems in one codebase.
+
+## Keeping every element on it
+
+A ladder drifts by partial updates more than by bad decisions: a role changes, some elements take the new value and some keep the old, and the page reads as two systems. So every type change ends in a sweep.
+
+1. **Walk every route**, not the page you changed, and check each text element against its role: size, leading, weight, tracking.
+2. **Move raw sizes onto role tokens** as you go. `text-[14px]` or `text-sm` has to be found and edited by hand next time; `text-copy` changes in one place.
+3. **Check the same element across pages** — a pane title, a page header, a pair of sibling buttons. They take one role everywhere; where two disagree, match the better one.
+
+One trap makes step 2 fail silently. `tailwind-merge`, behind most `cn()` helpers, recognises font sizes only from Tailwind's default scale, so it reads `text-copy` as a *colour* and drops it in favour of a later `text-gray-900`: no error, just a size that falls back to the inherited one. Register the role names:
+
+```ts
+import { extendTailwindMerge } from "tailwind-merge";
+
+export const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      "font-size": [{ text: ["page", "section", "copy", "summary", "dense", "code", "micro", "tip", "mark", "card"] }],
+    },
+  },
+});
+```
+
+Then check the *rendered* size of one element per role, not the source: the class can be written there and never reach the markup.

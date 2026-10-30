@@ -72,6 +72,26 @@ node <design-system-setup>/scripts/contrast.mjs --ladder "#b4b4b4" "#16161a" "#4
 
 Record the ratio against the worst composite in `DESIGN.md`, naming the backdrop.
 
+## A pocket on art
+
+The one material a `product` preset keeps: a frosted pocket on an illustration — a folder's front panel showing the sheets behind it — at the soften tier.
+
+```css
+.pocket { background: var(--surface-page); }                     /* opaque baseline */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .pocket {
+    background: linear-gradient(180deg, var(--pocket-tint-top), var(--pocket-tint-bottom));
+    backdrop-filter: blur(8px) saturate(1.4);
+    box-shadow: inset 0 1px 0 var(--pocket-catch);              /* catch light on the top edge */
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .pocket { background: var(--surface-page); backdrop-filter: none; }
+}
+```
+
+The backdrop is drawn by you and holds still, so saturation stays low (it is the subject) and nothing needs measuring for text. Over art that animates, skip the filter and draw the frost into the art.
+
 ## Glass over glass
 
 The upper filter samples the lower one's filtered output, so the result varies with stacking context, paint order and browser rather than doubling the frost; and two surfaces at one tint read as one object. The upper surface goes defensive or opaque, its blur decoration. **At most one meaningful blur in any vertical stack.**

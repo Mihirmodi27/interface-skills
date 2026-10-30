@@ -22,6 +22,8 @@ The eye needs time in proportion to the distance it travels and the area it re-r
 
 **Above ~150ms on a hover state**, a fast pointer across a list or a dense table leaves a visible trail. That caps `duration.micro` and `duration.state` for anything hovered in bulk, in any preset, so `expressive` spends its longer `duration.state` on entrances and single controls and keeps list-row hovers at `duration.micro`. Above ~200ms, `editorial`'s `duration.state` makes reading chrome feel heavy.
 
+**A large surface is the opposite case.** A row is a thin strip the pointer crosses; a card on a board is an area the eye rests on, and the same 80ms colour change across it looks instant, not smooth. The area sets the tier here as everywhere, so a card's wash takes about 200ms in and a slower 250ms out: the pointer has already left, the fade blocks nothing, and a sweep across the board fades behind it instead of strobing. Name only `background-color` (and `border-color` if it moves), never `transform` or `box-shadow`: in `product` a card that rises or darkens its shadow under the pointer claims it can be picked up. `expressive` lets primary navigation lift, because there the travel is the invitation.
+
 ## Exits
 
 An exit runs at about two-thirds of its entrance, on `ease.exit` (an `ease-in`, accelerating away, so the element reads as leaving rather than deleted), and travels about half the entrance's offset.

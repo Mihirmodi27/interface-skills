@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Interface design skills in two packages: the Glass package, an exact system to copy, and interface-design, the same practices fitted to your own project.",
-    "version": "2.0.0"
+    "version": "2.1.0"
   },
   "plugins": [
     {
       "name": "interface-design",
       "source": "./plugins/interface-design",
-      "description": "Six skills that apply one set of interface best practices — type hierarchy, colour and theming, layout, surfaces and depth, motion — in your project's own names and values, via a DESIGN.md the setup skill writes for you."
+      "description": "Seven skills that apply one set of interface best practices — type hierarchy, colour and theming, layout, surfaces and depth, motion, product patterns and UI copy — in your project's own names and values, via a DESIGN.md the setup skill writes for you."
     },
     {
       "name": "glass-package",

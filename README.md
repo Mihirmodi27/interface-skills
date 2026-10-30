@@ -4,7 +4,7 @@ AI skills for building interfaces — typography, colour, layout, surfaces and m
 
 | Package | For | What you get |
 |---|---|---|
-| **Customize** — `interface-design` | Any project, in its own style | One set of best practices, applied in *your* token names, *your* values and *your* project's character. A setup skill reads your codebase and writes a `DESIGN.md`; five skills work through it. |
+| **Customize** — `interface-design` | Any project, in its own style | One set of best practices, applied in *your* token names, *your* values and *your* project's character. A setup skill reads your codebase and writes a `DESIGN.md`; six skills work through it. |
 | **Glass package** — `glass-package` | Copying modimihir.com's look exactly | The real system, with its real values and drop-in token files and components: two weights, an intent-indexed grey ramp, glass that reads as material, one 640px measure, a 150/200/300ms motion ladder. |
 
 Both install together cleanly — their skill names don't overlap — and the installer asks which you want.
@@ -106,7 +106,7 @@ Skills load on demand — the agent reads each skill's `description` to decide w
 
 ## Customize: the adaptable set
 
-Six skills in [`plugins/interface-design/skills/`](plugins/interface-design/skills/):
+Seven skills in [`plugins/interface-design/skills/`](plugins/interface-design/skills/):
 
 | Skill | Covers |
 |---|---|
@@ -116,6 +116,7 @@ Six skills in [`plugins/interface-design/skills/`](plugins/interface-design/skil
 | [`layout-and-hierarchy`](plugins/interface-design/skills/layout-and-hierarchy/) | A reading measure that doesn't move between templates, spacing that groups, a nested radius ladder, a documented z-index ladder, forked components where the interaction model differs, disclosures that hide rather than unmount, and structural accessibility. |
 | [`surfaces-and-depth`](plugins/interface-design/skills/surfaces-and-depth/) | Elevation as a small named ladder of bundles — surface, edge, shadow, layer — layered shadows that hold up in dark themes, translucency as one optional material with every fallback, and when not to use it. |
 | [`interface-motion`](plugins/interface-design/skills/interface-motion/) | Motion that makes a change legible: durations set by how much of the screen changes, one standard curve, springs named by character, asymmetric open and close, shared elements, and reduced motion as a real alternative path. |
+| [`product-patterns`](plugins/interface-design/skills/product-patterns/) | How a product behaves and what it says: short sentence-case labels and verb buttons, row second lines that name type and origin, one treatment for destructive actions and confirmations scaled to the loss, an AI agent's work shown step by step with inline approvals, live transcripts, keyboard-first dense tools, board and list views, optimistic moves that roll back, dashboards, forms and sign-in screens — plus a workflow for iterating on feedback. |
 
 ### How it adapts
 

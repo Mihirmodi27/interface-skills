@@ -116,6 +116,10 @@ Two rules keep it from becoming a palette.
 
 A `#16276b` stop on a `#0b0b0b` page loses the stroke's darker half. Lightening only that end compresses the ramp until it stops reading as one gradient; **move every stop by roughly the same amount**, since a gradient is a relationship between stops. The fill is *tinted* to `gray-100`'s weight, not darkened, so it doesn't punch a hole in the page (the glass-tint rule, §6). The material — a 1px gradient stroke, a side-weighted glow, no wrapper — belongs to **glass-and-depth**.
 
+### Status colour is not an exception, and keeps one meaning
+
+If something reports state, it gets a semantic pair (`references/intent-ramp.md`), and **shape carries the state while colour confirms it**, so it reads in greyscale. Red means loss. A live or recording state is not danger: shape and motion say it, and red shrinks to a small dot at most. Every destructive or session-ending action (delete, clear, sign out) shares one red treatment, wherever it sits.
+
 ## 4. Text is a five-tier ladder — and it is *not* the grey ramp
 
 The lower three tiers are **their own tokens**, set by contrast:
@@ -222,7 +226,7 @@ Dropping the `backdrop-filter` is the other half, and both are required. Blur, s
 - [ ] **No step from 500 to 800 as text**; text is `gray-900`/`gray-1000` or muted/quiet/faint.
 - [ ] Tiers computed in the **light** theme, on the worst surface the text lands on.
 - [ ] Ladder strictly descending, so hierarchy survives the 4.5:1 floor.
-- [ ] Icons clear 3:1 and share the ladder of the label beside them.
+- [ ] Icons and small marks clear 3:1 on every ground they sit on (page, panel, hover) in both themes, and share the ladder of the label beside them.
 - [ ] Decorative marks (bullets, dots, inactive markers) on the grey ramp.
 - [ ] Alpha ramp for anything layered; solid only for opaque surfaces.
 - [ ] Alpha ramp white-based in dark mode.
@@ -230,6 +234,7 @@ Dropping the `backdrop-filter` is the other half, and both are required. Blur, s
 - [ ] At most one chromatic exception beyond focus, for a structural reason nothing else shares.
 - [ ] Inside it, only the mark is coloured; text stays in the page's ink.
 - [ ] A dark-mode gradient moves **every** stop, not just the vanished one.
+- [ ] Status carried by shape, colour confirming; red only for loss, one treatment for every destructive or session-ending action.
 - [ ] `:focus-visible` with `outline-offset`, not `:focus` — bar a skip link, which must show on keyboard focus regardless of heuristics.
 - [ ] Theme set by a data attribute, not `prefers-color-scheme`.
 - [ ] `color-scheme` declared in both themes.

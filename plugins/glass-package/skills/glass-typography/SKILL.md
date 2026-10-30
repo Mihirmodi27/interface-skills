@@ -40,6 +40,8 @@ Text tiers (`primary` → `quiet`) come from the **glass-color** skill. Only the
 
 **Eighteen is the ceiling, and it's lower than you think.** An earlier ladder topped out at 30px, with a 19px prose heading, a 17px dek and a 16px prose body. Case studies and articles opened at 30px and every other page at 18px, so a case study felt like a different site. **A scale is only a system if every template is on it**; one that opens two steps above the others is opting out, not expressing importance. The rest of the site ran on **two sizes**, 16 for headings and 14 for everything read; the detail templates came down to those, and the four sizes were deleted, not replaced.
 
+**The same goes for one element across pages.** A pane title at 16/500 on one page and 14/400 on the next reads as a bug, not a variant; so do two sibling buttons whose icons differ in size or weight. One element takes one role everywhere, and where siblings disagree, match the better one.
+
 ### When size stops doing the work
 
 Collapse the ladder and eight roles share 14px — the constraint the system is *for*. Each separates on a different axis, no two sharing a mechanism. That keeps a one-size column legible, and means a ninth 14px role needs an unused axis first.
@@ -66,11 +68,13 @@ Load 400 and 500. That is the system.
 - **400** — all body copy, all reading copy, all quiet UI.
 - **500** — headings at every level, active states, `<strong>`, lettermarks.
 
+**Which of the two is set by what the line is doing there, not how important it feels.** Every size has a quiet setting (400) and a lifted one (500). Lift one line per group, never two neighbours: a row's title at 500 leaves its date at 400, or the pair reads as one heavy block and neither leads. And every title in a set takes one weight; a column where some titles are 500 and some 400 reads as a rendering fault, so let position or a mark say which is finished.
+
 No 600, no 700. 500 against 400 is already a clear step; 700 makes headings shout and forces every *other* level louder to keep its distance, which is how systems end up with five weights and no hierarchy.
 
 **The one exception** is a single `font-semibold`, on 7.5px folder-card lettering. Below about 8px a 500 doesn't survive rasterisation as a weight — too few pixels across a stem — so it's 600 or nothing. It's below the readable floor, on something recognised rather than read: the only kind of exception to accept, and one is the right number.
 
-**Weight also keeps state off colour alone.** A contents rail's active row takes `font-medium` *and* primary colour: colour alone fails WCAG 1.4.1, weight alone is subtle but real, together they're unambiguous. Reach for weight before a background.
+**Weight also keeps state off colour alone.** A contents rail's active row takes `font-medium` *and* primary colour: colour alone fails WCAG 1.4.1, weight alone is subtle but real, together they're unambiguous. Reach for weight before a background. The reverse never holds: **no state greys a title.** Read or unread, done or not, a row's title stays the darkest thing in it, and the state goes on weight or a mark beside it.
 
 → Weight and tracking in depth, including when 300 is legitimate: `references/weight-and-tracking.md`
 
@@ -201,6 +205,10 @@ The most useful distinction here — one page runs two type systems:
 
 The ranges overlap: **once the ladder is short, leading and measure carry the distinction, not size.** A 14px nav row and a 14px paragraph share nothing else. If something looks off, check for reading leading on a UI row (it grows; the dock loses its rhythm) or UI leading on a paragraph (a wall).
 
+**UI copy is sentence case, generated labels included.** Buttons, column heads, field names, dialog titles, toasts, and anything a template builds from a key: first word and proper nouns capitalised, acronyms and third-party names as written. Labels generated from code drift into Title Case unnoticed, and a second case is a second voice.
+
+**An icon beside text is sized to the text, not the button.** 13px text takes a 13–14px icon with a 4–6px gap. An icon a size up outweighs its label: the mass problem **glass-color** solves for colour, by resting icons a tier below, solved here for size.
+
 → How prose blocks are set — headings, quotes, lists, spacing: `references/long-form-prose.md`
 
 ## Assets
@@ -216,12 +224,15 @@ The ranges overlap: **once the ladder is short, leading and measure carry the di
 4. **Set leading per curve.** Most drift is here: headings with reading leading, paragraphs with UI leading.
 5. **Add tracking only above 14px.**
 6. **Switch emphasis to weight + colour.** Then delete the italic font file.
+7. **Sweep after every type change.** The commonest type bug is a partial one: some elements took the new value, some kept the old. Walk every route, check each element against its role, and move raw sizes onto the role tokens so the next change is one edit. → The `tailwind-merge` trap that silently drops role tokens: `references/scale.md`
 
 ## Checklist
 
 - [ ] Two weights loaded and used; no 600/700 above the readable floor.
+- [ ] 400 or 500 by the line's job; no two neighbouring lines lifted; one weight for every title in a set.
 - [ ] Every size maps to a named role.
 - [ ] **Every template on the same ladder**; no page type opens a step above the others.
+- [ ] One element, one role, on every page; sibling controls match.
 - [ ] Roles sharing a size separate on weight, leading, colour or a rule — each a *different* one.
 - [ ] Nothing in a section outranks its heading.
 - [ ] Leading follows the display / reading / UI curves; check headings especially.
@@ -235,4 +246,7 @@ The ranges overlap: **once the ladder is short, leading and measure carry the di
 - [ ] A second family only for a real second register; system-stacked unless it carries reading copy.
 - [ ] Imported HTML prose: one scoped class, existing roles, `> :first-child` margin reset.
 - [ ] Code blocks and tables scroll in their own box, never the page body.
-- [ ] Active/selected states: weight or colour *and* one more signal.
+- [ ] Active/selected states: weight or colour *and* one more signal; no state greys a title.
+- [ ] Sentence case on every label, generated ones included.
+- [ ] Icons beside text sized to it: 13px text, 13–14px icon, 4–6px gap.
+- [ ] Swept after every type change; raw sizes moved onto role tokens.

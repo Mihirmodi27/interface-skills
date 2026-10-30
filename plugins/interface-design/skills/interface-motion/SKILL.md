@@ -1,6 +1,6 @@
 ---
 name: interface-motion
-description: "Design and audit interface motion so every animation makes a change legible — durations scaled to how much screen changes, one standard curve, a colour curve that never overshoots, springs by character, asymmetric open and close, travelling shared elements, one “chosen” signal, reduced motion as substitute, content never hidden behind animation, frame-throttled scroll, compositor-only properties, hover intent, once-only set pieces. In the project's tokens via DESIGN.md, with editorial, product and expressive dials. Use when adding or reviewing animations, transitions, menus, sheets, disclosures, tooltips, hover, press and selected states, reveal-on-scroll, scroll effects, page transitions, theme switches, splash or onboarding sequences, UI sound, or motion that feels sluggish, floaty, janky or gratuitous, and when implementing reduced-motion or no-JavaScript fallbacks."
+description: "Design and audit interface motion so every animation makes a change legible — durations scaled to how much screen changes, one standard curve, a colour curve that never overshoots, springs by character, asymmetric open and close, travelling shared elements, one “chosen” signal, reduced motion as substitute, content never hidden behind animation, frame-throttled scroll, compositor-only properties, hover intent, once-only set pieces. In the project's tokens via DESIGN.md, with editorial, product and expressive dials. Use when adding or reviewing animations, transitions, menus, sheets, disclosures, tooltips, hover, press and selected states, live or recording indicators, reveal-on-scroll, scroll effects, page transitions, theme switches, splash or onboarding sequences, UI sound, or motion that feels sluggish, floaty, janky, abrupt or gratuitous, and when implementing reduced-motion or no-JavaScript fallbacks."
 ---
 
 # Interface Motion
@@ -24,6 +24,12 @@ Read `DESIGN.md` at the project root: `## Profile` for the preset and any areas 
 
 **Every animation must answer "what just changed?" — and one that answers nothing is removed, not shortened.** Motion is the strongest attention signal an interface has; spent on nothing, it trains the eye to ignore it, and the animation that matters — a save confirming, a row arriving — goes unseen. A pulsing "New" badge beside a live sync indicator is the classic: the user tunes out both. Nothing animates to attract attention, and nothing loops except to report a state still in progress, like a spinner or a progress bar; any other loop is decoration, under law 4.
 
+**Paused means still.** A loop reporting a live state — level bars on a recorder, a stroke travelling round a card while something works — stops or settles low when that state pauses; still moving, it claims the thing is still listening. Only a progress indicator loops through a wait, because waiting is its state. On hover or focus a live indicator morphs in place into the action that ends it — bars into a stop square — so the control's next move appears where the eye already is.
+
+Hover travel answers nothing either: a card rising under the pointer claims it moved, or can be picked up, and a grid of them rising in turn reads as a marketing page. Hover is a wash; how far, if at all, a preset lets a hovered thing travel is a dial.
+
+→ Live indicators, pausing and the morph to their action: `references/patterns.md`
+
 ### 2. Duration grows with how much of the screen changes
 
 **Duration is set by how much the eye has to re-read, never by how important the element feels, and every tier is longer than the one below it.** Tie it to importance and the primary button gets a 500ms flourish, the navigation 150ms: the most-used control is the slowest, and nothing feels like one system.
@@ -37,7 +43,7 @@ Read `DESIGN.md` at the project root: `## Profile` for the preset and any areas 
 | `duration.overlay` | A large region entering or collapsing — a sheet, a panel, a reveal |
 | `duration.theme` | Everything on the page at once |
 
-An element tied to a larger change takes its tier: a disclosure chevron runs at `duration.popover` and lands with the panel opening below it. `duration.route` is the one tier size doesn't set; law 3 caps it. The numbers are dials; the ordering is not.
+An element tied to a larger change takes its tier: a disclosure chevron runs at `duration.popover` and lands with the panel opening below it. Hover is no exception: a wash across a large card at `duration.micro`'s 80ms looks instant, not smooth, where 200ms in and 250ms out reads as a fade; rows swept in bulk keep the short tier (Dials). `duration.route` is the one tier size doesn't set; law 3 caps it. The numbers are dials; the ordering is not.
 
 ### 3. Nothing repeated waits on an animation
 
@@ -75,7 +81,7 @@ Springs are wrong for discrete flips with no travel, anything that must land in 
 
 ### 7. Exits get out of the way
 
-**Closing is faster than opening, flat, and eases in — no spring, no overshoot, and it travels less far.** Opening answers the user's intent and can afford character; closing comes after they've moved on, so a bounce reads as reluctance and stands in their way, and a disappearing element needn't travel the full distance. In the Glass package a menu opens on a spring of about 400ms and closes on a 130ms `ease-in` tween.
+**Closing is faster than opening, flat, and eases in — no spring, no overshoot, and it travels less far.** Opening answers the user's intent and can afford character; closing comes after they've moved on, so a bounce reads as reluctance and stands in their way, and a disappearing element needn't travel the full distance. In the Glass package a menu opens on a spring of about 400ms and closes on a 130ms `ease-in` tween. The law is for things leaving; a hover wash fading behind a pointer that has already moved on stands in nobody's way, so its leave may run a little longer than its arrival, and a sweep across a board fades rather than strobes.
 
 ### 8. Where identity persists, the element travels
 
@@ -153,8 +159,9 @@ GPU escalation is for one travelling element with no semantics of its own, never
 | Springs | `snappy` 0.15 / 0.35s, `soft` 0.2 / 0.45s, one `playful` 0.3 / 0.5s | `snappy` 0 / 0.25s, for drag, throw and a re-targeting indicator only | `snappy` 0.2 / 0.4s, `soft` 0.3 / 0.6s, `playful` 0.45 / 0.7s |
 | Reveal-on-scroll | 8px travel, `duration.overlay`, no stagger | none | up to 24px, stagger ≤ 80ms, whole group ≤ 600ms |
 | Press feedback | scale 0.96 on small controls | `surface.pressed` step, no scale | scale 0.92–0.95 |
+| Hover on a card or large surface | a wash, 200ms in · 250ms out; no travel | a wash, 200ms in · 250ms out; no travel, no shadow change | a wash, 280ms in · 350ms out; a lift ≤ 4px on primary navigation only |
 | Set pieces | at most one on the site | none | a few, each named |
-| Ambient loops | none | progress indicators only | a hero only, paused off screen |
+| Ambient loops | none | progress indicators, and live-state indicators while the state is live | a hero only, paused off screen |
 | Sound | absent, or opt-in behind a visible toggle | absent | opt-in, default off, visible toggle |
 
 Springs are Motion's `bounce / duration`.
@@ -189,7 +196,8 @@ Collect evidence, then report:
 - **Hidden until animated:** `opacity: 0` initial states, reveal classes, `threshold:` above 0, `classList.add` on framework-rendered elements; a missing `<noscript>` reset or print rule.
 - **Scroll:** `addEventListener\("scroll"` without `passive` or rAF, or several per behaviour.
 - **Loops:** `infinite`, `repeat: Infinity`, `setInterval` driving UI.
-- **Hover:** timers never cleared on unmount; hover-only affordances with no `(hover: hover)` gate.
+- **Hover:** timers never cleared on unmount; hover-only affordances with no `(hover: hover)` gate; `rg -n "hover:-?translate|:hover[^{]*\{[^}]*transform" src` for cards that lift where the preset says wash.
+- **Live indicators:** loops with no paused branch.
 
 Then tab through with reduced motion on, and with JavaScript off, for anything that never appears or appears with no sign it opened. Check hover states on *leave* as well as enter; the leave state is where transition-property mistakes live.
 
@@ -205,8 +213,10 @@ Under `## Open issues`: each audit breach, one line with its evidence, removed w
 
 ## Checklist
 
-- [ ] Every animation answers "what changed?"; only an ongoing state loops.
-- [ ] `duration.*` tiers strictly ascend; the area changed sets each animation's tier.
+- [ ] Every animation answers "what changed?"; only an ongoing state loops, and it holds still when that state pauses.
+- [ ] Live indicators morph in place to their action on hover and focus.
+- [ ] `duration.*` tiers strictly ascend; the area changed sets each animation's tier, hover included.
+- [ ] Hover on cards is a wash at the dial's in · out, with no travel unless the preset allows it.
 - [ ] Press lands on `pointerdown` at `duration.instant`; nothing repeated waits; `duration.route` ≤ `duration.overlay`.
 - [ ] Each off-ladder duration is classed subject, set piece or ambient in `DESIGN.md`.
 - [ ] One `ease.standard`; colour and opacity on `ease.colour`; no overshoot on a filter or floored property.

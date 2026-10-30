@@ -47,6 +47,7 @@ const PACKAGES = {
       "layout-and-hierarchy",
       "surfaces-and-depth",
       "interface-motion",
+      "product-patterns",
     ],
   },
 };

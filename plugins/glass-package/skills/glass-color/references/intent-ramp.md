@@ -56,6 +56,8 @@ Body copy, headings, active states, `<strong>`. `#171717`, not `#000000`: pure b
 
 Also the *fill* for an inverted element: a tooltip is `bg-gray-1000` with `text-background-100`.
 
+**Not for a ticked box in a long list.** A column of inverted ink squares shouts down the list. A ticked box is a `gray-100` square on its 400 border with a `gray-1000` tick: the tick's shape carries the state, so the fill doesn't have to. A switch keeps the inverted fill, having no tick to carry it.
+
 ### background-100 · background-200
 
 Held out of the ramp because a page background is categorically different from a component surface. 100 is the page and card surface; 200 a subtle secondary surface.
@@ -141,7 +143,15 @@ The hardest-won rule here, from auditing the reference implementation against th
 
 Success/warning/error get their own tokens with their own light/dark values, not a squeeze into the grey ramp. Give each a *pair* — a text/icon value and a surface value, both re-picked per theme — and keep them out of the focus ring's territory so the ring stays distinctive.
 
-The reference implementation has none, because nothing on the site reports state. Check that before you add them.
+The reference implementation has none, because nothing on the site reports state. Check that before you add them. If you do:
+
+**Shape carries the state; colour confirms it.** A status glyph that fills as work moves (an empty ring, a half, a filled check, a cross) reads in greyscale and to a colour-blind reader; the hue only agrees with it. Colour as the sole signal fails WCAG 1.4.1 the way a colour-only active row does.
+
+**Red means loss, and nothing else.** A live or recording state is not danger. Give it shape and motion (a ring, a meter that moves while it listens) and keep red to a small live dot; a red-filled "recording" control borrows the destructive colour and makes every glance at it an alarm.
+
+**Destructive actions take a red ground, not red decoration.** In a menu: the danger *surface* value as the row's ground at rest, solid danger with `background-100` text when highlighted, no icon, set apart at the end. Every destructive or session-ending item — delete, clear, sign out — takes that one treatment, so the reader learns it once.
+
+**Small marks need 3:1 against every ground they land on**: page, panel and hover state, in each theme. A mark picked once for both themes, or checked only against the page, is the one that fails on the hover row.
 
 ## Spending your one chromatic exception
 

@@ -38,7 +38,7 @@ Five places projects have quietly broken a law:
 - **One token doing two jobs.** A grey used for borders and text: a border needs 3:1, text 4.5:1, and one value rarely serves both. Record the coupling as an open issue; don't split it yet.
 - **A job with no token.** Captions at six greys, durations typed inline. Propose a name in the project's style (`design-md.md` says how to detect it) and mark it `proposed`.
 - **Roles the list doesn't have.** A `keyline`, a `pull-quote`, a `kicker`: record each as a project role under its nearest canonical parent, with what separates it — size, weight, leading, colour or a rule. If nothing does, that's a finding.
-- **Boxes as the default.** Every section, stat and list in a card, cards inside cards, a bento grid of unlike sections, tinted strips behind labels, uppercase eyebrows, several chip shapes, a second highlight hue, done states in success colour. Count the boxes per main screen and list each that holds more than one object (`surfaces-and-depth` law 2, `layout-and-hierarchy` law 3). If the user has a reference interface they've already approved, screenshot each main screen beside it; the gaps are open issues.
+- **Boxes as the default.** Every section, stat and list in a card, cards inside cards, a bento grid of unlike sections, tinted strips behind labels, uppercase eyebrows, several chip shapes, a second hue that calls for attention (a hue family answering what, where or who under `product` is not one), success colour on done steps where completion isn't the news (a sequence the reader passes through, not a board or queue). Count the boxes per main screen and list each that holds more than one object (`surfaces-and-depth` law 2, `layout-and-hierarchy` law 3). If the user has a reference interface they've already approved, screenshot each main screen beside it; the gaps are open issues.
 - **Values on no ladder.** Twenty-three font sizes, fourteen radii. Cluster them by usage, propose the ladder, list the strays that could snap to a neighbour unseen.
 
 Compute contrast; don't estimate it:
@@ -85,7 +85,7 @@ With no tokens yet, `presets.md` and each skill's `## Dials` section give defaul
 
 ## How the other skills use this file
 
-Each skill in the set reads `DESIGN.md`, finds its section, and works in the project's names. If the file is missing, it runs steps 1–2 for its own domain, does the task and recommends this skill — it doesn't refuse. A decision that changes the system — a new role, a moved dial, a law knowingly broken — goes back under `Decisions`, which is what keeps the file true after the first day.
+Each skill in the set reads `DESIGN.md`, finds its section, and works in the project's names. If the file is missing, it runs steps 1–2 for its own domain, does the task and recommends this skill — it doesn't refuse. A decision that changes the system — a new role, a moved dial, a law knowingly broken — goes back under `Decisions` — dated, marked user decision or client feedback, newest first, replacing what it supersedes — which is what keeps the file true after the first day.
 
 ## Checklist
 

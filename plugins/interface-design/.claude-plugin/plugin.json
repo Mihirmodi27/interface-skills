@@ -1,8 +1,8 @@
 {
   "name": "interface-design",
   "displayName": "Interface Design",
-  "version": "2.0.0",
-  "description": "Interface best practices that adapt to your project: a setup skill reads your codebase and writes a DESIGN.md in your own token names, then five skills — typography, colour and theming, layout, surfaces and depth, motion — apply one set of laws through it, with dials set by a preset (editorial, product, expressive).",
+  "version": "2.1.0",
+  "description": "Interface best practices that adapt to your project: a setup skill reads your codebase and writes a DESIGN.md in your own token names, then six skills — typography, colour and theming, layout, surfaces and depth, motion, product patterns and UI copy — apply one set of laws through it, with dials set by a preset (editorial, product, expressive).",
   "author": {
     "name": "Mihir Modi",
     "url": "https://modimihir.com"

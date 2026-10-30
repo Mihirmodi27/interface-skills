@@ -13,6 +13,7 @@ For every animation, ask what it communicates, then find the cheapest thing that
 | Blur cross-fade | Cross-fade with `blur(0px)` at both ends | Blur is the trigger; the fade isn't |
 | Reveal-on-scroll | Off; content in its final visible state | The animation is the whole effect |
 | Route fade, ambient loop | Off | Ditto |
+| Live-state loop (level bars, a travelling stroke) | Held still on a representative frame | Shape and colour already say "live"; the movement only restates it |
 | Hover lift whose motion is the whole interaction | No hover variant at all | Static is correct |
 | Theme cross-fade | Instant | Whole-viewport interpolation |
 | Programmatic smooth scroll | `behavior: "auto"` | Whole-viewport motion is among the strongest triggers |

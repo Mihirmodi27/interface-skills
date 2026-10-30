@@ -117,9 +117,38 @@ useEffect(() => setOpen(false), [pathname]);              // navigation
 
 Bind `closeSoon` to leaving the trigger *and* the panel, `cancelClose` to entering either. Any `setTimeout` driving UI state is cleared on unmount and reset on navigation, or a menu opened on one page reappears 100ms into the next. Where they're adjacent, a hover bridge is cheaper: padding on the wrapper spanning the visual gap, so the pointer never leaves the hover region.
 
+## Hover on a card
+
+A wash, with the leave on the resting rule and the arrival on the hovered one, so each direction takes its own time:
+
+```css
+.card       { transition: background-color <hover out> <ease.colour>; }   /* the leave */
+.card:hover { background-color: var(--surface-hover); transition-duration: <hover in>; }
+```
+
+No `translate`, no shadow change, one named property; the bundle stays where `surfaces-and-depth` put it. Rows keep `duration.micro` both ways.
+
 ## Press
 
 `transform: scale(<press>)` on `:active`, `transition-duration: 0` in and `duration.state` back out, on `pointerdown`, not `click`. In `product`, prefer the `surface.pressed` step: a toolbar of twenty shrinking buttons is noise.
+
+## Live indicators
+
+An indicator that reports a live state — level bars while recording, a stroke travelling round a card while something is generated — moves only while the state does, and turns into its action on demand.
+
+```css
+.live .bars span  { animation: level 900ms <ease.standard> infinite alternate; }
+.live[data-paused] .bars span { animation: none; transform: scaleY(0.25); }   /* settle low, don't freeze mid-peak */
+.live .stop, .live .bars { transition: opacity <duration.state> <ease.colour>; }
+.live .stop { opacity: 0; }
+.live:is(:hover, :focus-visible) .stop  { opacity: 1; }
+.live:is(:hover, :focus-visible) .bars  { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .live .bars span { animation: none; } }
+```
+
+- **Paused settles, it doesn't freeze.** A loop stopped mid-cycle leaves a peak that looks like a glitch; hold a low resting frame, or stop a travelling stroke and dim its glow. Bars driven by a real input level fall on their own; a decorative loop has to be told.
+- **The morph is in place.** Bars and stop square share one box and cross-fade, so the control never moves under the pointer.
+- **The name is the action throughout** — a button named "Stop recording" — because on touch nothing hovers and the tap is the stop.
 
 ## Theme cross-fade
 

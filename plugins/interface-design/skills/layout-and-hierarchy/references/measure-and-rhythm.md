@@ -43,10 +43,29 @@ A working reader needs navigation, content and detail together, so the page is r
 | Region | Width | Collapses |
 |---|---|---|
 | Navigation | 220–264px | Last — to an icon strip, then a menu button |
-| Content | Fluid, capped at `measure.app` | Never |
+| Content | Fills its panel, left-aligned at one `gutter` | Never |
 | Inspector | 320–400px | First — to an overlay sheet on `z.overlay` |
 
-Settings help, onboarding copy, a changelog entry and an empty state's explanation still sit at `measure.reading`; a 1200px-wide paragraph of help text in a settings pane is the most common product failure of law 1. The inspector is detail, so it collapses first; navigation is how the reader leaves, so it stays longest.
+Settings help, onboarding copy, a changelog entry and an empty state's explanation still sit at `measure.reading`; a 1200px-wide paragraph of help text in a settings pane is the most common product failure of law 1. The inspector is detail, so it collapses first; navigation is how the reader leaves, so it stays longest. A centred column inside the content panel wastes the width a working reader opened the window for, and a page that sets its own `max-width` or padding drifts from its neighbours: the shell owns both.
+
+### The product page
+
+Top to bottom, every page in the shell has the same parts, so a reader learns one page and can read them all:
+
+| Part | Shape |
+|---|---|
+| Header bar | About 44px; breadcrumb at the start, the page's own actions at the end as quiet ghost buttons; the page title at the nav's size, not a display heading |
+| Stat strip | 3–4 figures under the header, parted by hairlines; each figure filters the table below to what it counts, and shows when it's the active filter |
+| Toolbar | Search, then filters as icons with tooltips — a text label on every filter crowds the bar — then the view switch; on touch the filters open as a labelled sheet |
+| Content | The table, board or list, at the panel's full width |
+
+**The table.** One shared component on every page: `radius.card` in a hairline frame, a tinted header row with `text.primary` labels, rows around 44px, hairlines between rows only (no column rules), a hover wash. A table that doesn't use it is a second table style.
+
+**The group bar.** One shared component: a tinted band about 36px tall holding a chevron, the group's name, its count and an add action, sticky under the header row while its group scrolls. Long administrative tables start with every group closed, each bar carrying a summary ("Admins 3/12 · Members 9/12"); a search opens every group it matches.
+
+**Forms.** The field that decides the rest goes first, at full width — a category before the free text that depends on it.
+
+**Overviews and dashboards.** Order the sections overview, trends, action items, and cut what nobody acts on — a recent-activity feed is the usual casualty. A long page is fine when the order is right. A scoped overview, one project's, is the global overview's layout over filtered sources, never a second layout, so the two can't disagree. Wireframe a new page type and share it before building: it is cheaper to argue about.
 
 ### Expressive — bands with a measure inside
 
@@ -79,10 +98,12 @@ Half-steps (6px, 10px, 14px, 44px) are legitimate when a ratio lands between who
 | Prose heading → its paragraph | 12px | 44px above | ≈ 3.7:1 |
 | List items → the next block | 8px | 24px | 3:1 |
 | Card title → its body, cards in a stack | 6px | 20px between cards | ≈ 3.3:1 |
+| Inside a dense card: meta line → title, title → details | 6px | 12px | 2:1 |
+| Board cards → the next lane | 8px between cards | 12px between lanes | 1.5:1, held by the lane's own edge |
 | Field label → its input, fields in a form | 4–6px | 16px | ≈ 3:1 |
 | Role title → its dates | 2px | 6px | 3:1 |
 
-Ratios cluster between 2:1 and 4:1. A form with `gap: 16px` on everything puts each label as far from its input as from the one above, and on a long form readers attach labels to the wrong field. A border round every field only adds noise over the spacing bug; tighten label-to-input to 4–6px and the form groups itself.
+Ratios cluster between 2:1 and 4:1. A form with `gap: 16px` on everything puts each label as far from its input as from the one above, and on a long form readers attach labels to the wrong field. A border round every field only adds noise over the spacing bug; tighten label-to-input to 4–6px and the form groups itself. The same goes for a screen called cluttered: check its gaps against this table — padding inside a card (12px on a dense board), tiers within it, gaps between peers — before reaching for colour, weight or another rule.
 
 ## Section rhythm
 
@@ -101,7 +122,7 @@ The first section has nothing above it to separate from, so it takes no rule. A 
 
 ## Page padding and chrome clearance
 
-- **Top space signals a document.** Editorial pages start well below the top edge (80–112px); product content starts close under the shell's header (16–24px), which already framed it.
+- **Top space signals a document.** Editorial pages start well below the top edge (80–112px); product content starts close under the page's header bar (16–24px), which already framed it.
 - **Fixed chrome reserves its own clearance.** Under a fixed bottom bar or dock, the page's bottom padding must exceed the bar's height plus its offset on every template whose content can end near the viewport bottom; a page ending in a footer can rely on the footer's padding.
 - **Audit it per template.** The long article ends in a padded footer; the short index without one puts its last item under the bar — the layout bug that most often survives review, because the test page is always a long one.
 
@@ -123,7 +144,7 @@ A fictional freight-tracking app — `product`, docs area `editorial`, Inter at 
 ```css
 :root {
   --measure-reading: 34rem;       /* 544px ≈ 65 characters of Inter at 16px — docs and all help text */
-  --measure-app: 1360px;
+  --measure-app: 100%;            /* content fills its panel, left-aligned */
   --shell-nav: 240px;
   --shell-inspector: 360px;
   --gutter: 16px;
@@ -140,8 +161,8 @@ A fictional freight-tracking app — `product`, docs area `editorial`, Inter at 
   --radius-small: 4px;            /* … holds a 4px badge */
   --radius-pill: 9999px;
 
-  --hairline-chrome: 1px;         /* divider uses border.divider */
-  --hairline-object: 1px;
+  --hairline-chrome: 0.5px;       /* a border: one device pixel on 2×, 1px on 1×; divider uses border.divider */
+  --hairline-object: 0.5px;       /* table frames match their row rules */
   --rule-emphasis: 2px;
 
   --z-below: -10; --z-raised: 10; --z-popover: 20; --z-dismiss: 40;

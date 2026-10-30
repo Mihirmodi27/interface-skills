@@ -25,6 +25,8 @@ Duration is set by **how much of the screen changes**, not by how important the 
 
 Three numbers carry almost everything: **150 / 200 / 300**. **Route is 260ms**, not 300: a page transition sits on the critical path to content, and 260 is the shortest crossfade that doesn't read as a flicker. **Theme is 400ms with plain `ease`**: the largest change gets the longest duration, and colour has no momentum, so the house curve's overshoot would read as a wobble. Nothing loops, nothing animates to attract attention, and nothing on the ladder exceeds 400ms.
 
+**Hover is on the ladder by area too.** A link's opacity takes 100ms; a wash across a whole card is a larger change and takes 200ms. Under 100ms on a large surface reads as a cut, not a fade. And **motion that stands for a process stops when the process does**: a moving meter or a working stroke holds still the moment its source pauses, since motion that carries on claims work that isn't happening.
+
 ### Two things that sit off the ladder
 
 The ladder is for **state**: something changed that the user must follow. Two things aren't, and forcing them onto it makes them worse.
@@ -235,6 +237,8 @@ const closeBoxSoon = () => {
 
 Where the elements are adjacent, a **hover bridge** is cheaper: wrapper padding that spans the gap (`pt-2.5` between a button and the pill below it), so the pointer never leaves the hover region. Otherwise use the timer, and always clear it on unmount and on navigation.
 
+**Hover reports; it doesn't travel.** A surface under the pointer takes a wash, never a translate-up: a grid of cards rising on hover reads as a marketing page, and moves the target the pointer is aiming at. The folder's rising cards (`LIFT`) are the one exception, and being the only one is the point (`references/springs.md`).
+
 ## 12. Press and sound
 
 ```
@@ -349,9 +353,12 @@ For anything collapsible: **animate height, don't unmount**, so the content stay
 - [ ] Scroll listeners `passive`, rAF-throttled, one per behaviour.
 - [ ] Hysteresis on any scroll-direction toggle.
 - [ ] Hover-only affordances gated on `(hover: hover) and (pointer: fine)`, with a touch path.
+- [ ] Hover timed by area: a link 100ms, a card-sized wash 200ms.
+- [ ] No translate on hover, bar the folder's rising cards.
 - [ ] `LazyMotion` + `m` + `strict`; no bare `motion.*`.
 - [ ] No `backdrop-filter` inside an animating transform.
 - [ ] Press feedback on pointer-down.
 - [ ] Audio armed on `pointerdown`, `keydown` **and** `touchstart`.
 - [ ] Dense hover surfaces opt out of hover sound.
 - [ ] Nothing loops; nothing animates to attract attention.
+- [ ] Motion standing for a process holds still when the process pauses.

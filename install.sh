@@ -31,7 +31,7 @@ set -eu
 REPO="Mihirmodi27/interface-skills"
 REF="${INTERFACE_SKILLS_REF:-main}"
 GLASS="glass-typography glass-motion glass-color glass-and-depth glass-layout"
-CUSTOM="design-system-setup typographic-system color-and-theming layout-and-hierarchy surfaces-and-depth interface-motion"
+CUSTOM="design-system-setup typographic-system color-and-theming layout-and-hierarchy surfaces-and-depth interface-motion product-patterns"
 # 1.x name → the Glass name it became.
 LEGACY="typographic-system:glass-typography interface-motion:glass-motion color-and-theming:glass-color layout-and-hierarchy:glass-layout glass-and-depth:glass-and-depth"
 # Ids and folders match the `skills` CLI (vercel-labs/skills), so a skill

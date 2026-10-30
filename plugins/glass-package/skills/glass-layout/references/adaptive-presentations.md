@@ -268,6 +268,25 @@ The last is a hover card *below* its row on narrow screens and *beside* it at `x
 | `sm` | 640px | Mobile dock ↔ desktop dock. Page padding. Masonry columns. Stack columns. |
 | `xl` | 1280px | The TOC rail appears. The hover card moves beside its row. |
 
-Two for the whole site, both derived from content, not a device list. `sm` coincides with the reading measure: below it the column is padding-limited, the natural place for the layout to change character. `xl` is where a 640px column finally leaves margin for a 196px rail. **A breakpoint should be the width at which a specific layout decision stops working.**
+Two for the whole site, both derived from content, not a device list. Both are viewport breakpoints only because here the column *is* the page. `sm` coincides with the reading measure: below it the column is padding-limited, the natural place for the layout to change character. `xl` is where a 640px column finally leaves margin for a 196px rail. **A breakpoint should be the width at which a specific layout decision stops working.**
 
 Type size is *not* on the list: a 30px article title once stepped to 26px below `sm`, until an 18px type ceiling removed the need (see the **glass-typography** skill). **A responsive type step usually means one size is too large for the narrowest measure you ship**, and fixing the ladder beats tuning the breakpoint.
+
+## Breakpoints on the container
+
+Once a region shares the screen with something that opens and closes — a sidebar, a list beside its detail — its width stops following the window's. A two-pane view switched on window width left the detail pane about 150px wide whenever the sidebar was open: wide window, narrow pane.
+
+```tsx
+<section className="@container">                  {/* the pane, not the page */}
+  <div className="grid @2xl:grid-cols-[minmax(240px,1fr)_2fr]">
+    <List />
+    <Detail className="@container" />            {/* sizes its own insides */}
+  </div>
+</section>
+```
+
+- **Query the box being laid out.** Tailwind v4 ships `@container` and the `@sm:`…`@7xl:` variants; plain CSS is `container-type: inline-size` and `@container (min-width: …)`.
+- **Let the side that can give way go first.** Clamp the list (`minmax`) so it narrows before the detail does.
+- **Nest a container where the inner pane has its own decisions**: gutters, a rail, header labels that collapse to icons. The detail measures itself, so its actions never clip, wherever it lands.
+
+The rule from the table above still holds: **a breakpoint is the width at which a specific layout decision stops working**, and that width belongs to the box the decision is about.

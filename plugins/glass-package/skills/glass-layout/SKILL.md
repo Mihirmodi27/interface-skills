@@ -102,7 +102,9 @@ rounded-2xl  16  the outer container (a dock, a sheet)
 | `2px` | Quote rules, focus rings |
 | `1px` (`h-px`) | Table-of-contents markers |
 
-`0.5px` is a true hairline on retina and rounds up to 1px elsewhere, never vanishing. Weight follows the line's job: dividing icon groups inside one dock, 0.5px; defining a card's edge, 1px. On translucent surfaces use the **alpha ramp** (`border-gray-alpha-400`); a solid border on glass reads as a pasted-on frame (see **glass-color**).
+`0.5px` **as a border** is a true hairline on retina and rounds up to 1px elsewhere, never vanishing; a box half a pixel tall can snap to nothing on a 1x screen, so draw hairlines as borders. Weight follows the line's job: dividing icon groups inside one dock, 0.5px; defining a card's edge, 1px. On translucent surfaces use the **alpha ramp** (`border-gray-alpha-400`); a solid border on glass reads as a pasted-on frame (see **glass-color**).
+
+**A frame and the dividers inside it are one drawing.** Every divider in a frame takes one weight and step, and each either meets the edge or stops at the content's inset at *both* ends. A divider touching one side and short of the other, or a hair heavier than its neighbours, reads as an edge that doesn't belong to its lines.
 
 A divider that isn't an `<hr>` gets `aria-hidden`; an `<hr>` divider needs `border-0` before its background, or you get the UA border *and* your line.
 
@@ -119,7 +121,7 @@ The most consequential idea: where pointer and touch interact differently, ship 
 
 The desktop dock reveals pages and settings **on hover**, collapsing on scroll; touch fires none of it. One component would need hover and touch paths, a collapse rule for one, and settings reachable two ways.
 
-`SectionNav` (a sticky rail) and `SectionNavCompact` (a `<details>` disclosure) likewise render one tree through a shared `Rows`: **share the data and rows; fork the container.** The test: **does the interaction model change, or just the arrangement?** Arrangement → breakpoints. Interaction model → two components.
+`SectionNav` (a sticky rail) and `SectionNavCompact` (a `<details>` disclosure) likewise render one tree through a shared `Rows`: **share the data and rows; fork the container.** The test: **does the interaction model change, or just the arrangement?** Arrangement → breakpoints. Interaction model → two components. And **a breakpoint measures the box it lays out**: a pane that shares the screen with a rail or sidebar switches on its own width, by container query, not the window's.
 
 ### The same fork, chosen by the reader
 
@@ -200,7 +202,7 @@ const COLS  = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3"];
 const WIDTH = ["", "max-w-[200px]", "max-w-[420px]", ""];
 ```
 
-One item stretched full width betrays a grid not designed for its edge cases. Tailwind scans source text, so write **literal class strings**; a computed `grid-cols-${n}` never reaches the stylesheet.
+One item stretched full width betrays a grid not designed for its edge cases. **Smaller is not more per row**: asked to shrink the folders by a quarter, shrink them and keep three to a row; a fourth column is a different layout nobody asked for. Tailwind scans source text, so write **literal class strings**; a computed `grid-cols-${n}` never reaches the stylesheet.
 
 ## 8. The z-index ladder
 
@@ -295,7 +297,9 @@ Print is a real presentation; forget the `.reveal` reset and scroll-triggered co
 - [ ] Headings spaced asymmetrically, ~3:1 above vs below.
 - [ ] Inner radius = outer radius − padding, at every level.
 - [ ] 0.5px chrome, 1px object edges; alpha ramp on translucent surfaces.
+- [ ] Hairlines drawn as borders, not half-pixel boxes; a frame's dividers share one weight and line up with its edge.
 - [ ] Two components where interaction differs; shared data and rows.
+- [ ] A pane sharing the screen breaks on its own width (container query), not the window's.
 - [ ] Hover-revealed affordances have a touch equivalent.
 - [ ] Reader-chosen layout state in a module both sides subscribe to, read in an effect, not during render.
 - [ ] A view preference persists only if you can say why; by default, not.
@@ -305,6 +309,7 @@ Print is a real presentation; forget the `.reveal` reset and scroll-triggered co
 - [ ] Dividers placed after empty sections are filtered out.
 - [ ] Catch-all redirect for removed routes.
 - [ ] Grids look deliberate at 1, 2 and n items.
+- [ ] Resizing items keeps the count per row unless asked otherwise.
 - [ ] Dynamic Tailwind classes written as literal strings.
 - [ ] z-index from a documented ladder, with gaps.
 - [ ] Skip link present, moved by transform, matching `id="main"`.

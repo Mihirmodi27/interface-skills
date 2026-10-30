@@ -18,6 +18,14 @@ All body copy. All prose. Deks. Meta lines. Tags. Tooltips. Timestamps. Quiet na
 **500 — structure and state.**
 Headings h1–h4. `<strong>`. The active row in a table of contents. Names and wordmarks. Captions that label an image rather than describe it. Lettermarks. Company/role titles in a list, where the role is structural and the date supporting.
 
+### Quiet and lifted, by scenario
+
+The lists above are defaults; the choice is made per spot. The same 13px line is 400 as a date under a title and 500 as the name heading a group, because the job changed, not the importance.
+
+- **One lift per group.** A card or row lifts one line. Lift its title and its time together and the two fuse into one dark block, so neither leads.
+- **One weight per set.** Every title in a column of rows or a stack of cards takes the same weight. Mixed weights in one column read as a rendering fault, never as meaning; let position or a mark say which item is finished.
+- **Interfaces drift heavy; correct one line at a time.** When a screen feels heavy, the fix is moving lines back to 400, one step and one context at a time, and asking "one step up or down?" of each, not re-picking the system. With two weights, a step is the whole axis, so there's never a lighter scale to reach for.
+
 ### When 300 is legitimate
 
 Rarely, and never for text read at length: at a very large display size (48px+), where 400 starts to look heavy, or a decorative numeral. If your interface tops out at 30px — most do — you don't need it. The reference implementation loaded 300 for a while and never used it; dropping it from the font request was a straight performance win.

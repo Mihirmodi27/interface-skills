@@ -86,7 +86,7 @@ A project may slot extra tiers between secondary and tertiary (the Glass package
 | `focus` | The focus ring. Must hit 3:1 against every surface it can land on |
 | `accent` · `accent.hover` | The brand or action colour, if the system has one, and its hovered state. `accent` may share a token with `focus` |
 | `status.danger` · `status.warning` · `status.success` · `status.info` | Each a pair — `status.<name>.fg`, a foreground that clears 4.5:1 as text, and `status.<name>.bg`, a background tint — plus `status.<name>.solid` where a filled control needs it (a destructive button). Required in product systems, usually absent in editorial ones |
-| `exception.<name>` | A deliberate chromatic spend outside the accent — one per system in editorial, a few in expressive. Always named after what it's *for* |
+| `exception.<name>` | A deliberate chromatic spend outside the accent — one per system in editorial, a few in expressive; in product none by default, plus one hue family per question the reader can't answer at a glance, named `exception.<question>.<member>` (`exception.type.task`, `exception.area.<name>`, `exception.person.<n>`), each listed in `DESIGN.md`. Always named after what it's *for* |
 
 ## Layout
 

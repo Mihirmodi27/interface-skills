@@ -45,6 +45,7 @@ The gap between 150 and 200 maps to *whether other things move too*.
 - A chevron rotating 180° in a disclosure: 200ms. The rotation is small, but the panel opening below it isn't, so the chevron matches the larger event.
 - A hover card scaling in: 200ms. It's a new object with content, appearing over existing content.
 - The menu glyph's two bars rotating into a cross: 200ms. Two elements moving in opposition read as one compound gesture.
+- A hover wash across a whole card or panel: 200ms. The 100ms that suits a link reads as a cut over that much area (at 80ms a large card's hover looks instant), and the lag that rules out longer hovers on a list of links doesn't arise: a pointer settles on a card, it doesn't sweep a column of them.
 
 ## Why route transitions are 260ms
 

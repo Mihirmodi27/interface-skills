@@ -90,6 +90,8 @@ Vertical dividers use `w-[0.5px]` with an explicit height and `self-center`:
 
 A 24px line in a 40px-tall row: the divider spans the icons, not the padding. `aria-hidden` because it's decoration.
 
+**The box form has a gap, and the reference implementation has it.** `h-[0.5px]` and `w-[0.5px]` with a background are boxes, and a box is snapped to device pixels by its edges: on a 1x screen, half a pixel starting at a fractional position can round to zero and the line disappears. A *border* of 0.5px is always drawn at least one device pixel. So draw every hairline as a border: `border-t-[0.5px]` on the element, or an empty span carrying `border-l-[0.5px]` for a vertical divider, the same weight and colour by the more reliable route. Three exceptions stay deliberately heavier: focus rings (a half-pixel ring is too faint to find), the `prefers-contrast: more` edge, and marks such as a quote rule.
+
 On glass, a solid `gray-400` border reads as a pasted-on frame; use the alpha ramp.
 
 ## Elevation tiers

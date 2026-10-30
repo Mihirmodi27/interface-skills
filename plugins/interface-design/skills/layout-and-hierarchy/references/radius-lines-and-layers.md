@@ -53,15 +53,38 @@ A superellipse eases curvature into the straight edge where a quarter-circle `bo
 
 | Role | Job | editorial | product | expressive |
 |---|---|---|---|---|
-| `hairline.chrome` | A divider inside one object — toolbar groups, menu rows | 0.5px | 1px, `border.divider` | 1px |
-| `hairline.object` | An object's edge — a card, an input, a disclosure | 1px | 1px, `border.default` | 1–2px |
+| `hairline.chrome` | A divider inside one object — toolbar groups, menu rows, table rows | 0.5px | 0.5px, `border.divider` | 1px |
+| `hairline.object` | An object's edge — a card, an input, a disclosure, a table frame | 1px | 0.5px, `border.default` | 1–2px |
 | `rule.emphasis` | A deliberate mark — a quote bar, a focus ring, an active tab | 2px | 2px | 3–4px |
 
-`0.5px` rounds up to 1px on 1× screens, degrading to the next weight rather than disappearing. Where chrome and object share a weight, the divider must step down in colour so it never matches the edge. A vertical divider spans the content, not the padding: a 24px line in a 40px row, centred.
+Where chrome and object share a weight, the divider must step down in colour so it never outranks the edge.
+
+### Half a pixel, drawn as a border
+
+A `0.5px` border is one device pixel on a 2× screen and rounds up to a full pixel on 1×: browsers snap any border width between 0 and 1 device pixel up to one. A box half a pixel tall with a background gets no such snapping — on 1× it antialiases to a faint smear or nothing. So every hairline is a border, including a divider between rows:
 
 ```css
-.divider-v { inline-size: var(--hairline-chrome); block-size: 24px; align-self: center; background: var(--border-divider); }
+:root { --hairline: 0.5px; }
+@media (prefers-contrast: more) { :root { --hairline: 1px; } }
+
+.row + .row { border-block-start: var(--hairline) solid var(--border-divider); }
 ```
+
+Three things never take the half pixel, on purpose:
+
+- **Focus rings**, on `rule.emphasis`: a half-pixel ring is too faint to find.
+- **`prefers-contrast: more`**, whose whole job is a real edge, so the token swaps to 1px rather than each component guessing.
+- **Deliberate thick marks** — the current tab's underline, a quote or note bar.
+
+A vertical divider is a border too, and spans the content, not the padding: a 24px line in a 40px row, centred.
+
+```css
+.divider-v { block-size: 24px; align-self: center; border-inline-start: var(--hairline-chrome) solid var(--border-divider); }
+```
+
+### A frame matches what it frames
+
+Where a frame holds dividers — a product table, a grouped list, a settings panel — the outer edge and the inner lines are read as one grid, so they share a weight and an inset and meet without a step. A 1px frame round 0.5px row rules looks like a border drawn on afterwards; a header rule inset 12px under a frame drawn edge to edge looks misaligned. The divider may step down in colour, never in weight.
 
 Two resets that cause visible bugs:
 

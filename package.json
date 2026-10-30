@@ -1,6 +1,6 @@
 {
   "name": "interface-skills",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Interface design skills in two packages: the Glass package, one exact system to copy, and a customizable set that applies the same practices in your project's own names and values.",
   "keywords": [
     "claude",

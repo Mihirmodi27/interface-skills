@@ -12,6 +12,7 @@ It is written for two readers at once — a person skimming it to learn the syst
 - **Contrast is written down, not implied.** Every text tier carries its measured ratio against the surface it's checked on, per theme. Setup computes them with `scripts/contrast.mjs`.
 - **Leave out what isn't there.** No dark theme, no dark column. No prose, no `lead` row. An empty row reads as a requirement.
 - **Decisions carry a reason and a date.** Anything that moves a dial off its preset, or knowingly breaks a law, goes under `## Decisions`. A skill that meets a decision respects it; a skill that would break a law without one asks first and then records the answer here.
+- **The decisions log reads as the current state, not a diary.** Each entry is dated and marked by who decided — *user decision* or *client feedback* — newest first. A new decision on a subject replaces the entry it supersedes rather than sitting below it; git history keeps the old one. A session reads the log before changing anything it covers, so a decided value isn't "fixed" back.
 - **Findings are not fixes.** Setup lists what violates a law under `## Open issues` and leaves the code alone unless asked. The list is how a later session knows what's known.
 
 ## Template
@@ -85,9 +86,14 @@ Plus `material.translucent` tiers, if any, and their fallbacks.
 
 Plus springs by character, and the reduced-motion policy in one sentence.
 
+## Patterns
+
+**Nouns** — one per kind of thing: task (never "issue"), note, project, member. **Row second line** — `{type} from {origin}`. **Destructive** — delete, remove, sign out: last in menu, no icon; projects and accounts need a typed word. **Shortcuts** — ⌘K palette, J/K, F filter, Escape one layer. **Remembered views** — tasks and meetings per page; folders pinned to folders.
+
 ## Decisions
 
-- YYYY-MM-DD — Three weights, not two: the billing table needs a middle weight for column totals. (`typographic-system` dial override.)
+- YYYY-MM-DD — Card titles at 500, not 600: they read heavy beside the pane title. (User decision; `typographic-system` dial.)
+- YYYY-MM-DD — Three weights, not two: the billing table needs a middle weight for column totals. (Client feedback; `typographic-system` dial override.)
 
 ## Open issues
 

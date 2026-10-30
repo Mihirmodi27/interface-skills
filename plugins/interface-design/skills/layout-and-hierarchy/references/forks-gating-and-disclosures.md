@@ -62,6 +62,28 @@ For every hover behaviour, write down what a touch user gets; "nothing" is a bug
 
 Resize slowly and note where a specific decision fails — the rail no longer fits beside the column, the three-up grid's cards drop below a readable width, the inspector squeezes the content under its minimum — then name the breakpoint for it (`bp.rail`, `bp.grid-3`, `bp.inspector`) and record why it sits there. A breakpoint from a device list never lines up with the layout.
 
+### On the container, inside a shell
+
+A shell's content panel is the window minus whatever the sidebar and inspector take, and that changes while the window doesn't. A list and detail view split on a window query showed both panes at a width where, with the sidebar open, the detail had about 150px. Query the panel instead, and let each pane size itself from its own width:
+
+```css
+.panel  { container: panel / inline-size; }
+.split  { display: grid; grid-template-columns: 1fr; }
+@container panel (min-width: 720px) {
+  .split { grid-template-columns: clamp(240px, 32cqi, 360px) 1fr; }   /* the list gives way first */
+}
+
+.detail { container: detail / inline-size; padding-inline: var(--gutter); }
+@container detail (min-width: 560px) { .detail { padding-inline: calc(var(--gutter) * 2); } }
+@container detail (max-width: 480px) { .detail-actions .label { display: none; } }  /* icons keep their tooltips */
+```
+
+The list is clamped so it yields before the detail does, and the detail decides its own gutters, side rail and header labels, so its actions shrink to icons rather than clip. Name container breakpoints like any other (`bp.split`, `bp.detail-rail`).
+
+### Size and count are separate
+
+"Make the folders 25% smaller" is a request about size: the items shrink and the row keeps its count. Fitting more per row is a different change, to the grid, and happens only when asked. Treat the two as separate tokens — an item width and a column count — so one can't move the other by accident.
+
 ## Reader-chosen views
 
 ### State in a module both sides read
@@ -85,8 +107,14 @@ The toggle and the view are siblings, so neither owns the value. On a server-ren
 | The reader | Theme, sound, reduced motion, density | Yes |
 | A thing they were looking at | Grid versus list for a gallery, which tab of a spec was open | No — reset on arrival |
 | A working setup the user built on purpose | A saved board view, a filtered table with a name | Yes, as a named, visible object, and recorded under `## Decisions` |
+| How they work a page they return to daily (product) | Board or list for the task page, a week or a three-day span | Yes, per page, with the switch always visible in the page header, recorded under `## Decisions` |
+| A default that is the point | A folder view that always opens on its folders | No — the default wins even where the page's other choices persist |
 
-A persisted toggle lands a reader in a mode picked weeks ago for a different collection, and they assume the page is broken; a saved view escapes this because it is visible and named.
+A persisted toggle lands a reader in a mode picked weeks ago for a different collection, and they assume the page is broken; a saved view escapes this because it is visible and named, and a per-page choice because the switch showing it sits in the header of the page it governs.
+
+### Which views a collection gets
+
+A second view shows how the collection moves. Work that moves through states gets a board whose columns run in the order work moves, each headed by its state; work that moves through time gets a week board with a span switch (week, three days, day). The list stays as the other view. A collection that doesn't move — a directory, an archive — gets a list and no board.
 
 ### Carry the position across
 

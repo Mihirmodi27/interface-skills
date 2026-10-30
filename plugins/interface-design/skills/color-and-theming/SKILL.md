@@ -1,6 +1,6 @@
 ---
 name: color-and-theming
-description: "Build and audit an interface's colour system in any palette, neutral or brand, by naming every token for the job it does rather than its lightness. Covers contrast-measured text tiers, translucent layers, a focus colour never lost, status pairs, rule-bound exceptions and flash-free theming, in the project's token names and preset from DESIGN.md. Use when defining or naming colour tokens, deriving a ramp from a brand hue, picking a colour for a border, hover or selected state, choosing text tiers, adding status or error colours, deciding what colour a completed step or the current nav item takes, removing a second highlight hue, adding a dark theme or a theme toggle, fixing a flash of wrong theme, re-picking an accent or a gradient for dark mode, deciding between build-time tokens and runtime custom properties, or reviewing a palette that feels muddy, inconsistent, low-contrast or accidentally colourful."
+description: "Build and audit an interface's colour system in any palette, neutral or brand, by naming every token for the job it does rather than its lightness. Covers contrast-measured text tiers, translucent layers, a focus colour never lost, status pairs, rule-bound exceptions and flash-free theming, in the project's token names and preset from DESIGN.md. Use when defining or naming colour tokens, deriving a ramp from a brand hue, picking a colour for a border, hover or selected state, choosing text tiers, adding status or error colours, deciding what colour a completed step or the current nav item takes, removing a second highlight hue, answering a review that the UI is too grey, colouring types, folders, avatars or figures, styling a live state or a destructive item, adding a dark theme or a theme toggle, fixing a flash of wrong theme, re-picking an accent or a gradient for dark mode, or reviewing a palette that feels muddy, inconsistent, low-contrast or accidentally colourful."
 ---
 
 # Colour and Theming
@@ -73,27 +73,34 @@ Focus may share a token with `accent` but may not sit beside it: an accent ring 
 
 **Every state or status expressed in colour is also expressed in something that survives without colour — an icon, a word, a weight, a rule, a marker, a position.**
 
-About one man in twelve has some colour-vision deficiency, and every reader loses hue in sunlight, greyscale screenshots, cheap projectors; a red border as the only sign of an error tells them nothing. Status is an icon plus a sentence, with colour reinforcing both. The case people miss is state *within* a neutral system: once every tier clears 4.5:1 only two or three greys are readable, too close to mean "selected" or "current", so a nav item marked active only by being one tier darker needs a rule, a marker, a fill or a weight as well.
+About one man in twelve has some colour-vision deficiency, and every reader loses hue in sunlight, greyscale screenshots, cheap projectors; a red border as the only sign of an error tells them nothing. Status is an icon plus a sentence, with colour reinforcing both: **shape carries the state, colour confirms it.** A status glyph whose shape moves with the work, a ring that fills until it is a check, reads in greyscale; so do priority bars. The case people miss is state *within* a neutral system: once every tier clears 4.5:1 only two or three greys are readable, too close to mean "selected" or "current", so a nav item marked active only by being one tier darker needs a rule, a marker, a fill or a weight as well.
 
 A status palette is a set of **pairs**, each a foreground at 4.5:1 on the page and its own tint plus a tint that reads as a surface, not a highlighter, re-picked per theme.
 
-→ Status pairs with a worked set, and the exception test in full: `references/status-and-exceptions.md`
+→ Status pairs with a worked set, the glyph shapes, and the exception test in full: `references/status-and-exceptions.md`
 
 ### 7. Colour is spent structurally
 
-**Every chromatic spend beyond the accent and the status palette is named for what it's for, justified by a reason that no other element on the page shares, and contained so that only the mark takes the colour.**
+**Every hue has one job, written down. Each chromatic spend beyond the accent and the status palette is named for what it's for, with a reason that can't spread to another element or another job, and contained so that only the mark takes the colour.**
 
-Colour is attention, spent because of what the element *is*, not because the page felt grey. Content looks like everything else the reader came for; only the interface speaking about it — an offer, a warning, a way in — may announce itself. The Glass package's one exception, a "short version" panel, is the site's only offer, so the reason cannot spread; "it's important", "it's new" or "it's the brand colour" can, and becomes a palette within two components, because every author thinks their element qualifies.
+Colour is attention, spent because of what the element *is*, never as decoration. Content looks like everything else the reader came for; only the interface speaking about it — an offer, a warning, a way in — may announce itself. The Glass package's one exception, a "short version" panel, is the site's only offer, so the reason cannot spread; "it's important", "it's new" or "it's the brand colour" can, and becomes a palette within two components, because every author thinks their element qualifies.
 
-Only the edge, the icon or the glyph takes the colour, never the text inside: a coloured paragraph shares the loudness until it means nothing. Record each as `exception.<what-it's-for>` in `DESIGN.md` with its reason: how many a system holds is a dial; a written, non-transferable reason is not. First ask whether weight, position and space can do the job. Most can.
+**"Too grey" is answered with jobs, not decoration.** Near-monochrome can go too far: a records product built to it came back as "all black and white" from its owner and "wants more colour" from its client within days. What it lacked was hue that answers a question at a glance, one family per question — *what* a thing is (its type), *how* it's doing (status), *where* it lives (its area), *who* (a person). A hue never crosses into another job: a type hue never signals state, and the danger red never marks something that is merely live.
 
-**One hue acts, and colour points at what still needs a person.** The accent's jobs — primary action, focus, "your turn" — share one hue. A second highlight hue beside it (a teal next to a blue) splits one meaning in two, and readers start asking which colour means what; whatever wanted it goes to a status pair, a neutral marker or weight. Finished work is uncoloured: a completed step, a passed check or a done task is an ink check on a neutral circle, because a column of green ticks outshouts the one item still pending. Success is for an outcome the reader must notice — approved, released — not for every completion. Where the reader *is*, the current nav item or step, is neutral too, a grey pill or a rule: it is position, not a call to act.
+Only the edge, the icon or the glyph takes the colour, never the text inside: a coloured paragraph shares the loudness until it means nothing. Record each as `exception.<what-it's-for>` in `DESIGN.md`, a family as `exception.<question>.<member>`, with its reason: how many a system holds is a dial; a written, non-transferable job is not. First ask whether weight, position and space can do the job. Most can.
+
+**One hue acts, and colour points at what still needs a person.** The accent's jobs — primary action, focus, "your turn" — share one hue, and it marks one action per view. A second highlight hue beside it (a teal next to a blue) splits one meaning in two, and readers start asking which colour means what; whatever wanted it goes to a status pair, a neutral marker or weight. A hue family is not a highlight: it sits on marks and asks nothing of the reader. Where the reader *is*, the current nav item or step, is neutral, a grey pill or a rule: it is position, not a call to act. A place in the data with one member, today's column on a calendar, may be a written exception.
+
+**Success has one job; whether finishing is that job is a dial.** Ask whether completion is the news. In a sequence the reader passes through — setup steps, passed checks, a wizard — it isn't: done is an ink check on a neutral circle, because a column of green ticks outshouts the one item still pending, and success is kept for an outcome the reader must notice, approved or released. On a board or list people open to see what got done, it is: done takes `status.success` on a filled check whose shape already says done, while what's late takes warning or danger so the eye still finds what needs a person.
+
+→ Hue families, figures, done states, live and AI marks, destructive rows: `references/status-and-exceptions.md`
 
 ### 8. A theme is a re-pick, not a reuse
 
-**Every coloured value — accent, focus, status pair, exception, every stop of every gradient — is chosen afresh for each theme and measured there.**
+**Every coloured value — accent, focus, status pair, exception, each hue in a family, every stop of every gradient — is chosen afresh for each theme and measured there.**
 
-- **Accents.** A hue at 4.5:1 on white has far less on near-black; reused, it dims the ring and links. Re-pick its lightness (usually trimming chroma) and re-check `text.on-accent`, which often flips from light to dark.
+- **Accents.** A hue at 4.5:1 on white has far less on near-black; reused, it dims the ring and links. Re-pick its lightness (usually trimming chroma) and re-check `text.on-accent`, which often flips from light to dark. A dark fill that keeps white text is too dark to be text on the dark page; no one value is both, so dark adds a lighter `accent.ink` for links, icons and brand text.
+- **Small marks, against every ground.** Area colours shared across themes fell to 1.8:1 on a light frame. A mark the reader needs clears 3:1 on every ground it sits on — panel, frame, hover row — in each theme.
 - **Gradients move every stop.** The darkest stop can sit a few points above a dark page and vanish down half its length; lightening only that stop compresses the ramp until it isn't one gradient. Move every stop by roughly the same amount.
 - **Near-black, not black.** Dark `surface.page` sits a little above `#000`: pure black gives shadows nothing to sit on and glares against light text. Light `text.primary` is near-black too: pure black on white halates at small sizes.
 - **"Raised" flips direction.** In light it is darker than or equal to the page, with an edge; in dark, *lighter*. Dark fills are tinted, not darkened, so they don't punch a hole in the page.
@@ -122,9 +129,10 @@ A build-time token (a Sass variable, an inlined JS constant, a static theme obje
 | Palette | Near-monochrome neutral | Near-monochrome neutral plus a status palette | Brand palette used broadly, each hue placed by rule |
 | Neutral chroma (OKLCH C) | 0–0.01 | 0–0.015, toward brand hue | 0–0.03, toward brand hue |
 | What the accent does | Focus, and nothing else | Primary action, focus, selection | Brand surfaces, action, focus |
-| Chromatic exceptions beyond accent and status | ≤ 1 | 0 — the status palette is the colour | ≤ 4, each named |
+| Chromatic exceptions beyond accent and status | ≤ 1 | None by default; a hue family per question the reader can't answer at a glance (what, where, who), plus one-member exceptions — each listed | ≤ 4, each named |
 | Hues that call for action | 1, the accent | 1, the accent | Brand hues, each placed by rule |
-| Completed and current-location states | Uncoloured | Uncoloured; success only for an outcome to notice | Per brand, still counted |
+| Completed states | Uncoloured | `status.success` where completion is the news; uncoloured in a sequence passed through | Per brand, still counted |
+| Current location | Uncoloured | Uncoloured | Per brand, still counted |
 | Link colour | Text colour, underlined | `accent` | `accent` or a brand hue, underlined in prose |
 | Text tiers, `text.primary` to `text.tertiary` | 3–5 | 3 | 3–4 |
 | Minimum step between adjacent tiers (ratio of ratios) | 1.15× | 1.4× | 1.25× |
@@ -134,6 +142,8 @@ A build-time token (a Sass variable, an inlined JS constant, a static theme obje
 | Dark `surface.page` lightness (OKLCH L) | 0.14–0.18 | 0.17–0.21 | 0.12–0.18 |
 
 **Palette and neutral chroma.** Near-monochrome makes the accent and the one exception loud by default, but every state must then be carried by something other than colour (law 6). Tinted greys tie to the brand, but past about 0.015 chroma they read as colour, and a tinted `text.tertiary` beside a status foreground can look like a status.
+
+**Exceptions and done.** An editorial page's content is prose, so its colour can be the one offer, and nothing on it is a task to finish. A product holds many kinds of record in many places by many people and is scanned, not read; in grey alone every row must be read to be sorted, which is usually what "too grey" means, and its boards exist to show what got done. So it starts from the status palette alone and adds a family, or colours done, when a question can't be answered at a glance, never because a screen looks plain.
 
 **What the accent does.** Restricted to focus, colour *is* where the keyboard is. On primary actions it shows a working user the next step — worth it in a product, at the price of law 5's care for the ring beside accent buttons.
 
@@ -153,7 +163,7 @@ A build-time token (a Sass variable, an inlined JS constant, a static theme obje
 4. **Place surfaces and lines** (`surface.raised`, `surface.hover`, `surface.pressed`, `surface.subtle`, `border.default`, `border.hover`) as small steps down from the page in light, up in dark, spaced by contrast against it; what must be seen (an input's edge, an icon, the focus ring) clears 3:1.
 5. **Solve the text tiers from contrast targets** (tertiary at the dial's target, the rest at least the minimum step apart) on each tier's worst surface; verify per theme with `contrast.mjs --ladder`.
 6. **Derive the accent from the brand hue**, per theme: `text.on-accent` at 4.5:1 and `focus` at 3:1 on every surface; then its hover and `surface.selected` tint, re-measuring the lowest text tier on that tint.
-7. **Status pairs**, if the preset needs them; **exceptions**, if one passes law 7.
+7. **Status pairs**, if the preset needs them; **exceptions and hue families**, each passing law 7, every mark at 3:1 on its grounds.
 8. **The translucent set**: black at low alpha in light, white in dark, for `border.layered` and any layered washes.
 9. **Write it** as custom properties, one block per theme, with the framework's tokens pointing at them (law 10), and record the ratios in `DESIGN.md`.
 
@@ -173,8 +183,10 @@ Collect evidence, then measure. The greps assume CSS, Tailwind or CSS-in-JS; ada
 | Lost focus | `outline:\s*(none\|0)`, `:focus\b` without `-visible`, `ring-0` | 5 |
 | Colour-only status | error or success styling with no icon or message; nav active by colour alone | 6 |
 | Uncounted colour | each hue outside accent, focus and status, and its job | 7 |
-| A second action hue; coloured done states | two hues on buttons, links or "needs you" markers; success colour on completed steps, checks or the current nav item | 7 |
+| A second action hue; done coloured against the dial | two hues on buttons, links or "needs you" markers; success colour on passed steps, checks or the current nav item | 7 |
+| A hue doing two jobs | a type or area hue on state or text; danger red on a live or recording state; status colour on a plain count or a zero | 7 |
 | Reused accents and half-moved gradients | some gradient stops re-declared per theme, not all; single-value accents | 8 |
+| Faint marks | type, area and person hues shared across themes; each measured at `--min 3` on panel, frame and hover | 8 |
 | Pure black | `#000\b`, `#000000`, `black` on surfaces | 8 |
 | Two theme mechanisms | `prefers-color-scheme` in CSS alongside a toggle; missing `color-scheme` | 9 |
 | Flash of wrong theme | theme set in a component effect, not an inline head script | 9 |
@@ -188,7 +200,7 @@ Report each finding as one line in `DESIGN.md` `## Open issues`, with evidence �
 
 - **The ratios.** Every text tier and the focus colour, per theme, with the surface measured on; re-measure when a value in `## Colour` changes.
 - **New roles.** Any you added — a missing `surface.selected`, a tier between secondary and tertiary — in the project's naming style, marked `proposed` until accepted.
-- **Exceptions.** Each `exception.<name>` under **Exceptions**: what it's for, and why that reason can't spread.
+- **Exceptions.** Each `exception.<name>` under **Exceptions**: what it's for, and why that reason can't spread; a family with its question, its members and the marks it may take.
 - **Moved dials.** Under `## Decisions`, dated, with the reason: "Links in `accent`, not text colour: the docs area is navigation-heavy and readers scan for links."
 - **Open issues.** As in the audit; remove the line once fixed.
 
@@ -206,14 +218,15 @@ Report each finding as one line in `DESIGN.md` `## Open issues`, with evidence �
 - [ ] No state or status is signalled by colour alone.
 - [ ] Each `status.*` is a fg/bg pair per theme, fg at 4.5:1 on the page and its tint.
 - [ ] Each `exception.<name>` has a written reason no other element shares; only its mark is coloured.
-- [ ] One hue calls for action; completed states and the reader's current location are uncoloured.
-- [ ] Accents, status pairs and exceptions are re-picked per theme; every gradient stop moves.
+- [ ] Each hue family answers one question (what, how, where, who) and never another's.
+- [ ] One hue calls for action; the reader's current location is uncoloured; done is coloured only where the dial says completion is the news.
+- [ ] Accents, status pairs, exceptions and family hues are re-picked per theme; every gradient stop moves; marks clear 3:1 on every ground.
 - [ ] Dark `surface.page` and light `text.primary` are near-black, not `#000`.
 - [ ] With a toggle, the theme is a root attribute or class set by a blocking inline script before the stylesheet.
 - [ ] `color-scheme` is declared in every theme.
 - [ ] Context-dependent and multi-layer values are runtime custom properties; preference overrides follow every theme block.
 - [ ] Dial check: palette, accent's jobs and link colour match the preset.
-- [ ] Dial check: exception count is within the preset's limit.
+- [ ] Dial check: exception count and done colour match the preset.
 - [ ] Dial check: tier count, minimum step and tertiary target match the preset.
 - [ ] Dial check: status palette present if the preset requires it.
 - [ ] Dial check: theme control and dark page lightness match, or `## Decisions` says why not.

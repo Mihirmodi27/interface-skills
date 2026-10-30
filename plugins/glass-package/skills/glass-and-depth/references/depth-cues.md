@@ -105,6 +105,21 @@ The reference implementation started with an exported constant and moved to this
 
 **A transient element gets no contact shadow.** A tooltip that exists for 300ms should look like it's hovering briefly, not resting on the page. Permanent chrome needs it.
 
+### A confirmation takes an existing tier
+
+The dialog that asks "are you sure?" is the one most often built as a one-off, and a red icon circle with red body text in a box nobody else uses looks pasted in from another product. It takes the panel the rest of the system floats, and the same pattern wherever loss is permanent, so deleting one thing and deleting everything read alike:
+
+- **Plain words for what goes**, in the page's ink: what is removed, and that it can't be undone.
+- **Type-to-confirm where loss is total**: "Type DELETE to confirm", matched case-insensitively. Autofocus the input, not Cancel, and keep the action disabled until it matches.
+- **The action carries the red**, as every destructive action does (**glass-color**), and reports progress in its own label ("Deleting…") while it runs.
+- **Focus returns to the opener.** A dialog opened from state — a row's menu, a keyboard shortcut — has no trigger for the primitive to fall back to, so focus drops to `<body>` and a keyboard user starts the page over. Hold the opening element on open and focus it on close.
+
+```tsx
+const opener = useRef<HTMLElement | null>(null);
+const open = () => { opener.current = document.activeElement as HTMLElement; setOpen(true); };
+const close = () => { setOpen(false); requestAnimationFrame(() => opener.current?.focus()); };
+```
+
 ## 4. Continuous corners
 
 ```css
