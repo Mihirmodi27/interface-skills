@@ -106,7 +106,7 @@ The mapping covers user-agent styles: `<cite>`, `<blockquote>`, `<b>`, `<th>` an
 
 ### 10. Numerals that align are tabular
 
-**Any number in a column, a table, a timestamp, a counter or anything that updates live uses tabular figures.** Proportional digits change width with value: prices misalign, a clock twitches. `type.data` is usually `type.ui` or `type.body` plus `font-variant-numeric: tabular-nums`, not its own size. Global or scoped is a dial; a live number never shifting its row is the law. The property fails silently, so check the family ships `tnum`.
+**Any number in a column, a table, a timestamp, a counter or anything that updates live uses tabular figures.** Default digits are proportional — a 1 is narrower than an 8 — so a value shakes as it updates and a column of figures never lines up. Tabular digits all share one width, and one line of CSS sets them. `type.data` is usually `type.ui` or `type.body` plus `font-variant-numeric: tabular-nums`, not its own size. Global or scoped is a dial; a live number never shifting its row is the law. The property fails silently, so check the family ships `tnum`.
 
 → Figures, alignment and feature settings: `references/numerals-and-loading.md`
 

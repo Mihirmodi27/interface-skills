@@ -134,6 +134,8 @@ At 500, `<strong>` doesn't make a dark blot you read before the sentence; and be
 body { font-variant-numeric: tabular-nums; }
 ```
 
+Default digits are proportional — a 1 is narrower than an 8 — so a value shakes as it updates and a column of figures never lines up. Tabular digits all share one width.
+
 Globally, not per-component: text-heavy interfaces put numbers in columns that should align — date ranges, timestamps, read times, versions. Proportional numerals win only inside a running sentence, too rare to set the default. A live clock **must** be tabular or its row twitches every second as digits change width.
 
 ## 7. One family, self-hosted
